@@ -59,7 +59,7 @@
                        VerticalAlignment="Center" Margin="0,0,4,0"/>
             <TextBox x:Name="TxtBpm"
                      Width="56" Height="28"
-                     Text="{Binding CurrentProject.Model.TempoMap.Events[0].Bpm,
+                     Text="{Binding CurrentProject.Model.TempoMap.Bpm,
                                     StringFormat='{}{0:F1}', FallbackValue='120.0'}"
                      VerticalContentAlignment="Center"
                      TextAlignment="Center"
@@ -67,14 +67,14 @@
             <TextBlock Text="박자" Foreground="#A6ADC8" FontSize="11"
                        VerticalAlignment="Center" Margin="8,0,4,0"/>
             <TextBox Width="40" Height="28"
-                     Text="{Binding CurrentProject.Model.TempoMap.Events[0].Numerator,
+                     Text="{Binding CurrentProject.Model.TempoMap.Numerator,
                                     FallbackValue='4'}"
                      VerticalContentAlignment="Center"
                      TextAlignment="Center"
                      IsEnabled="{Binding HasProject}"/>
             <TextBlock Text="/" Foreground="#A6ADC8" VerticalAlignment="Center" Margin="2,0"/>
             <TextBox Width="40" Height="28"
-                     Text="{Binding CurrentProject.Model.TempoMap.Events[0].Denominator,
+                     Text="{Binding CurrentProject.Model.TempoMap.Denominator,
                                     FallbackValue='4'}"
                      VerticalContentAlignment="Center"
                      TextAlignment="Center"

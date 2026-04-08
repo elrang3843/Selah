@@ -14,6 +14,27 @@ public class TempoMap
     /// <summary>현재 구현(MVP): 첫 번째 이벤트의 BPM 반환</summary>
     public double GetBpm() => Events.Count > 0 ? Events[0].Bpm : 120.0;
 
+    /// <summary>바인딩용 — 현재 BPM (첫 번째 이벤트)</summary>
+    public double Bpm
+    {
+        get => GetBpm();
+        set { if (Events.Count > 0) Events[0].Bpm = value; }
+    }
+
+    /// <summary>바인딩용 — 박자 분자 (첫 번째 이벤트)</summary>
+    public int Numerator
+    {
+        get => GetNumerator();
+        set { if (Events.Count > 0) Events[0].Numerator = Math.Max(1, value); }
+    }
+
+    /// <summary>바인딩용 — 박자 분모 (첫 번째 이벤트)</summary>
+    public int Denominator
+    {
+        get => GetDenominator();
+        set { if (Events.Count > 0) Events[0].Denominator = Math.Max(1, value); }
+    }
+
     public int GetNumerator() => Events.Count > 0 ? Events[0].Numerator : 4;
     public int GetDenominator() => Events.Count > 0 ? Events[0].Denominator : 4;
 

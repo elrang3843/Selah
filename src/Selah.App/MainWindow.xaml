@@ -3,16 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Selah.App.ViewModels"
         xmlns:views="clr-namespace:Selah.App.Views"
-        xmlns:conv="clr-namespace:Selah.App.Converters"
         Title="{Binding WindowTitle}"
         Width="1280" Height="800"
         MinWidth="800" MinHeight="500"
         Background="#1E1E2E">
-
-    <Window.Resources>
-        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
-        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
-    </Window.Resources>
 
     <!-- 키보드 단축키 -->
     <Window.InputBindings>

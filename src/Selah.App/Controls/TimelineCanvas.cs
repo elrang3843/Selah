@@ -235,7 +235,7 @@ public class TimelineCanvas : FrameworkElement
     {
         double x = (double)tl.PlayheadFrames / proj.SampleRate * tl.PixelsPerSecond
                    - tl.ScrollOffsetX;
-        if (x < 0 || x > dc.Drawing?.Bounds.Width) return;
+        if (x < 0) return;
 
         dc.DrawLine(PlayheadPen, new Point(x, 0), new Point(x, h));
 

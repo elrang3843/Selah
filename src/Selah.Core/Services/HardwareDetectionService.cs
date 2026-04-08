@@ -20,7 +20,8 @@ public class HardwareDetectionService
 
         if (OperatingSystem.IsWindows())
         {
-            info.HasNvidiaGpu = CheckNvidiaGpu(out info.NvidiaDriverVersion);
+            info.HasNvidiaGpu = CheckNvidiaGpu(out string? driverVer);
+            info.NvidiaDriverVersion = driverVer;
             info.HasDirectMl = CheckDirectMl();
         }
 

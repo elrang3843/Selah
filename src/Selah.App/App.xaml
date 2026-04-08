@@ -9,9 +9,18 @@
                 <ResourceDictionary Source="Resources/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- 공통 컨버터 -->
-            <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
-            <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
+            <!-- ── 공통 컨버터 (앱 전역 등록) ── -->
+            <conv:BoolToVisibilityConverter        x:Key="BoolToVis"/>
+            <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
+            <conv:InverseBoolConverter             x:Key="InverseBoolConverter"/>
+            <conv:NullToVisibilityConverter        x:Key="NullToVisibilityConverter"/>
+            <conv:InstalledColorConverter          x:Key="InstalledColorConverter"/>
+            <conv:InstalledTextBrushConverter      x:Key="InstalledTextBrushConverter"/>
+            <conv:InstalledStatusConverter         x:Key="InstalledStatusConverter"/>
+            <conv:PlayPauseConverter               x:Key="PlayPauseConverter"/>
+            <conv:HexToColorConverter              x:Key="HexToColorConverter"/>
+            <conv:MuteColorConverter               x:Key="MuteColorConverter"/>
+            <conv:SoloColorConverter               x:Key="SoloColorConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

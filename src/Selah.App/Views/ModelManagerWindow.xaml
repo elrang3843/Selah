@@ -8,9 +8,7 @@
         Background="#1E1E2E"
         ShowInTaskbar="False">
 
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-    </Window.Resources>
+    <!-- 앱 전역 컨버터 사용 (App.xaml에 등록됨) -->
 
     <DockPanel Margin="0">
 
@@ -33,7 +31,7 @@
                         Style="{StaticResource DefaultButton}" Width="90" Height="30"
                         Margin="0,0,8,0"/>
                 <Button Content="Demucs 설치 (pip)" Command="{Binding InstallDemucsCommand}"
-                        Style="{StaticResource AccentButton}" Width="140" Height="30"
+                        Style="{StaticResource AccentButton}" Width="150" Height="30"
                         IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
                         Margin="0,0,16,0"/>
                 <TextBlock VerticalAlignment="Center" Foreground="#7F849C" FontSize="11"
@@ -87,15 +85,18 @@
                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
                                            FontSize="13" Foreground="#CDD6F4"/>
                             </StackPanel>
-                            <TextBlock Text="{Binding License}" Foreground="#7F849C" FontSize="11"
-                                       Margin="14,0,0,0"/>
-                            <TextBlock Foreground="{Binding IsInstalled,
-                                        Converter={StaticResource InstalledTextBrushConverter}}"
-                                       FontSize="11" Margin="14,2,0,0">
-                                <Run Text="{Binding IsInstalled, Converter={StaticResource InstalledStatusConverter}}"/>
-                                <Run Text=" · "/>
-                                <Run Text="{Binding SizeDisplay}"/>
-                            </TextBlock>
+                            <TextBlock Text="{Binding License}" Foreground="#7F849C"
+                                       FontSize="11" Margin="14,0,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="14,2,0,0">
+                                <TextBlock Foreground="{Binding IsInstalled,
+                                            Converter={StaticResource InstalledTextBrushConverter}}"
+                                           FontSize="11"
+                                           Text="{Binding IsInstalled,
+                                               Converter={StaticResource InstalledStatusConverter}}"/>
+                                <TextBlock Text=" · " Foreground="#45475A" FontSize="11"/>
+                                <TextBlock Text="{Binding SizeDisplay}"
+                                           Foreground="#6C7086" FontSize="11"/>
+                            </StackPanel>
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -122,7 +123,7 @@
                                TextWrapping="Wrap" Foreground="#CDD6F4"
                                LineHeight="22" Margin="0,0,0,20"/>
 
-                    <!-- 스템 타입 / 엔진 -->
+                    <!-- 스템 타입 / 엔진 / 라이선스 -->
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="100"/>
@@ -133,13 +134,19 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="분리 방식" Foreground="#6C7086" FontSize="12"/>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="분리 방식"
+                                   Foreground="#6C7086" FontSize="12"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Foreground="#CDD6F4" FontSize="12"
                                    Text="{Binding SelectedModel.StemType}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="실행 엔진" Foreground="#6C7086" FontSize="12" Margin="0,4,0,0"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="#CDD6F4" FontSize="12" Margin="0,4,0,0"
-                                   Text="{Binding SelectedModel.Engine}"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="라이선스" Foreground="#6C7086" FontSize="12" Margin="0,4,0,0"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="실행 엔진"
+                                   Foreground="#6C7086" FontSize="12" Margin="0,4,0,0"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="#CDD6F4" FontSize="12"
+                                   Margin="0,4,0,0" Text="{Binding SelectedModel.Engine}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="라이선스"
+                                   Foreground="#6C7086" FontSize="12" Margin="0,4,0,0"/>
                         <TextBlock Grid.Row="2" Grid.Column="1" Foreground="#A6E3A1" FontSize="12"
                                    FontWeight="SemiBold" Margin="0,4,0,0"
                                    Text="{Binding SelectedModel.License}"/>
@@ -172,7 +179,7 @@
                                 Height="30"/>
                     </StackPanel>
 
-                    <!-- 설치 상태 -->
+                    <!-- 설치 상태 표시 -->
                     <Border CornerRadius="4" Padding="12,8">
                         <Border.Style>
                             <Style TargetType="Border">
@@ -180,7 +187,8 @@
                                 <Setter Property="BorderBrush" Value="#A6E3A1"/>
                                 <Setter Property="BorderThickness" Value="1"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedModel.IsInstalled}" Value="False">
+                                    <DataTrigger Binding="{Binding SelectedModel.IsInstalled}"
+                                                 Value="False">
                                         <Setter Property="Background" Value="#1E1E2E"/>
                                         <Setter Property="BorderBrush" Value="#45475A"/>
                                     </DataTrigger>
@@ -190,10 +198,13 @@
                         <TextBlock FontSize="13" FontWeight="SemiBold">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="✓ 설치됨 — MR 추출 기능 사용 가능"/>
+                                    <Setter Property="Text"
+                                            Value="✓ 설치됨 — MR 추출 기능 사용 가능"/>
                                     <Setter Property="Foreground" Value="#A6E3A1"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedModel.IsInstalled}" Value="False">
+                                        <DataTrigger
+                                            Binding="{Binding SelectedModel.IsInstalled}"
+                                            Value="False">
                                             <Setter Property="Text"
                                                     Value="미설치 — 위의 'Demucs 설치' 버튼을 클릭하거나 pip install demucs 를 실행하세요."/>
                                             <Setter Property="Foreground" Value="#A6ADC8"/>
