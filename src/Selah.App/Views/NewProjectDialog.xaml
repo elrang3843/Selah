@@ -1,0 +1,59 @@
+<Window x:Class="Selah.App.Views.NewProjectDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="새 프로젝트 만들기"
+        Width="420" Height="320"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#1E1E2E"
+        ShowInTaskbar="False">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 제목 -->
+        <TextBlock Grid.Row="0" Text="새 프로젝트"
+                   FontSize="20" FontWeight="SemiBold"
+                   Foreground="#89B4FA" Margin="0,0,0,20"/>
+
+        <!-- 프로젝트 이름 -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,16">
+            <Label Content="프로젝트 이름" Margin="0,0,0,4"/>
+            <TextBox x:Name="TxtName" Text="새 프로젝트"
+                     FontSize="14" Height="34"
+                     VerticalContentAlignment="Center"/>
+        </StackPanel>
+
+        <!-- 샘플레이트 선택 -->
+        <StackPanel Grid.Row="2">
+            <Label Content="샘플레이트 (Sample Rate)" Margin="0,0,0,8"/>
+
+            <RadioButton x:Name="Rb32k" Content="32 kHz  — 저사양 / 대화·현장 녹음 중심 (용량↓, CPU↓)"
+                         Foreground="#A6ADC8" FontSize="12" Margin="0,0,0,6"/>
+            <RadioButton x:Name="Rb44k" Content="44.1 kHz  — 음악 파일 중심"
+                         Foreground="#A6ADC8" FontSize="12" Margin="0,0,0,6"/>
+            <RadioButton x:Name="Rb48k" Content="48 kHz  — 영상/스트리밍 중심 ★ 권장"
+                         Foreground="#CDD6F4" FontSize="12" FontWeight="SemiBold"
+                         IsChecked="True" Margin="0,0,0,6"/>
+            <RadioButton x:Name="Rb96k" Content="96 kHz  — 고음질 (용량↑, CPU↑) — 고사양 권장"
+                         Foreground="#A6ADC8" FontSize="12"/>
+        </StackPanel>
+
+        <!-- 하단 버튼 -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="취소" Width="80" Height="34"
+                    Style="{StaticResource DefaultButton}"
+                    IsCancel="True" Margin="0,0,8,0"/>
+            <Button Content="만들기" Width="90" Height="34"
+                    Style="{StaticResource AccentButton}"
+                    IsDefault="True"
+                    Click="BtnCreate_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

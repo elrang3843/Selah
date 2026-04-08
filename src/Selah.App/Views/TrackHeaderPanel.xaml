@@ -1,0 +1,89 @@
+<UserControl x:Class="Selah.App.Views.TrackHeaderPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Selah.App.ViewModels"
+             Background="#181825"
+             MinWidth="180">
+
+    <UserControl.Resources>
+        <!-- 트랙 헤더 한 행 -->
+        <DataTemplate DataType="{x:Type vm:TrackViewModel}">
+            <Border Height="{Binding HeightPixels}"
+                    BorderBrush="#313244" BorderThickness="0,0,0,1"
+                    Background="#1E1E2E">
+                <Grid Margin="6,4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 트랙 이름 + 색상 표시 -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                        <Rectangle Width="4" Height="16" Margin="0,0,6,0"
+                                   RadiusX="2" RadiusY="2">
+                            <Rectangle.Fill>
+                                <SolidColorBrush Color="{Binding Color, Converter={StaticResource HexToColorConverter}}"/>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <TextBox Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
+                                 Background="Transparent" BorderThickness="0"
+                                 Foreground="#CDD6F4" FontWeight="SemiBold"
+                                 FontSize="12" MaxWidth="120"
+                                 TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+
+                    <!-- 뮤트 / 솔로 버튼 -->
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,4">
+                        <ToggleButton Content="M" ToolTip="음소거 (Mute)"
+                                      IsChecked="{Binding Muted}"
+                                      Command="{Binding MuteCommand}"
+                                      Width="24" Height="20" FontSize="10"
+                                      Foreground="{Binding Muted, Converter={StaticResource MuteColorConverter}}"/>
+                        <ToggleButton Content="S" ToolTip="솔로 (Solo)"
+                                      IsChecked="{Binding Solo}"
+                                      Command="{Binding SoloCommand}"
+                                      Width="24" Height="20" FontSize="10"
+                                      Margin="3,0,0,0"
+                                      Foreground="{Binding Solo, Converter={StaticResource SoloColorConverter}}"/>
+                    </StackPanel>
+
+                    <!-- 볼륨 슬라이더 -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="볼" Foreground="#6C7086" FontSize="10"
+                                   VerticalAlignment="Center" Margin="0,0,3,0"/>
+                        <Slider Minimum="-60" Maximum="12"
+                                Value="{Binding GainDb}"
+                                Width="80" VerticalAlignment="Center"
+                                ToolTip="{Binding GainDb, StringFormat='{}{0:F1} dB'}"/>
+                        <TextBlock Text="{Binding GainDb, StringFormat='{}{0:F1}'}"
+                                   Foreground="#A6ADC8" FontSize="10"
+                                   VerticalAlignment="Center" Margin="4,0,0,0" Width="30"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- 눈금자 높이만큼 여백 -->
+        <Border DockPanel.Dock="Top" Height="28" Background="#181825"
+                BorderBrush="#313244" BorderThickness="0,0,0,1">
+            <TextBlock Text="트랙" Foreground="#6C7086" FontSize="11"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- 트랙 목록 -->
+        <ItemsControl ItemsSource="{Binding CurrentProject.Tracks}">
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="ItemsControl">
+                    <ScrollViewer x:Name="TrackScroll"
+                                  VerticalScrollBarVisibility="Hidden"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <ItemsPresenter/>
+                    </ScrollViewer>
+                </ControlTemplate>
+            </ItemsControl.Template>
+        </ItemsControl>
+    </DockPanel>
+</UserControl>

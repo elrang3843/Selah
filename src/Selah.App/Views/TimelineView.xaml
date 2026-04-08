@@ -1,0 +1,40 @@
+<UserControl x:Class="Selah.App.Views.TimelineView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Selah.App.Controls"
+             Background="#1E1E2E">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" MinWidth="120" MaxWidth="320"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 트랙 헤더 패널 -->
+        <Selah.App.Views.TrackHeaderPanel
+            Grid.Column="0"
+            DataContext="{Binding}"/>
+
+        <!-- 분리선 (드래그 가능) -->
+        <GridSplitter Grid.Column="1"
+                      HorizontalAlignment="Stretch"
+                      Background="#313244"
+                      Cursor="SizeWE"/>
+
+        <!-- 타임라인 캔버스 영역 -->
+        <ScrollViewer Grid.Column="2"
+                      x:Name="TimelineScroll"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto"
+                      Background="#1E1E2E"
+                      ScrollChanged="TimelineScroll_ScrollChanged">
+            <controls:TimelineCanvas
+                x:Name="Canvas"
+                ProjectViewModel="{Binding CurrentProject}"
+                TimelineViewModel="{Binding Timeline}"
+                PlayheadSeeked="Canvas_PlayheadSeeked"
+                MouseWheel="Canvas_MouseWheel"/>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,0 +1,414 @@
+using System.Windows.Input;
+using NAudio.Wave;
+using Selah.Core.Audio;
+using Selah.Core.Models;
+using Selah.Core.Services;
+
+namespace Selah.App.ViewModels;
+
+/// <summary>
+/// 메인 윈도우 ViewModel. 앱 전반 상태와 최상위 커맨드를 관리합니다.
+/// </summary>
+public class MainViewModel : ViewModelBase, IDisposable
+{
+    // ── 서비스 ──
+    public readonly ProjectService ProjectService = new();
+    public readonly FFmpegService FFmpegService = new();
+    public readonly ModelManagerService ModelManagerService = new();
+    public readonly HardwareDetectionService HardwareDetectionService = new();
+    public readonly AudioEngine AudioEngine = new();
+    public readonly AudioRenderer AudioRenderer = new();
+
+    private ProjectViewModel? _currentProject;
+    private string _statusMessage = "준비됨";
+    private bool _isBusy;
+    private HardwareInfo? _hardwareInfo;
+    private bool _disposed;
+
+    // ── 요청 이벤트 (코드 비하인드에서 다이얼로그를 띄움) ──
+    public event Func<(string name, int sampleRate), Task>? NewProjectRequested;
+    public event Func<Task<string?>>? OpenProjectFolderRequested;
+    public event Func<Task<string?>>? SaveProjectFolderRequested;
+    public event Func<Task<string[]?>>? ImportAudioRequested;
+    public event Func<Task<string?>>? ExportPathRequested;
+    public event Action<string>? ErrorOccurred;
+
+    public MainViewModel()
+    {
+        FFmpegService.Detect();
+        _hardwareInfo = HardwareDetectionService.Detect();
+
+        Timeline = new TimelineViewModel();
+        ModelManager = new ModelManagerViewModel(ModelManagerService);
+
+        // ── 커맨드 초기화 ──
+        NewProjectCommand = new AsyncRelayCommand(OnNewProject);
+        OpenProjectCommand = new AsyncRelayCommand(OnOpenProject);
+        SaveProjectCommand = new AsyncRelayCommand(OnSaveProject, () => CurrentProject != null);
+        SaveAsCommand = new AsyncRelayCommand(OnSaveAs, () => CurrentProject != null);
+        ImportAudioCommand = new AsyncRelayCommand(OnImportAudio, () => CurrentProject != null);
+        AddTrackCommand = new RelayCommand(OnAddTrack, () => CurrentProject != null);
+        DeleteSelectedTrackCommand = new RelayCommand(OnDeleteSelectedTrack, () => SelectedTrack != null);
+        PlayCommand = new RelayCommand(OnTogglePlay, () => CurrentProject != null);
+        StopCommand = new RelayCommand(OnStop, () => CurrentProject != null);
+        ReturnToStartCommand = new RelayCommand(OnReturnToStart, () => CurrentProject != null);
+        ExportCommand = new AsyncRelayCommand(OnExport, () => CurrentProject != null);
+        SplitAtPlayheadCommand = new RelayCommand(OnSplitAtPlayhead, () => CurrentProject != null);
+        ToggleMetronomeCommand = new RelayCommand(OnToggleMetronome, () => CurrentProject != null);
+        ToggleSnapCommand = new RelayCommand(() => Timeline.SnapEnabled = !Timeline.SnapEnabled);
+
+        AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
+        AudioEngine.PlaybackStopped += OnPlaybackStopped;
+    }
+
+    // ── 프로퍼티 ──
+
+    public ProjectViewModel? CurrentProject
+    {
+        get => _currentProject;
+        private set
+        {
+            SetField(ref _currentProject, value);
+            OnPropertyChanged(nameof(WindowTitle));
+            OnPropertyChanged(nameof(HasProject));
+        }
+    }
+
+    private TrackViewModel? _selectedTrack;
+    public TrackViewModel? SelectedTrack
+    {
+        get => _selectedTrack;
+        set => SetField(ref _selectedTrack, value);
+    }
+
+    public TimelineViewModel Timeline { get; }
+    public ModelManagerViewModel ModelManager { get; }
+
+    public string WindowTitle =>
+        CurrentProject == null
+            ? "셀라(Selah) - 찬양사역용 MR편집기"
+            : $"{CurrentProject.Name}{(CurrentProject.IsDirty ? " *" : "")} - 셀라";
+
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        set => SetField(ref _statusMessage, value);
+    }
+
+    public bool IsBusy
+    {
+        get => _isBusy;
+        set => SetField(ref _isBusy, value);
+    }
+
+    public bool HasProject => CurrentProject != null;
+    public bool IsFFmpegAvailable => FFmpegService.IsAvailable;
+
+    public string HardwareStatusText =>
+        _hardwareInfo?.BackendDisplayName ?? "진단 중...";
+
+    public string SampleRateText =>
+        CurrentProject != null ? $"{CurrentProject.SampleRate / 1000.0:G4} kHz" : "";
+
+    private bool _isPlaying;
+    public bool IsPlaying
+    {
+        get => _isPlaying;
+        private set => SetField(ref _isPlaying, value);
+    }
+
+    private bool _isMetronomeOn;
+    public bool IsMetronomeOn
+    {
+        get => _isMetronomeOn;
+        private set => SetField(ref _isMetronomeOn, value);
+    }
+
+    public string PlayheadTimeDisplay
+    {
+        get
+        {
+            if (CurrentProject == null) return "00:00.0";
+            var s = Timeline.PlayheadSeconds;
+            int min = (int)(s / 60);
+            double sec = s % 60;
+            return $"{min:D2}:{sec:05.1f}";
+        }
+    }
+
+    // ── 커맨드 ──
+
+    public ICommand NewProjectCommand { get; }
+    public ICommand OpenProjectCommand { get; }
+    public ICommand SaveProjectCommand { get; }
+    public ICommand SaveAsCommand { get; }
+    public ICommand ImportAudioCommand { get; }
+    public ICommand AddTrackCommand { get; }
+    public ICommand DeleteSelectedTrackCommand { get; }
+    public ICommand PlayCommand { get; }
+    public ICommand StopCommand { get; }
+    public ICommand ReturnToStartCommand { get; }
+    public ICommand ExportCommand { get; }
+    public ICommand SplitAtPlayheadCommand { get; }
+    public ICommand ToggleMetronomeCommand { get; }
+    public ICommand ToggleSnapCommand { get; }
+
+    // ── 커맨드 핸들러 ──
+
+    private async Task OnNewProject()
+    {
+        // 이벤트를 통해 UI가 다이얼로그를 처리하고 결과를 반환
+        if (NewProjectRequested != null)
+            await NewProjectRequested((string.Empty, 0));
+        // 실제 생성은 CreateProject() 공개 메서드에서 처리
+    }
+
+    public void CreateProject(string name, int sampleRate)
+    {
+        var project = ProjectService.NewProject(name, sampleRate);
+        project.Tracks.Add(new Track { Name = "트랙 1", TrackIndex = 0 });
+        var vm = new ProjectViewModel(project, ProjectService, FFmpegService);
+        CurrentProject = vm;
+        AudioEngine.LoadProject(project);
+        Timeline.PlayheadFrames = 0;
+        Timeline.IsPlaying = false;
+        StatusMessage = $"새 프로젝트 '{name}' 생성됨 ({sampleRate / 1000.0:G4} kHz)";
+    }
+
+    private async Task OnOpenProject()
+    {
+        if (OpenProjectFolderRequested == null) return;
+        var folder = await OpenProjectFolderRequested();
+        if (folder == null) return;
+        await LoadProjectFromFolderAsync(folder);
+    }
+
+    public async Task LoadProjectFromFolderAsync(string folder)
+    {
+        IsBusy = true;
+        StatusMessage = "프로젝트 불러오는 중...";
+        try
+        {
+            var project = await ProjectService.LoadAsync(folder);
+            var vm = new ProjectViewModel(project, ProjectService, FFmpegService);
+            CurrentProject = vm;
+            AudioEngine.LoadProject(project);
+            Timeline.PlayheadFrames = 0;
+            StatusMessage = $"'{project.Name}' 불러오기 완료";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"열기 실패: {ex.Message}";
+            ErrorOccurred?.Invoke(ex.Message);
+        }
+        finally { IsBusy = false; }
+    }
+
+    private async Task OnSaveProject()
+    {
+        if (CurrentProject == null) return;
+        if (CurrentProject.Model.FilePath == null) { await OnSaveAs(); return; }
+        await SaveCurrentProjectAsync();
+    }
+
+    private async Task OnSaveAs()
+    {
+        if (CurrentProject == null) return;
+        if (SaveProjectFolderRequested == null) return;
+        var folder = await SaveProjectFolderRequested();
+        if (folder == null) return;
+        CurrentProject.Model.FilePath = folder;
+        await SaveCurrentProjectAsync();
+    }
+
+    private async Task SaveCurrentProjectAsync()
+    {
+        if (CurrentProject == null) return;
+        IsBusy = true;
+        StatusMessage = "저장 중...";
+        try
+        {
+            await CurrentProject.SaveAsync();
+            OnPropertyChanged(nameof(WindowTitle));
+            StatusMessage = "저장 완료";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"저장 실패: {ex.Message}";
+            ErrorOccurred?.Invoke(ex.Message);
+        }
+        finally { IsBusy = false; }
+    }
+
+    private async Task OnImportAudio()
+    {
+        if (CurrentProject == null || ImportAudioRequested == null) return;
+        var files = await ImportAudioRequested();
+        if (files == null || files.Length == 0) return;
+
+        // 프로젝트 폴더가 없으면 임시 경로 사용
+        if (CurrentProject.Model.FilePath == null)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "Selah", CurrentProject.Model.Id);
+            CurrentProject.Model.FilePath = tempDir;
+            Directory.CreateDirectory(tempDir);
+        }
+
+        IsBusy = true;
+        int imported = 0;
+        foreach (var file in files)
+        {
+            StatusMessage = $"불러오는 중: {Path.GetFileName(file)}";
+            try
+            {
+                var source = await CurrentProject.ImportAudioAsync(file,
+                    new Progress<double>(p => StatusMessage = $"변환 중: {p:P0}"));
+
+                // 새 트랙에 클립 자동 배치
+                var track = CurrentProject.AddTrack(source.Name);
+                var clip = new Clip
+                {
+                    SourceId = source.Id,
+                    TimelineStartSamples = 0,
+                    SourceInSamples = 0,
+                    SourceOutSamples = source.LengthSamples
+                };
+                source.AbsolutePath ??= Path.Combine(CurrentProject.Model.FilePath!, source.RelPath);
+                track.AddClip(new ClipViewModel(clip, CurrentProject.Model));
+                imported++;
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"오류: {ex.Message}";
+                ErrorOccurred?.Invoke(ex.Message);
+            }
+        }
+        AudioEngine.RebuildMixers();
+        IsBusy = false;
+        StatusMessage = $"{imported}개 파일 임포트 완료";
+    }
+
+    private void OnAddTrack()
+    {
+        var track = CurrentProject?.AddTrack();
+        if (track != null) SelectedTrack = track;
+    }
+
+    private void OnDeleteSelectedTrack()
+    {
+        if (CurrentProject == null || SelectedTrack == null) return;
+        CurrentProject.RemoveTrack(SelectedTrack);
+        SelectedTrack = CurrentProject.Tracks.LastOrDefault();
+        AudioEngine.RebuildMixers();
+    }
+
+    private void OnTogglePlay()
+    {
+        if (AudioEngine.IsPlaying)
+        {
+            AudioEngine.Stop();
+            IsPlaying = false;
+            Timeline.IsPlaying = false;
+            StatusMessage = "정지";
+        }
+        else
+        {
+            AudioEngine.Seek(Timeline.PlayheadFrames);
+            AudioEngine.Play();
+            IsPlaying = true;
+            Timeline.IsPlaying = true;
+            StatusMessage = "재생 중...";
+        }
+    }
+
+    private void OnStop()
+    {
+        AudioEngine.Stop();
+        AudioEngine.Seek(0);
+        Timeline.UpdatePlayhead(0, CurrentProject?.SampleRate ?? 48000);
+        IsPlaying = false;
+        Timeline.IsPlaying = false;
+        StatusMessage = "정지";
+        OnPropertyChanged(nameof(PlayheadTimeDisplay));
+    }
+
+    private void OnReturnToStart()
+    {
+        bool wasPlaying = AudioEngine.IsPlaying;
+        if (wasPlaying) AudioEngine.Stop();
+        Timeline.UpdatePlayhead(0, CurrentProject?.SampleRate ?? 48000);
+        AudioEngine.Seek(0);
+        if (wasPlaying) { AudioEngine.Play(); IsPlaying = true; }
+        OnPropertyChanged(nameof(PlayheadTimeDisplay));
+    }
+
+    private async Task OnExport()
+    {
+        if (CurrentProject == null || ExportPathRequested == null) return;
+        var path = await ExportPathRequested();
+        if (path == null) return;
+
+        IsBusy = true;
+        StatusMessage = "렌더링 중...";
+        try
+        {
+            await AudioRenderer.RenderToWavAsync(
+                CurrentProject.Model,
+                path,
+                bitDepth: 24,
+                includeMetronome: false,
+                progress: new Progress<double>(p =>
+                {
+                    StatusMessage = $"렌더링 중... {p:P0}";
+                    OnPropertyChanged(nameof(StatusMessage));
+                }));
+            StatusMessage = $"내보내기 완료: {Path.GetFileName(path)}";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"내보내기 실패: {ex.Message}";
+            ErrorOccurred?.Invoke(ex.Message);
+        }
+        finally { IsBusy = false; }
+    }
+
+    private void OnSplitAtPlayhead()
+    {
+        if (CurrentProject == null || SelectedTrack == null) return;
+        SelectedTrack.SplitClipAt(Timeline.PlayheadFrames);
+        AudioEngine.RebuildMixers();
+    }
+
+    private void OnToggleMetronome()
+    {
+        IsMetronomeOn = !IsMetronomeOn;
+        AudioEngine.MetronomeEnabled = IsMetronomeOn;
+        StatusMessage = IsMetronomeOn ? "메트로놈 켜짐" : "메트로놈 꺼짐";
+    }
+
+    private void OnPlayheadAdvanced(object? s, long frames)
+    {
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        {
+            int sr = CurrentProject?.SampleRate ?? 48000;
+            Timeline.UpdatePlayhead(frames, sr);
+            OnPropertyChanged(nameof(PlayheadTimeDisplay));
+        });
+    }
+
+    private void OnPlaybackStopped(object? s, EventArgs e)
+    {
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        {
+            IsPlaying = false;
+            Timeline.IsPlaying = false;
+        });
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        AudioEngine.Dispose();
+    }
+}
