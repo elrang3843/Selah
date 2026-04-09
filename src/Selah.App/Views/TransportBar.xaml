@@ -84,11 +84,11 @@
         <!-- ⑥ 메트로놈 / 스냅 -->
         <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
             <ToggleButton Content="♩ 메트로놈" ToolTip="메트로놈 켜기/끄기 (M)"
-                          IsChecked="{Binding IsMetronomeOn}"
+                          IsChecked="{Binding IsMetronomeOn, Mode=OneWay}"
                           Command="{Binding ToggleMetronomeCommand}"
                           Height="28" Margin="0,0,4,0"/>
             <ToggleButton Content="⊞ 스냅" ToolTip="스냅 켜기/끄기 (N)"
-                          IsChecked="{Binding Timeline.SnapEnabled}"
+                          IsChecked="{Binding Timeline.SnapEnabled, Mode=OneWay}"
                           Command="{Binding ToggleSnapCommand}"
                           Height="28"/>
         </StackPanel>
