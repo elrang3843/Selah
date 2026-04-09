@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,8 +41,53 @@ public class TimelineCanvas : FrameworkElement
         set => SetValue(TimelineViewModelProperty, value);
     }
 
+    // 현재 구독 중인 ProjectViewModel (구독 해제 시 참조 필요)
+    private ProjectViewModel? _subscribedProject;
+
     private static void OnProjectChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        => ((TimelineCanvas)d).InvalidateVisual();
+    {
+        var canvas = (TimelineCanvas)d;
+        canvas.UnsubscribeFromProject(canvas._subscribedProject);
+        canvas._subscribedProject = (ProjectViewModel?)e.NewValue;
+        canvas.SubscribeToProject(canvas._subscribedProject);
+        canvas.InvalidateMeasure();
+        canvas.InvalidateVisual();
+    }
+
+    private void SubscribeToProject(ProjectViewModel? proj)
+    {
+        if (proj == null) return;
+        proj.Tracks.CollectionChanged += OnTracksChanged;
+        foreach (var track in proj.Tracks)
+            track.Clips.CollectionChanged += OnClipsChanged;
+    }
+
+    private void UnsubscribeFromProject(ProjectViewModel? proj)
+    {
+        if (proj == null) return;
+        proj.Tracks.CollectionChanged -= OnTracksChanged;
+        foreach (var track in proj.Tracks)
+            track.Clips.CollectionChanged -= OnClipsChanged;
+    }
+
+    private void OnTracksChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+            foreach (TrackViewModel track in e.NewItems)
+                track.Clips.CollectionChanged += OnClipsChanged;
+        if (e.OldItems != null)
+            foreach (TrackViewModel track in e.OldItems)
+                track.Clips.CollectionChanged -= OnClipsChanged;
+
+        InvalidateMeasure();
+        InvalidateVisual();
+    }
+
+    private void OnClipsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        InvalidateMeasure();
+        InvalidateVisual();
+    }
 
     private static void OnTimelineChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {

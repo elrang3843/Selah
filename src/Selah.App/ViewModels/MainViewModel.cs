@@ -269,7 +269,7 @@ public class MainViewModel : ViewModelBase, IDisposable
                 var clip = new Clip
                 {
                     SourceId = source.Id,
-                    TimelineStartSamples = 0,
+                    TimelineStartSamples = Timeline.PlayheadFrames,
                     SourceInSamples = 0,
                     SourceOutSamples = source.LengthSamples
                 };
