@@ -192,6 +192,23 @@
         <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
     </Style>
 
+    <!-- MenuItem 다크 테마 (활성/비활성 명확히 구분) -->
+    <Style TargetType="MenuItem">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{StaticResource Surface2Brush}"/>
+                <Setter Property="Opacity" Value="0.45"/>
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter Property="Background" Value="{StaticResource Surface1Brush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- Window 기본 배경 -->
     <Style TargetType="Window">
         <Setter Property="Background" Value="{StaticResource BgBrush}"/>
