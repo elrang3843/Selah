@@ -54,6 +54,11 @@ public sealed class AudioEngine : IDisposable
         if (_project == null || _masterMixer == null) return;
         if (State == PlaybackState.Playing) return;
 
+        // 재생할 콘텐츠가 없으면 오디오 디바이스를 열지 않음 (드라이버 초기화 노이즈 방지)
+        bool hasContent = _project.Tracks.Any(t => !t.Muted && t.Clips.Any(c => !c.Muted))
+                          || MetronomeEnabled;
+        if (!hasContent) return;
+
         if (_waveOut == null)
             InitWaveOut();
 
