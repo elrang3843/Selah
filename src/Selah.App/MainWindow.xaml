@@ -33,7 +33,7 @@
                 <MenuItem Header="열기(_O)..." Command="{Binding OpenProjectCommand}"
                           InputGestureText="Ctrl+O"/>
                 <Separator/>
-                <MenuItem Header="저장(_S)" Command="{Binding SaveProjectCommand}"
+                <MenuItem Header="저장" Command="{Binding SaveProjectCommand}"
                           InputGestureText="Ctrl+S"/>
                 <MenuItem Header="다른 이름으로 저장..." Command="{Binding SaveAsCommand}"
                           InputGestureText="Ctrl+Shift+S"/>
