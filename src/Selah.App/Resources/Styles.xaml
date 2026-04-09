@@ -47,6 +47,21 @@
             <Trigger Property="Role" Value="SubmenuItem">
                 <Setter Property="Foreground" Value="{x:Static SystemColors.MenuTextBrush}"/>
             </Trigger>
+            <!-- 비활성 Submenu: 접근키(_S 등) 유무 관계없이 GrayText 강제 지정 -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Role" Value="SubmenuItem"/>
+                    <Condition Property="IsEnabled" Value="False"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Foreground" Value="{x:Static SystemColors.GrayTextBrush}"/>
+            </MultiTrigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Role" Value="SubmenuHeader"/>
+                    <Condition Property="IsEnabled" Value="False"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Foreground" Value="{x:Static SystemColors.GrayTextBrush}"/>
+            </MultiTrigger>
         </Style.Triggers>
     </Style>
 
