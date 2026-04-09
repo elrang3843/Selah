@@ -25,16 +25,6 @@
     <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}"/>
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}"/>
 
-    <!-- ═══ Menu 다크 테마용 시스템 색상 오버라이드 ═══ -->
-    <!-- WPF MenuItem은 SystemColors를 직접 참조하므로 반드시 오버라이드해야 함 -->
-    <SolidColorBrush x:Key="{x:Static SystemColors.MenuBrushKey}"           Color="#181825"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.MenuBarBrushKey}"        Color="#181825"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.MenuTextBrushKey}"       Color="#CDD6F4"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.MenuHighlightBrushKey}"  Color="#313244"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"      Color="#313244"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"  Color="#CDD6F4"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.GrayTextBrushKey}"       Color="#45475A"/>
-
     <!-- ═══ 기본 텍스트 스타일 ═══ -->
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
@@ -200,12 +190,6 @@
     <!-- ScrollBar 다크 테마 -->
     <Style TargetType="ScrollBar">
         <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-    </Style>
-
-    <!-- MenuItem: SystemColors 오버라이드가 색상 처리, 여기선 폰트만 -->
-    <Style TargetType="MenuItem">
-        <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
-        <Setter Property="FontSize" Value="13"/>
     </Style>
 
     <!-- Window 기본 배경 -->
