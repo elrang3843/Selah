@@ -25,9 +25,6 @@
     <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}"/>
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}"/>
 
-    <!-- ═══ 컨버터 ═══ -->
-    <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
     <!-- ═══ 기본 텍스트 스타일 ═══ -->
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
