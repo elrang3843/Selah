@@ -48,11 +48,11 @@ public class ProjectViewModel : ViewModelBase
 
     // ── 트랙 관리 ──
 
-    public TrackViewModel AddTrack(string name = "새 트랙")
+    public TrackViewModel AddTrack(string? name = null)
     {
         var track = new Track
         {
-            Name = name,
+            Name = name ?? (_project.Tracks.Count + 1).ToString(),
             TrackIndex = _project.Tracks.Count,
             Color = TrackColors[_project.Tracks.Count % TrackColors.Length]
         };

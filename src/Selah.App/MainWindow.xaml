@@ -20,7 +20,7 @@
         <KeyBinding Key="S"                    Command="{Binding SplitAtPlayheadCommand}"/>
         <KeyBinding Key="M"                    Command="{Binding ToggleMetronomeCommand}"/>
         <KeyBinding Key="N"                    Command="{Binding ToggleSnapCommand}"/>
-        <KeyBinding Gesture="Delete"          Command="{Binding DeleteSelectedTrackCommand}"/>
+        <KeyBinding Gesture="Delete"           Command="{Binding DeleteCommand}"/>
     </Window.InputBindings>
 
     <DockPanel>
@@ -52,7 +52,7 @@
                 <Separator/>
                 <MenuItem Header="클립 분할" Command="{Binding SplitAtPlayheadCommand}"
                           InputGestureText="S"/>
-                <MenuItem Header="선택 삭제" Command="{Binding DeleteSelectedTrackCommand}"
+                <MenuItem Header="선택 삭제" Command="{Binding DeleteCommand}"
                           InputGestureText="Del"/>
             </MenuItem>
 

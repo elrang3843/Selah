@@ -56,6 +56,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         SplitAtPlayheadCommand = new RelayCommand(OnSplitAtPlayhead, () => CurrentProject != null);
         ToggleMetronomeCommand = new RelayCommand(OnToggleMetronome, () => CurrentProject != null);
         ToggleSnapCommand = new RelayCommand(() => Timeline.SnapEnabled = !Timeline.SnapEnabled);
+        DeleteCommand = new RelayCommand(OnDelete, () => CurrentProject != null);
 
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
         AudioEngine.PlaybackStopped += OnPlaybackStopped;
@@ -79,6 +80,13 @@ public class MainViewModel : ViewModelBase, IDisposable
     {
         get => _selectedTrack;
         set => SetField(ref _selectedTrack, value);
+    }
+
+    private ClipViewModel? _selectedClip;
+    public ClipViewModel? SelectedClip
+    {
+        get => _selectedClip;
+        set => SetField(ref _selectedClip, value);
     }
 
     public TimelineViewModel Timeline { get; }
@@ -152,6 +160,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     public ICommand SplitAtPlayheadCommand { get; }
     public ICommand ToggleMetronomeCommand { get; }
     public ICommand ToggleSnapCommand { get; }
+    public ICommand DeleteCommand { get; }
 
     // ── 커맨드 핸들러 ──
 
@@ -166,7 +175,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     public void CreateProject(string name, int sampleRate)
     {
         var project = ProjectService.NewProject(name, sampleRate);
-        project.Tracks.Add(new Track { Name = "트랙 1", TrackIndex = 0 });
+        project.Tracks.Add(new Track { Name = "1", TrackIndex = 0 });
         var vm = new ProjectViewModel(project, ProjectService, FFmpegService);
         CurrentProject = vm;
         AudioEngine.LoadProject(project);
@@ -265,7 +274,7 @@ public class MainViewModel : ViewModelBase, IDisposable
                     new Progress<double>(p => StatusMessage = $"변환 중: {p:P0}"));
 
                 // 새 트랙에 클립 자동 배치
-                var track = CurrentProject.AddTrack(source.Name);
+                var track = CurrentProject.AddTrack();
                 var clip = new Clip
                 {
                     SourceId = source.Id,
@@ -300,6 +309,21 @@ public class MainViewModel : ViewModelBase, IDisposable
         CurrentProject.RemoveTrack(SelectedTrack);
         SelectedTrack = CurrentProject.Tracks.LastOrDefault();
         AudioEngine.RebuildMixers();
+    }
+
+    private void OnDelete()
+    {
+        if (CurrentProject == null) return;
+        if (SelectedClip != null && SelectedTrack != null)
+        {
+            SelectedTrack.RemoveClip(SelectedClip);
+            SelectedClip = null;
+            AudioEngine.RebuildMixers();
+        }
+        else if (SelectedTrack != null)
+        {
+            OnDeleteSelectedTrack();
+        }
     }
 
     private void OnTogglePlay()

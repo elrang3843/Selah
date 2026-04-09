@@ -34,6 +34,7 @@
                 x:Name="Canvas"
                 ProjectViewModel="{Binding CurrentProject}"
                 TimelineViewModel="{Binding Timeline}"
+                IsMetronomeVisible="{Binding IsMetronomeOn}"
                 PlayheadSeeked="Canvas_PlayheadSeeked"
                 MouseWheel="Canvas_MouseWheel"/>
         </ScrollViewer>
