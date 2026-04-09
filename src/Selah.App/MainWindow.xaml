@@ -17,9 +17,9 @@
         <KeyBinding Gesture="Ctrl+E"           Command="{Binding ExportCommand}"/>
         <KeyBinding Gesture="Space"            Command="{Binding PlayCommand}"/>
         <KeyBinding Gesture="Home"             Command="{Binding ReturnToStartCommand}"/>
-        <KeyBinding Gesture="S"               Command="{Binding SplitAtPlayheadCommand}"/>
-        <KeyBinding Gesture="M"               Command="{Binding ToggleMetronomeCommand}"/>
-        <KeyBinding Gesture="N"               Command="{Binding ToggleSnapCommand}"/>
+        <KeyBinding Key="S"                    Command="{Binding SplitAtPlayheadCommand}"/>
+        <KeyBinding Key="M"                    Command="{Binding ToggleMetronomeCommand}"/>
+        <KeyBinding Key="N"                    Command="{Binding ToggleSnapCommand}"/>
         <KeyBinding Gesture="Delete"          Command="{Binding DeleteSelectedTrackCommand}"/>
     </Window.InputBindings>
 
