@@ -30,18 +30,22 @@
         </StackPanel>
 
         <!-- 샘플레이트 선택 -->
-        <StackPanel Grid.Row="2">
+        <StackPanel Grid.Row="2" Margin="0,0,0,16">
             <Label Content="샘플레이트 (Sample Rate)" Margin="0,0,0,8"/>
 
-            <RadioButton x:Name="Rb32k" Content="32 kHz  — 저사양 / 대화·현장 녹음 중심 (용량↓, CPU↓)"
-                         Foreground="#A6ADC8" FontSize="12" Margin="0,0,0,6"/>
-            <RadioButton x:Name="Rb44k" Content="44.1 kHz  — 음악 파일 중심"
-                         Foreground="#A6ADC8" FontSize="12" Margin="0,0,0,6"/>
-            <RadioButton x:Name="Rb48k" Content="48 kHz  — 영상/스트리밍 중심 ★ 권장"
+            <RadioButton x:Name="Rb32k" GroupName="SampleRate"
+                         Content="32 kHz  — 저사양 / 대화·현장 녹음 중심 (용량↓, CPU↓)"
+                         Foreground="#A6ADC8" FontSize="12" Margin="0,0,0,6" Height="Auto"/>
+            <RadioButton x:Name="Rb44k" GroupName="SampleRate"
+                         Content="44.1 kHz  — 음악 파일 중심"
+                         Foreground="#A6ADC8" FontSize="12" Margin="0,0,0,6" Height="Auto"/>
+            <RadioButton x:Name="Rb48k" GroupName="SampleRate"
+                         Content="48 kHz  — 영상/스트리밍 중심 ★ 권장"
                          Foreground="#CDD6F4" FontSize="12" FontWeight="SemiBold"
-                         IsChecked="True" Margin="0,0,0,6"/>
-            <RadioButton x:Name="Rb96k" Content="96 kHz  — 고음질 (용량↑, CPU↑) — 고사양 권장"
-                         Foreground="#A6ADC8" FontSize="12"/>
+                         IsChecked="True" Margin="0,0,0,6" Height="Auto"/>
+            <RadioButton x:Name="Rb96k" GroupName="SampleRate"
+                         Content="96 kHz  — 고음질 (용량↑, CPU↑) — 고사양 권장"
+                         Foreground="#A6ADC8" FontSize="12" Height="Auto"/>
         </StackPanel>
 
         <!-- 하단 버튼 -->
