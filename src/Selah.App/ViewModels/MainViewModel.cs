@@ -315,9 +315,10 @@ public class MainViewModel : ViewModelBase, IDisposable
         {
             AudioEngine.Seek(Timeline.PlayheadFrames);
             AudioEngine.Play();
-            IsPlaying = true;
-            Timeline.IsPlaying = true;
-            StatusMessage = "재생 중...";
+            bool playing = AudioEngine.IsPlaying;
+            IsPlaying = playing;
+            Timeline.IsPlaying = playing;
+            StatusMessage = playing ? "재생 중..." : "재생할 콘텐츠가 없습니다";
         }
     }
 

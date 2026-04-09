@@ -14,10 +14,10 @@ public class MetronomeProvider : ISampleProvider
     private bool _enabled;
 
     // 클릭 사운드 파라미터
-    private const int ClickFrames = 1764;   // ~20ms @ 88200 Hz, 882 @ 44100
+    private readonly int _clickFrames;      // ~20ms, 샘플레이트에 비례
     private const float DownbeatFreq = 1400f;
     private const float BeatFreq = 880f;
-    private const float ClickGain = 0.35f;
+    private const float ClickGain = 0.22f;
 
     public WaveFormat WaveFormat { get; }
 
@@ -31,6 +31,7 @@ public class MetronomeProvider : ISampleProvider
     {
         _tempoMap = tempoMap;
         WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, 2);
+        _clickFrames = sampleRate / 50;  // 20ms
     }
 
     public void Seek(long positionFrames) => _positionFrames = positionFrames;
@@ -56,7 +57,7 @@ public class MetronomeProvider : ISampleProvider
         for (int f = 0; f < frames; f++)
         {
             long absFrame = _positionFrames + f;
-            float click = GenerateClickSample(absFrame, samplesPerBeat, samplesPerBar, numerator, sr);
+            float click = GenerateClickSample(absFrame, samplesPerBeat, samplesPerBar, numerator, sr, _clickFrames);
             for (int ch = 0; ch < channels; ch++)
                 buffer[offset + f * channels + ch] = click;
         }
@@ -66,7 +67,7 @@ public class MetronomeProvider : ISampleProvider
     }
 
     private static float GenerateClickSample(
-        long frame, double samplesPerBeat, double samplesPerBar, int numerator, int sampleRate)
+        long frame, double samplesPerBeat, double samplesPerBar, int numerator, int sampleRate, int clickFrames)
     {
         // 현재 마디 내 위치 (소수 포함)
         double posInBar = frame % samplesPerBar;
@@ -75,7 +76,7 @@ public class MetronomeProvider : ISampleProvider
         for (int beat = 0; beat < numerator; beat++)
         {
             double beatStart = beat * samplesPerBeat;
-            if (posInBar >= beatStart && posInBar < beatStart + ClickFrames)
+            if (posInBar >= beatStart && posInBar < beatStart + clickFrames)
             {
                 float posInClick = (float)(posInBar - beatStart);
                 float freq = beat == 0 ? DownbeatFreq : BeatFreq;

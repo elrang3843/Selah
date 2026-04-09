@@ -61,25 +61,41 @@ public sealed class ClipSampleProvider : ISampleProvider, IDisposable
         }
     }
 
+    // 소스 샘플레이트 → 프로젝트(출력) 샘플레이트 변환
+    private long ToProjectFrames(long srcFrames)
+    {
+        if (_reader == null || _reader.WaveFormat.SampleRate == WaveFormat.SampleRate)
+            return srcFrames;
+        return (long)(srcFrames * (double)WaveFormat.SampleRate / _reader.WaveFormat.SampleRate);
+    }
+
+    // 프로젝트(출력) 샘플레이트 → 소스 샘플레이트 변환
+    private long ToSrcFrames(long projectFrames)
+    {
+        if (_reader == null || _reader.WaveFormat.SampleRate == WaveFormat.SampleRate)
+            return projectFrames;
+        return (long)(projectFrames * (double)_reader.WaveFormat.SampleRate / WaveFormat.SampleRate);
+    }
+
     /// <summary>재생 위치를 타임라인 절대 프레임으로 이동합니다.</summary>
     public void Seek(long timelineFrames)
     {
         _positionFrames = timelineFrames;
 
+        // 샘플 프로바이더 체인(리샘플러 포함)을 리셋하여 내부 버퍼 오염 방지
+        OpenReader();
+
         if (_reader == null) return;
 
         long relFrame = timelineFrames - _clip.TimelineStartSamples;
-        long srcFrame = _clip.SourceInSamples + relFrame;
+        if (relFrame < 0) return; // 클립 시작 전 — 다음 Read에서 무음 반환
+
+        long srcFrame = _clip.SourceInSamples + ToSrcFrames(relFrame);
 
         if (srcFrame < _clip.SourceInSamples || srcFrame >= _clip.SourceOutSamples)
-            return; // 범위 밖 — 다음 Read 에서 무음 반환
+            return; // 범위 밖
 
-        // WaveFileReader는 바이트 단위로 Seek
-        int srcChannels = _reader.WaveFormat.Channels;
-        int bytesPerSample = _reader.WaveFormat.BitsPerSample / 8;
-        long bytePos = srcFrame * srcChannels * bytesPerSample;
-        bytePos = Math.Clamp(bytePos, 0, _reader.Length);
-        _reader.Position = bytePos;
+        SeekReaderToFrame(srcFrame);
     }
 
     public int Read(float[] buffer, int offset, int count)
@@ -91,7 +107,8 @@ public sealed class ClipSampleProvider : ISampleProvider, IDisposable
         Array.Clear(buffer, offset, count);
 
         long clipStartFrame = _clip.TimelineStartSamples;
-        long clipEndFrame = _clip.TimelineStartSamples + _clip.LengthSamples;
+        // 클립 길이를 소스 샘플 단위 → 프로젝트 프레임 단위로 변환
+        long clipEndFrame = clipStartFrame + ToProjectFrames(_clip.LengthSamples);
 
         // 현재 블록이 클립과 겹치는지 확인
         if (_positionFrames >= clipEndFrame || _positionFrames + requestedFrames <= clipStartFrame)
@@ -108,8 +125,9 @@ public sealed class ClipSampleProvider : ISampleProvider, IDisposable
         int bufferFrameOffset = (int)(overlapStartFrame - _positionFrames);
         int bufSampleOffset = offset + bufferFrameOffset * channels;
 
-        // 소스 파일 내 위치 설정
-        long srcFrame = _clip.SourceInSamples + (overlapStartFrame - clipStartFrame);
+        // 소스 파일 내 위치 설정 (프로젝트 프레임 → 소스 프레임 변환 포함)
+        long overlapRelProjectFrames = overlapStartFrame - clipStartFrame;
+        long srcFrame = _clip.SourceInSamples + ToSrcFrames(overlapRelProjectFrames);
         SeekReaderToFrame(srcFrame);
 
         if (_sampleProvider != null && overlapFrames > 0)
