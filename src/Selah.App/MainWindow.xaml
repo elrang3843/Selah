@@ -27,7 +27,7 @@
         <!-- ═══ 메뉴바 ═══ -->
         <Menu DockPanel.Dock="Top" Background="#181825"
               FontFamily="Segoe UI, Malgun Gothic" FontSize="13">
-            <MenuItem Header="파일(_F)">
+            <MenuItem Header="파일(_F)" Foreground="#CDD6F4">
                 <MenuItem Header="새 프로젝트(_N)..." Command="{Binding NewProjectCommand}"
                           InputGestureText="Ctrl+N"/>
                 <MenuItem Header="열기(_O)..." Command="{Binding OpenProjectCommand}"
@@ -46,7 +46,7 @@
                 <MenuItem Header="종료(_X)" Click="MenuExit_Click"/>
             </MenuItem>
 
-            <MenuItem Header="편집(_E)">
+            <MenuItem Header="편집(_E)" Foreground="#CDD6F4">
                 <MenuItem Header="실행 취소" InputGestureText="Ctrl+Z" IsEnabled="False"/>
                 <MenuItem Header="다시 실행" InputGestureText="Ctrl+Y" IsEnabled="False"/>
                 <Separator/>
@@ -56,19 +56,19 @@
                           InputGestureText="Del"/>
             </MenuItem>
 
-            <MenuItem Header="트랙(_T)">
+            <MenuItem Header="트랙(_T)" Foreground="#CDD6F4">
                 <MenuItem Header="새 트랙 추가" Command="{Binding AddTrackCommand}"/>
                 <MenuItem Header="선택 트랙 삭제" Command="{Binding DeleteSelectedTrackCommand}"/>
             </MenuItem>
 
-            <MenuItem Header="도구(_O)">
+            <MenuItem Header="도구(_O)" Foreground="#CDD6F4">
                 <MenuItem Header="모델 관리자..." Click="MenuModelManager_Click"/>
                 <MenuItem Header="하드웨어 진단..." Click="MenuHardwareDiag_Click"/>
                 <Separator/>
                 <MenuItem Header="FFmpeg 설치 안내..." Click="MenuFFmpegGuide_Click"/>
             </MenuItem>
 
-            <MenuItem Header="도움말(_H)">
+            <MenuItem Header="도움말(_H)" Foreground="#CDD6F4">
                 <MenuItem Header="단축키 목록" Click="MenuShortcuts_Click" InputGestureText="F1"/>
                 <Separator/>
                 <MenuItem Header="윤리적 사용 가이드라인..." Click="MenuEthics_Click"/>

@@ -25,21 +25,6 @@
     <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}"/>
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}"/>
 
-    <!-- ═══ 메뉴 스타일 ═══ -->
-    <!-- TopLevel(어두운 메뉴바): 밝은 텍스트 / Submenu(시스템 팝업): 시스템 기본 텍스트 -->
-    <Style TargetType="MenuItem">
-        <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
-        <Setter Property="FontSize" Value="13"/>
-        <Style.Triggers>
-            <Trigger Property="Role" Value="TopLevelHeader">
-                <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-            </Trigger>
-            <Trigger Property="Role" Value="TopLevelItem">
-                <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
     <!-- ═══ 기본 텍스트 스타일 ═══ -->
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
