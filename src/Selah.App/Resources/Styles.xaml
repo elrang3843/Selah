@@ -25,6 +25,31 @@
     <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}"/>
     <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}"/>
 
+    <!-- ═══ 메뉴 스타일 ═══ -->
+    <!--
+        Foreground는 상속 프로퍼티이므로 TopLevelHeader에 CDD6F4를 설정하면
+        팝업 자식 MenuItem까지 상속됨. 이를 막기 위해 SubmenuItem/SubmenuHeader도
+        명시적으로 SystemColors.MenuTextBrush를 지정해 상속 체인을 차단.
+    -->
+    <Style TargetType="MenuItem">
+        <Style.Triggers>
+            <!-- 메뉴바(어두운 배경) → 밝은 텍스트 -->
+            <Trigger Property="Role" Value="TopLevelHeader">
+                <Setter Property="Foreground" Value="#CDD6F4"/>
+            </Trigger>
+            <Trigger Property="Role" Value="TopLevelItem">
+                <Setter Property="Foreground" Value="#CDD6F4"/>
+            </Trigger>
+            <!-- 팝업(시스템 흰 배경) → 시스템 기본 텍스트: 상속 차단 -->
+            <Trigger Property="Role" Value="SubmenuHeader">
+                <Setter Property="Foreground" Value="{x:Static SystemColors.MenuTextBrush}"/>
+            </Trigger>
+            <Trigger Property="Role" Value="SubmenuItem">
+                <Setter Property="Foreground" Value="{x:Static SystemColors.MenuTextBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- ═══ 기본 텍스트 스타일 ═══ -->
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
