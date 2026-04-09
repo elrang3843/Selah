@@ -313,11 +313,22 @@ public class TimelineCanvas : FrameworkElement
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        double w = availableSize.Width;
+        // 너비: 콘텐츠 기반으로 계산 (ScrollViewer가 ∞를 전달할 수 있으므로 그대로 반환 금지)
+        double w = 1000;
+        var tl = TimelineViewModel;
+        var proj = ProjectViewModel;
+        if (proj != null && tl != null && proj.Model.TotalLengthSamples > 0)
+            w = (double)proj.Model.TotalLengthSamples / proj.SampleRate * tl.PixelsPerSecond + 200;
+        if (!double.IsPositiveInfinity(availableSize.Width))
+            w = Math.Max(w, availableSize.Width);
+
+        // 높이: 눈금자 + 트랙 합계
         double h = RulerHeight;
-        if (ProjectViewModel != null)
-            h += ProjectViewModel.Tracks.Sum(t => t.HeightPixels);
-        h = Math.Max(h, availableSize.Height);
+        if (proj != null)
+            h += proj.Tracks.Sum(t => t.HeightPixels);
+        if (!double.IsPositiveInfinity(availableSize.Height))
+            h = Math.Max(h, availableSize.Height);
+
         return new Size(w, h);
     }
 }
