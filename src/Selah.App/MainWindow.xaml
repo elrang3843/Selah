@@ -25,7 +25,7 @@
 
     <DockPanel>
         <!-- ═══ 메뉴바 ═══ -->
-        <Menu DockPanel.Dock="Top" Background="#181825" Foreground="#CDD6F4"
+        <Menu DockPanel.Dock="Top" Background="#181825"
               FontFamily="Segoe UI, Malgun Gothic" FontSize="13">
             <MenuItem Header="파일(_F)">
                 <MenuItem Header="새 프로젝트(_N)..." Command="{Binding NewProjectCommand}"
