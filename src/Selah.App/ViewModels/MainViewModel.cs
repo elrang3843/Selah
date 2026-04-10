@@ -178,6 +178,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         project.Tracks.Add(new Track { Name = "1", TrackIndex = 0 });
         var vm = new ProjectViewModel(project, ProjectService, FFmpegService);
         CurrentProject = vm;
+        SelectedTrack = vm.Tracks.FirstOrDefault();
         AudioEngine.LoadProject(project);
         Timeline.PlayheadFrames = 0;
         Timeline.IsPlaying = false;
@@ -201,6 +202,7 @@ public class MainViewModel : ViewModelBase, IDisposable
             var project = await ProjectService.LoadAsync(folder);
             var vm = new ProjectViewModel(project, ProjectService, FFmpegService);
             CurrentProject = vm;
+            SelectedTrack = vm.Tracks.FirstOrDefault();
             AudioEngine.LoadProject(project);
             Timeline.PlayheadFrames = 0;
             StatusMessage = $"'{project.Name}' 불러오기 완료";
@@ -265,6 +267,7 @@ public class MainViewModel : ViewModelBase, IDisposable
 
         IsBusy = true;
         int imported = 0;
+        bool useSelectedTrack = true; // 첫 번째 파일은 선택된 트랙에 배치
         foreach (var file in files)
         {
             StatusMessage = $"불러오는 중: {Path.GetFileName(file)}";
@@ -273,8 +276,11 @@ public class MainViewModel : ViewModelBase, IDisposable
                 var source = await CurrentProject.ImportAudioAsync(file,
                     new Progress<double>(p => StatusMessage = $"변환 중: {p:P0}"));
 
-                // 새 트랙에 클립 자동 배치
-                var track = CurrentProject.AddTrack();
+                // 첫 번째 파일은 선택 트랙에, 이후 파일은 새 트랙에 배치
+                var track = (useSelectedTrack && SelectedTrack != null)
+                    ? SelectedTrack
+                    : CurrentProject.AddTrack();
+                useSelectedTrack = false;
                 var clip = new Clip
                 {
                     SourceId = source.Id,
