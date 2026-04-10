@@ -418,9 +418,10 @@ public class MainViewModel : ViewModelBase, IDisposable
     /// </summary>
     private static long ResolveInsertPosition(TrackViewModel track, long playheadFrame)
     {
+        // TimelineEndProjectFrame: 소스 SR → 프로젝트 SR 변환이 반영된 끝 위치
         var overlapping = track.Clips.FirstOrDefault(c =>
-            playheadFrame >= c.TimelineStartSamples && playheadFrame < c.TimelineEndSamples);
-        return overlapping?.TimelineEndSamples ?? playheadFrame;
+            playheadFrame >= c.TimelineStartSamples && playheadFrame < c.TimelineEndProjectFrame);
+        return overlapping?.TimelineEndProjectFrame ?? playheadFrame;
     }
 
     private void OnToggleMetronome()

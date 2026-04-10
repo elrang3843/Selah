@@ -266,7 +266,7 @@ public class TimelineCanvas : FrameworkElement
             foreach (var clip in track.Clips)
             {
                 double clipStartPx = (double)clip.TimelineStartSamples / sr * pps - scrollX;
-                double clipWidthPx = (double)clip.LengthSamples / sr * pps;
+                double clipWidthPx = (double)clip.TimelineLengthFrames / sr * pps;
 
                 if (clipStartPx + clipWidthPx < 0 || clipStartPx > w) continue;
 
@@ -422,7 +422,7 @@ public class TimelineCanvas : FrameworkElement
                 foreach (var clip in track.Clips)
                 {
                     double clipStartPx = (double)clip.TimelineStartSamples / sr * pps - scrollX;
-                    double clipWidthPx = (double)clip.LengthSamples / sr * pps;
+                    double clipWidthPx = (double)clip.TimelineLengthFrames / sr * pps;
                     if (mouseX >= clipStartPx && mouseX <= clipStartPx + clipWidthPx)
                         return (track, clip);
                 }
@@ -542,8 +542,18 @@ public class TimelineCanvas : FrameworkElement
         double w = 1000;
         var tl = TimelineViewModel;
         var proj = ProjectViewModel;
-        if (proj != null && tl != null && proj.Model.TotalLengthSamples > 0)
-            w = (double)proj.Model.TotalLengthSamples / proj.SampleRate * tl.PixelsPerSecond + 200;
+        if (proj != null && tl != null)
+        {
+            // TotalLengthSamples를 직접 사용하는 대신 ClipViewModel.TimelineLengthFrames를 통해
+            // 소스 SR 변환이 반영된 정확한 총 길이를 계산합니다.
+            long maxEnd = proj.Tracks
+                .SelectMany(t => t.Clips)
+                .Select(c => c.TimelineEndProjectFrame)
+                .DefaultIfEmpty(0)
+                .Max();
+            if (maxEnd > 0)
+                w = (double)maxEnd / proj.SampleRate * tl.PixelsPerSecond + 200;
+        }
         if (!double.IsPositiveInfinity(availableSize.Width))
             w = Math.Max(w, availableSize.Width);
 
