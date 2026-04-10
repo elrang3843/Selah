@@ -130,13 +130,16 @@ public class TimelineCanvas : FrameworkElement
     private static readonly Brush TrackSep = new SolidColorBrush(Color.FromRgb(0x31, 0x32, 0x44));
     private static readonly Brush PlayheadBrush = new SolidColorBrush(Color.FromRgb(0xF3, 0x8B, 0xA8));
     private static readonly Brush ClipText = new SolidColorBrush(Colors.White);
+    private static readonly Brush ClipDimText = new SolidColorBrush(Color.FromArgb(180, 255, 255, 255));
     private static readonly Brush ClipLabelBg = new SolidColorBrush(Color.FromArgb(90, 0, 0, 0));
     private static readonly Brush MetronomeBg = new SolidColorBrush(Color.FromRgb(0x15, 0x15, 0x20));
     private static readonly Brush SelectedClipBorderBrush = new SolidColorBrush(Colors.White);
+    private static readonly Brush DropTargetHighlight = new SolidColorBrush(Color.FromArgb(40, 0xA6, 0xE3, 0xA1));
     private static readonly Pen PlayheadPen = new(PlayheadBrush, 1.5);
     private static readonly Pen TrackSepPen = new(TrackSep, 1);
     private static readonly Pen RulerTickPen = new(RulerTick, 1);
     private static readonly Pen SelectedClipPen = new(SelectedClipBorderBrush, 2);
+    private static readonly Pen DropTargetPen = new(new SolidColorBrush(Color.FromArgb(120, 0xA6, 0xE3, 0xA1)), 1.5);
 
     static TimelineCanvas()
     {
@@ -144,16 +147,19 @@ public class TimelineCanvas : FrameworkElement
         TrackSepPen.Freeze();
         RulerTickPen.Freeze();
         SelectedClipPen.Freeze();
+        DropTargetPen.Freeze();
         RulerBg.Freeze(); RulerText.Freeze(); RulerTick.Freeze();
         TrackBg.Freeze(); TrackSep.Freeze(); PlayheadBrush.Freeze();
-        ClipText.Freeze(); ClipLabelBg.Freeze();
+        ClipText.Freeze(); ClipDimText.Freeze(); ClipLabelBg.Freeze();
         MetronomeBg.Freeze(); SelectedClipBorderBrush.Freeze();
+        DropTargetHighlight.Freeze();
     }
 
     // ── 선택/드래그 상태 ──
 
     private ClipViewModel? _selectedClip;
     private TrackViewModel? _selectedClipTrack;
+    private TrackViewModel? _dragTargetTrack;   // 드래그 중 마우스가 위치한 트랙
     private bool _isDraggingClip;
     private double _dragStartX;
     private long _dragClipOrigStart;
@@ -253,6 +259,10 @@ public class TimelineCanvas : FrameworkElement
                 : new SolidColorBrush(Color.FromRgb(0x24, 0x24, 0x3A));
             dc.DrawRectangle(trackBg, null, new Rect(0, y, w, trackH));
 
+            // 드래그 드롭 대상 트랙 하이라이트
+            if (_isDraggingClip && track == _dragTargetTrack && track != _selectedClipTrack)
+                dc.DrawRectangle(DropTargetHighlight, DropTargetPen, new Rect(0, y, w, trackH));
+
             foreach (var clip in track.Clips)
             {
                 double clipStartPx = (double)clip.TimelineStartSamples / sr * pps - scrollX;
@@ -294,21 +304,34 @@ public class TimelineCanvas : FrameworkElement
                     dc.DrawGeometry(new SolidColorBrush(Color.FromArgb(60, 0, 0, 0)), null, fadeGeom);
                 }
 
-                // 클립 이름 (충분한 너비일 때만)
+                // 클립 이름 + 재생 길이 (충분한 너비일 때만)
                 if (cw > 40)
                 {
-                    var ft = new FormattedText(clip.DisplayName,
+                    var nameFt = new FormattedText(clip.DisplayName,
                         CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
                         new Typeface("Segoe UI"), 11, ClipText, 96);
-                    ft.MaxTextWidth = cw - 10;
-                    ft.Trimming = TextTrimming.CharacterEllipsis;
+                    nameFt.MaxTextWidth = cw - 10;
+                    nameFt.Trimming = TextTrimming.CharacterEllipsis;
+
+                    var durFt = new FormattedText(FormatDuration(clip.LengthSeconds),
+                        CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+                        new Typeface("Segoe UI"), 9, ClipDimText, 96);
+                    durFt.MaxTextWidth = cw - 10;
 
                     double labelX = cx + 4;
                     double labelY = y + 5;
-                    double labelW = Math.Min(ft.Width + 6, cw - 6);
-                    double labelH = ft.Height + 2;
-                    dc.DrawRectangle(ClipLabelBg, null, new Rect(labelX - 2, labelY - 1, labelW, labelH));
-                    dc.DrawText(ft, new Point(labelX, labelY));
+                    bool showDur = trackH > nameFt.Height + durFt.Height + 16;
+                    double bgH = showDur
+                        ? nameFt.Height + durFt.Height + 4
+                        : nameFt.Height + 2;
+                    double bgW = Math.Min(
+                        Math.Max(nameFt.Width, showDur ? durFt.Width : 0) + 6,
+                        cw - 6);
+
+                    dc.DrawRectangle(ClipLabelBg, null, new Rect(labelX - 2, labelY - 1, bgW, bgH));
+                    dc.DrawText(nameFt, new Point(labelX, labelY));
+                    if (showDur)
+                        dc.DrawText(durFt, new Point(labelX, labelY + nameFt.Height + 2));
                 }
             }
 
@@ -337,6 +360,14 @@ public class TimelineCanvas : FrameworkElement
         dc.DrawGeometry(PlayheadBrush, null, tri);
     }
 
+    private static string FormatDuration(double seconds)
+    {
+        var ts = TimeSpan.FromSeconds(seconds);
+        return ts.TotalMinutes >= 1
+            ? $"{(int)ts.TotalMinutes}:{ts.Seconds:D2}.{ts.Milliseconds / 100}"
+            : $"{seconds:F1}s";
+    }
+
     private static Color ParseHex(string hex)
     {
         hex = hex.TrimStart('#');
@@ -351,6 +382,23 @@ public class TimelineCanvas : FrameworkElement
     }
 
     // ── 히트 테스트 ──
+
+    private TrackViewModel? HitTestTrack(double mouseY)
+    {
+        var proj = ProjectViewModel;
+        if (proj == null) return null;
+
+        double trackY = RulerHeight;
+        if (IsMetronomeVisible) trackY += MetronomeTrackHeight;
+
+        foreach (var track in proj.Tracks)
+        {
+            if (mouseY >= trackY && mouseY < trackY + track.HeightPixels)
+                return track;
+            trackY += track.HeightPixels;
+        }
+        return null;
+    }
 
     private (TrackViewModel? track, ClipViewModel? clip) HitTestClip(double mouseX, double mouseY)
     {
@@ -409,6 +457,7 @@ public class TimelineCanvas : FrameworkElement
             _isDraggingClip = true;
             _dragStartX = pos.X;
             _dragClipOrigStart = clip.TimelineStartSamples;
+            _dragTargetTrack = track;
             CaptureMouse();
         }
 
@@ -436,6 +485,9 @@ public class TimelineCanvas : FrameworkElement
                 newStart = tl.SnapFrame(newStart, proj.SampleRate, proj.Model.TempoMap);
 
             _selectedClip.TimelineStartSamples = newStart;
+
+            // 수직 이동: 마우스가 위치한 트랙을 드롭 대상으로 추적
+            _dragTargetTrack = HitTestTrack(pos.Y) ?? _dragTargetTrack;
             InvalidateVisual();
         }
         else if (e.LeftButton == MouseButtonState.Pressed && !_isDraggingClip)
@@ -447,10 +499,24 @@ public class TimelineCanvas : FrameworkElement
     protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
     {
         base.OnMouseLeftButtonUp(e);
-        if (_isDraggingClip)
+
+        if (_isDraggingClip && _selectedClip != null)
+        {
+            // 다른 트랙으로 드롭: 클립을 원래 트랙에서 제거하고 대상 트랙에 추가
+            if (_dragTargetTrack != null && _dragTargetTrack != _selectedClipTrack
+                && _selectedClipTrack != null)
+            {
+                _selectedClipTrack.RemoveClip(_selectedClip);
+                _dragTargetTrack.AddClip(_selectedClip);
+                _selectedClipTrack = _dragTargetTrack;
+                ClipSelected?.Invoke(this, (_selectedClipTrack, _selectedClip));
+            }
+
             ClipMoved?.Invoke(this, EventArgs.Empty);
+        }
 
         _isDraggingClip = false;
+        _dragTargetTrack = null;
         ReleaseMouseCapture();
     }
 
