@@ -15,6 +15,7 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
     private readonly SoftLimiter _limiter;
     private long _positionFrames;
     private readonly object _lock = new();
+    private float[] _temp = Array.Empty<float>();
     private bool _disposed;
 
     public WaveFormat WaveFormat { get; }
@@ -68,10 +69,13 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
         }
 
         Array.Clear(buffer, offset, count);
-        var temp = new float[count];
 
+        long currentPosition;
         lock (_lock)
         {
+            if (_temp.Length < count)
+                _temp = new float[count];
+
             bool anySolo = _project.Tracks.Any(t => t.Solo);
 
             foreach (var mixer in _trackMixers)
@@ -81,19 +85,19 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
                 if (track.Muted) continue;
                 if (anySolo && !track.Solo) continue;
 
-                Array.Clear(temp, 0, count);
-                mixer.Read(temp, 0, count);
+                Array.Clear(_temp, 0, count);
+                mixer.Read(_temp, 0, count);
                 for (int i = 0; i < count; i++)
-                    buffer[offset + i] += temp[i];
+                    buffer[offset + i] += _temp[i];
             }
 
             // 메트로놈 추가
             if (_metronome.Enabled)
             {
-                Array.Clear(temp, 0, count);
-                _metronome.Read(temp, 0, count);
+                Array.Clear(_temp, 0, count);
+                _metronome.Read(_temp, 0, count);
                 for (int i = 0; i < count; i++)
-                    buffer[offset + i] += temp[i];
+                    buffer[offset + i] += _temp[i];
             }
 
             // 소프트 리미터
@@ -101,8 +105,13 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
 
             int frames = count / WaveFormat.Channels;
             _positionFrames += frames;
-            PlayheadAdvanced?.Invoke(this, _positionFrames);
+            currentPosition = _positionFrames;
         }
+
+        // PlayheadAdvanced는 lock 밖에서 발생시킵니다.
+        // lock 안에서 호출하면 이벤트 핸들러가 UI 스레드 디스패치를 시도할 때
+        // UI 스레드가 Stop()으로 오디오 스레드를 기다리고 있을 경우 교착 상태가 됩니다.
+        PlayheadAdvanced?.Invoke(this, currentPosition);
 
         return count;
     }

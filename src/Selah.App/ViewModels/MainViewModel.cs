@@ -433,7 +433,10 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private void OnPlayheadAdvanced(object? s, long frames)
     {
-        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        // BeginInvoke(비동기)를 사용해야 합니다.
+        // Invoke(동기)를 사용하면 오디오 스레드가 UI 스레드를 기다리는 동안
+        // UI 스레드가 Stop()→WaveOut.Join()으로 오디오 스레드를 기다려 교착 상태가 발생합니다.
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
             int sr = CurrentProject?.SampleRate ?? 48000;
             Timeline.UpdatePlayhead(frames, sr);
@@ -443,7 +446,7 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private void OnPlaybackStopped(object? s, EventArgs e)
     {
-        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
             IsPlaying = false;
             Timeline.IsPlaying = false;
