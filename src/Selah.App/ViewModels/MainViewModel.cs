@@ -267,7 +267,11 @@ public class MainViewModel : ViewModelBase, IDisposable
 
         IsBusy = true;
         int imported = 0;
-        bool useSelectedTrack = true; // 첫 번째 파일은 선택된 트랙에 배치
+
+        // 삽입 대상 트랙: 선택된 트랙이 있으면 사용, 없으면 새 트랙 생성
+        var targetTrack = SelectedTrack ?? CurrentProject.AddTrack();
+        long insertPosition = Timeline.PlayheadFrames; // 여러 파일은 순서대로 이어서 배치
+
         foreach (var file in files)
         {
             StatusMessage = $"불러오는 중: {Path.GetFileName(file)}";
@@ -276,20 +280,16 @@ public class MainViewModel : ViewModelBase, IDisposable
                 var source = await CurrentProject.ImportAudioAsync(file,
                     new Progress<double>(p => StatusMessage = $"변환 중: {p:P0}"));
 
-                // 첫 번째 파일은 선택 트랙에, 이후 파일은 새 트랙에 배치
-                var track = (useSelectedTrack && SelectedTrack != null)
-                    ? SelectedTrack
-                    : CurrentProject.AddTrack();
-                useSelectedTrack = false;
                 var clip = new Clip
                 {
                     SourceId = source.Id,
-                    TimelineStartSamples = Timeline.PlayheadFrames,
+                    TimelineStartSamples = insertPosition,
                     SourceInSamples = 0,
                     SourceOutSamples = source.LengthSamples
                 };
                 source.AbsolutePath ??= Path.Combine(CurrentProject.Model.FilePath!, source.RelPath);
-                track.AddClip(new ClipViewModel(clip, CurrentProject.Model));
+                targetTrack.AddClip(new ClipViewModel(clip, CurrentProject.Model));
+                insertPosition += source.LengthSamples; // 다음 클립은 현재 클립 끝에 이어서
                 imported++;
             }
             catch (Exception ex)
