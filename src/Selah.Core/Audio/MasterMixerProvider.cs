@@ -40,7 +40,13 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
             foreach (var m in _trackMixers) m.Dispose();
             _trackMixers.Clear();
             foreach (var track in _project.Tracks)
-                _trackMixers.Add(new TrackMixerProvider(track, _project, WaveFormat));
+            {
+                var mixer = new TrackMixerProvider(track, _project, WaveFormat);
+                // 재생 중 호출되는 경우 현재 재생 위치에서 시작하도록 동기화합니다.
+                // 동기화하지 않으면 새 믹서가 position 0에서 시작해 오디오가 처음부터 재생됩니다.
+                mixer.Seek(_positionFrames);
+                _trackMixers.Add(mixer);
+            }
         }
     }
 

@@ -6,7 +6,7 @@ namespace Selah.Core.Audio;
 
 /// <summary>
 /// 실시간 재생 엔진.
-/// WASAPI 공유 모드(기본) → 실패 시 WaveOut 폴백.
+/// WaveOut(기본, 커널 믹서 경유) → 실패 시 WASAPI 폴백.
 /// </summary>
 public sealed class AudioEngine : IDisposable
 {
@@ -71,10 +71,21 @@ public sealed class AudioEngine : IDisposable
 
         _volumeProvider = new VolumeSampleProvider(_masterMixer) { Volume = 1f };
 
-        // WASAPI: 기기의 믹스 포맷을 조회하여 SR이 다르면 소프트웨어 리샘플링 후 전달합니다.
-        // 이렇게 하지 않으면 NAudio가 closestMatchFormat으로 기기를 초기화해도
-        // 우리 프로바이더는 여전히 projectSR로 데이터를 공급하므로
-        // 샘플 해석 오류 → 저음역 잡음이 발생합니다.
+        // WaveOut을 기본으로 사용합니다.
+        // Windows 커널 믹서가 SR/포맷 변환을 안정적으로 처리하며,
+        // WASAPI Shared는 일부 드라이버에서 Loudness Equalization 등
+        // 오디오 Enhancement와 상호작용하여 잡음을 유발할 수 있습니다.
+        try
+        {
+            var wo = new WaveOutEvent { DesiredLatency = 150 };
+            wo.Init(new SampleToWaveProvider16(_volumeProvider));
+            wo.PlaybackStopped += OnPlaybackStopped;
+            _waveOut = wo;
+            return;
+        }
+        catch { /* WaveOut 실패 시 WASAPI 시도 */ }
+
+        // WASAPI 폴백: WaveOut을 사용할 수 없는 환경(서버, 가상 머신 등)에서 시도합니다.
         try
         {
             ISampleProvider outputForWasapi = _volumeProvider;
@@ -95,20 +106,7 @@ public sealed class AudioEngine : IDisposable
             wasapi.PlaybackStopped += OnPlaybackStopped;
             _waveOut = wasapi;
         }
-        catch
-        {
-            // WASAPI 실패 시 WaveOut 폴백.
-            // 16-bit PCM으로 명시적 변환하여 드라이버의 float 포맷 지원 여부와 무관하게
-            // 안정적으로 동작하도록 합니다.
-            try
-            {
-                var wo = new WaveOutEvent { DesiredLatency = 150 };
-                wo.Init(new SampleToWaveProvider16(_volumeProvider));
-                wo.PlaybackStopped += OnPlaybackStopped;
-                _waveOut = wo;
-            }
-            catch { /* 오디오 디바이스 없음 */ }
-        }
+        catch { /* 오디오 디바이스 없음 */ }
     }
 
     private void OnPlaybackStopped(object? s, StoppedEventArgs e)

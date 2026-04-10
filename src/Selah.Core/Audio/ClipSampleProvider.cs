@@ -155,9 +155,7 @@ public sealed class ClipSampleProvider : ISampleProvider, IDisposable
     private void SeekReaderToFrame(long srcFrame)
     {
         if (_reader == null) return;
-        int srcChannels = _reader.WaveFormat.Channels;
-        int bps = _reader.WaveFormat.BitsPerSample / 8;
-        long bytePos = Math.Clamp(srcFrame * srcChannels * bps, 0, _reader.Length);
+        long bytePos = Math.Clamp(srcFrame * _reader.WaveFormat.BlockAlign, 0, _reader.Length);
         _reader.Position = bytePos;
     }
 
