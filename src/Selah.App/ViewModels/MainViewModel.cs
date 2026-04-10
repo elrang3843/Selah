@@ -270,7 +270,9 @@ public class MainViewModel : ViewModelBase, IDisposable
 
         // 삽입 대상 트랙: 선택된 트랙이 있으면 사용, 없으면 새 트랙 생성
         var targetTrack = SelectedTrack ?? CurrentProject.AddTrack();
-        long insertPosition = Timeline.PlayheadFrames; // 여러 파일은 순서대로 이어서 배치
+
+        // 플레이헤드가 기존 클립 위에 있으면 그 클립의 끝에서부터 삽입
+        long insertPosition = ResolveInsertPosition(targetTrack, Timeline.PlayheadFrames);
 
         foreach (var file in files)
         {
@@ -408,6 +410,17 @@ public class MainViewModel : ViewModelBase, IDisposable
         if (CurrentProject == null || SelectedTrack == null) return;
         SelectedTrack.SplitClipAt(Timeline.PlayheadFrames);
         AudioEngine.RebuildMixers();
+    }
+
+    /// <summary>
+    /// 플레이헤드 위치가 기존 클립 내부에 있으면 해당 클립의 끝 위치를 반환하고,
+    /// 그렇지 않으면 playheadFrame을 그대로 반환합니다.
+    /// </summary>
+    private static long ResolveInsertPosition(TrackViewModel track, long playheadFrame)
+    {
+        var overlapping = track.Clips.FirstOrDefault(c =>
+            playheadFrame >= c.TimelineStartSamples && playheadFrame < c.TimelineEndSamples);
+        return overlapping?.TimelineEndSamples ?? playheadFrame;
     }
 
     private void OnToggleMetronome()
