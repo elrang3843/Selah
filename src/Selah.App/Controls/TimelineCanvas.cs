@@ -5,6 +5,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Selah.App.ViewModels;
+using Selah.Core.Audio;
+using Selah.Core.Models;
 
 namespace Selah.App.Controls;
 
@@ -140,6 +142,7 @@ public class TimelineCanvas : FrameworkElement
     private static readonly Pen RulerTickPen = new(RulerTick, 1);
     private static readonly Pen SelectedClipPen = new(SelectedClipBorderBrush, 2);
     private static readonly Pen DropTargetPen = new(new SolidColorBrush(Color.FromArgb(120, 0xA6, 0xE3, 0xA1)), 1.5);
+    private static readonly Pen WaveformPen = new(new SolidColorBrush(Color.FromArgb(170, 0xCA, 0xD3, 0xF5)), 1.0);
 
     static TimelineCanvas()
     {
@@ -148,12 +151,17 @@ public class TimelineCanvas : FrameworkElement
         RulerTickPen.Freeze();
         SelectedClipPen.Freeze();
         DropTargetPen.Freeze();
+        WaveformPen.Freeze();
         RulerBg.Freeze(); RulerText.Freeze(); RulerTick.Freeze();
         TrackBg.Freeze(); TrackSep.Freeze(); PlayheadBrush.Freeze();
         ClipText.Freeze(); ClipDimText.Freeze(); ClipLabelBg.Freeze();
         MetronomeBg.Freeze(); SelectedClipBorderBrush.Freeze();
         DropTargetHighlight.Freeze();
     }
+
+    // ── 웨이브폼 캐시 ──
+
+    private readonly WaveformCache _waveformCache = new();
 
     // ── 선택/드래그 상태 ──
 
@@ -290,6 +298,21 @@ public class TimelineCanvas : FrameworkElement
 
                 dc.DrawRectangle(clipBg, borderPen, clipRect);
 
+                // 웨이브폼 렌더링
+                var src = proj.Model.AudioSources.FirstOrDefault(s => s.Id == clip.Model.SourceId);
+                if (src?.AbsolutePath != null)
+                {
+                    var peaks = _waveformCache.GetOrRequest(src,
+                        () => Dispatcher.BeginInvoke(new Action(InvalidateVisual)));
+                    if (peaks != null && peaks.Length > 0)
+                    {
+                        double srcSr = src.SampleRate > 0 ? src.SampleRate : (double)sr;
+                        double srcFramesPerPixel = srcSr / pps;
+                        DrawWaveform(dc, peaks, clipStartPx, cx, y + 2, cw, trackH - 4,
+                            srcFramesPerPixel, clip.Model.SourceInSamples);
+                    }
+                }
+
                 // 페이드 인 시각화
                 if (clip.FadeInSamples > 0)
                 {
@@ -338,6 +361,52 @@ public class TimelineCanvas : FrameworkElement
             dc.DrawLine(TrackSepPen, new Point(0, y + trackH), new Point(w, y + trackH));
             y += trackH;
         }
+    }
+
+    /// <summary>
+    /// 클립 내 웨이브폼 피크를 1px 수직 선으로 렌더링합니다.
+    /// </summary>
+    /// <param name="clipStartPx">스크롤을 반영한 클립 시작 화면 위치 (음수 가능)</param>
+    /// <param name="cx">실제 그리기 시작 X (clipStartPx를 0으로 클램프한 값)</param>
+    /// <param name="cy">클립 사각형 상단 Y</param>
+    /// <param name="cw">실제 그리기 너비</param>
+    /// <param name="clipH">클립 사각형 높이</param>
+    /// <param name="srcFramesPerPixel">픽셀 1개당 소스 프레임 수</param>
+    /// <param name="srcInSamples">클립 소스 시작 프레임 (소스 SR 기준)</param>
+    private static void DrawWaveform(DrawingContext dc, float[] peaks,
+        double clipStartPx, double cx, double cy, double cw, double clipH,
+        double srcFramesPerPixel, long srcInSamples)
+    {
+        double midY = cy + clipH / 2.0;
+        double halfH = clipH / 2.0 - 2;
+        if (halfH < 1) return;
+
+        // 클립 영역 밖으로 그려지지 않도록 클리핑
+        dc.PushClip(new RectangleGeometry(new Rect(cx, cy, cw, clipH)));
+
+        // clipStartPx가 0보다 작으면(클립이 왼쪽으로 스크롤됨) 그만큼 오프셋 보정
+        double pixelOffset = cx - clipStartPx;
+
+        var geo = new StreamGeometry();
+        using (var ctx = geo.Open())
+        {
+            int iw = (int)Math.Ceiling(cw);
+            for (int px = 0; px < iw; px++)
+            {
+                double srcRelFrame = srcInSamples + (pixelOffset + px) * srcFramesPerPixel;
+                int peakIdx = (int)(srcRelFrame / WaveformCache.FramesPerPeak);
+                if (peakIdx < 0 || peakIdx >= peaks.Length) continue;
+                float peak = peaks[peakIdx];
+                if (peak <= 0f) continue;
+                double amp = peak * halfH;
+                double screenX = cx + px + 0.5; // 픽셀 중앙 정렬
+                ctx.BeginFigure(new Point(screenX, midY - amp), false, false);
+                ctx.LineTo(new Point(screenX, midY + amp), true, false);
+            }
+        }
+        geo.Freeze();
+        dc.DrawGeometry(null, WaveformPen, geo);
+        dc.Pop();
     }
 
     private static void DrawPlayhead(DrawingContext dc, TimelineViewModel tl,
