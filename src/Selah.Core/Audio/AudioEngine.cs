@@ -71,20 +71,43 @@ public sealed class AudioEngine : IDisposable
 
         _volumeProvider = new VolumeSampleProvider(_masterMixer) { Volume = 1f };
 
+        // WASAPI: 기기의 믹스 포맷을 조회하여 SR이 다르면 소프트웨어 리샘플링 후 전달합니다.
+        // 이렇게 하지 않으면 NAudio가 closestMatchFormat으로 기기를 초기화해도
+        // 우리 프로바이더는 여전히 projectSR로 데이터를 공급하므로
+        // 샘플 해석 오류 → 저음역 잡음이 발생합니다.
         try
         {
+            ISampleProvider outputForWasapi = _volumeProvider;
+            try
+            {
+                using var deviceEnum = new NAudio.CoreAudioApi.MMDeviceEnumerator();
+                using var device = deviceEnum.GetDefaultAudioEndpoint(
+                    NAudio.CoreAudioApi.DataFlow.Render,
+                    NAudio.CoreAudioApi.Role.Multimedia);
+                int mixSR = device.AudioClient.MixFormat.SampleRate;
+                if (mixSR != _masterMixer.WaveFormat.SampleRate)
+                    outputForWasapi = new WdlResamplingSampleProvider(_volumeProvider, mixSR);
+            }
+            catch { /* 믹스 포맷 조회 실패 시 리샘플링 없이 시도 */ }
+
             var wasapi = new WasapiOut(NAudio.CoreAudioApi.AudioClientShareMode.Shared, 100);
-            wasapi.Init(_volumeProvider);
+            wasapi.Init(outputForWasapi);
             wasapi.PlaybackStopped += OnPlaybackStopped;
             _waveOut = wasapi;
         }
         catch
         {
-            // WASAPI 실패 시 WaveOut 폴백
-            var wo = new WaveOutEvent { DesiredLatency = 150 };
-            wo.Init(_volumeProvider);
-            wo.PlaybackStopped += OnPlaybackStopped;
-            _waveOut = wo;
+            // WASAPI 실패 시 WaveOut 폴백.
+            // 16-bit PCM으로 명시적 변환하여 드라이버의 float 포맷 지원 여부와 무관하게
+            // 안정적으로 동작하도록 합니다.
+            try
+            {
+                var wo = new WaveOutEvent { DesiredLatency = 150 };
+                wo.Init(new SampleToWaveProvider16(_volumeProvider));
+                wo.PlaybackStopped += OnPlaybackStopped;
+                _waveOut = wo;
+            }
+            catch { /* 오디오 디바이스 없음 */ }
         }
     }
 
