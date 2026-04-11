@@ -140,6 +140,8 @@ public class TimelineCanvas : FrameworkElement
     private static readonly Pen PlayheadPen = new(PlayheadBrush, 1.5);
     private static readonly Pen TrackSepPen = new(TrackSep, 1);
     private static readonly Pen RulerTickPen = new(RulerTick, 1);
+    private static readonly Pen RulerMidTickPen = new(new SolidColorBrush(Color.FromArgb(160, 0x45, 0x47, 0x5A)), 1);
+    private static readonly Pen RulerSubTickPen = new(new SolidColorBrush(Color.FromArgb(90, 0x45, 0x47, 0x5A)), 1);
     private static readonly Pen SelectedClipPen = new(SelectedClipBorderBrush, 2);
     private static readonly Pen DropTargetPen = new(new SolidColorBrush(Color.FromArgb(120, 0xA6, 0xE3, 0xA1)), 1.5);
     private static readonly Pen WaveformPen = new(new SolidColorBrush(Color.FromArgb(170, 0xCA, 0xD3, 0xF5)), 1.0);
@@ -149,6 +151,8 @@ public class TimelineCanvas : FrameworkElement
         PlayheadPen.Freeze();
         TrackSepPen.Freeze();
         RulerTickPen.Freeze();
+        RulerMidTickPen.Freeze();
+        RulerSubTickPen.Freeze();
         SelectedClipPen.Freeze();
         DropTargetPen.Freeze();
         WaveformPen.Freeze();
@@ -207,38 +211,61 @@ public class TimelineCanvas : FrameworkElement
 
         double pps = tl.PixelsPerSecond;
         double scrollX = tl.ScrollOffsetX;
-
-        double minTickPx = 60;
-        double[] intervals = { 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 300 };
-        double tickInterval = intervals.FirstOrDefault(iv => iv * pps >= minTickPx);
-        if (tickInterval == 0) tickInterval = 300;
-
         double startTime = scrollX / pps;
         double endTime = (scrollX + w) / pps;
 
-        for (double t = Math.Floor(startTime / tickInterval) * tickInterval;
-             t <= endTime; t += tickInterval)
+        // 주 눈금 간격 (레이블 포함, 최소 70px 간격)
+        double[] majorCandidates = { 0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 300 };
+        double major = majorCandidates.FirstOrDefault(iv => iv * pps >= 70);
+        if (major == 0) major = 300;
+
+        // 0.5초 보조 눈금: 주 눈금보다 세밀하고 최소 14px 간격
+        bool showMid = major > 0.5 && 0.5 * pps >= 14;
+
+        // 0.1초 미세 눈금: 보조/주 눈금보다 세밀하고 최소 7px 간격
+        bool showSub = (showMid ? 0.5 : major) > 0.1 && 0.1 * pps >= 7;
+
+        // ① 미세 눈금 (0.1초, 높이 4px)
+        if (showSub)
+            for (double t = Math.Floor(startTime / 0.1) * 0.1; t <= endTime; t += 0.1)
+            {
+                if (IsTick(t, showMid ? 0.5 : major)) continue;
+                double x = t * pps - scrollX;
+                if (x < 0 || x > w) continue;
+                dc.DrawLine(RulerSubTickPen, new Point(x, RulerHeight - 4), new Point(x, RulerHeight));
+            }
+
+        // ② 보조 눈금 (0.5초, 높이 8px)
+        if (showMid)
+            for (double t = Math.Floor(startTime / 0.5) * 0.5; t <= endTime; t += 0.5)
+            {
+                if (IsTick(t, major)) continue;
+                double x = t * pps - scrollX;
+                if (x < 0 || x > w) continue;
+                dc.DrawLine(RulerMidTickPen, new Point(x, RulerHeight - 8), new Point(x, RulerHeight));
+            }
+
+        // ③ 주 눈금 (레이블, 높이 14px)
+        for (double t = Math.Floor(startTime / major) * major; t <= endTime; t += major)
         {
             double x = t * pps - scrollX;
             if (x < 0 || x > w) continue;
-
-            bool isMajor = Math.Abs(t % (tickInterval * 5)) < tickInterval * 0.01;
-            double tickH = isMajor ? 14 : 7;
-            dc.DrawLine(RulerTickPen, new Point(x, RulerHeight - tickH), new Point(x, RulerHeight));
-
-            if (isMajor)
-            {
-                var ts = TimeSpan.FromSeconds(t);
-                string label = ts.TotalMinutes >= 1
-                    ? $"{(int)ts.TotalMinutes}:{ts.Seconds:D2}"
-                    : $"{t:G3}s";
-
-                var ft = new FormattedText(label, CultureInfo.InvariantCulture,
-                    FlowDirection.LeftToRight,
-                    new Typeface("Segoe UI"), 10, RulerText, 96);
-                dc.DrawText(ft, new Point(x + 2, 4));
-            }
+            dc.DrawLine(RulerTickPen, new Point(x, RulerHeight - 14), new Point(x, RulerHeight));
+            var ts = TimeSpan.FromSeconds(t);
+            string label = ts.TotalMinutes >= 1
+                ? $"{(int)ts.TotalMinutes}:{ts.Seconds:D2}"
+                : $"{t:G3}s";
+            var ft = new FormattedText(label, CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight, new Typeface("Segoe UI"), 10, RulerText, 96);
+            dc.DrawText(ft, new Point(x + 2, 4));
         }
+    }
+
+    /// <summary>t가 interval의 정수배인지 확인합니다 (부동소수점 오차 허용).</summary>
+    private static bool IsTick(double t, double interval)
+    {
+        double r = t % interval;
+        return r < interval * 0.001 || r > interval * 0.999;
     }
 
     private void DrawTracks(DrawingContext dc, ProjectViewModel proj,
