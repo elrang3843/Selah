@@ -77,6 +77,7 @@ public class MainViewModel : ViewModelBase, IDisposable
             SetField(ref _currentProject, value);
             OnPropertyChanged(nameof(WindowTitle));
             OnPropertyChanged(nameof(HasProject));
+            System.Windows.Input.CommandManager.InvalidateRequerySuggested();
         }
     }
 
@@ -84,7 +85,11 @@ public class MainViewModel : ViewModelBase, IDisposable
     public TrackViewModel? SelectedTrack
     {
         get => _selectedTrack;
-        set => SetField(ref _selectedTrack, value);
+        set
+        {
+            SetField(ref _selectedTrack, value);
+            System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+        }
     }
 
     private ClipViewModel? _selectedClip;
