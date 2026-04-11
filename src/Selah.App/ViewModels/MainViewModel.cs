@@ -60,6 +60,7 @@ public class MainViewModel : ViewModelBase, IDisposable
 
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
         AudioEngine.PlaybackStopped += OnPlaybackStopped;
+        AudioEngine.ContentEnded += OnContentEnded;
     }
 
     // ── 프로퍼티 ──
@@ -450,6 +451,23 @@ public class MainViewModel : ViewModelBase, IDisposable
         {
             IsPlaying = false;
             Timeline.IsPlaying = false;
+        });
+    }
+
+    private void OnContentEnded(object? s, EventArgs e)
+    {
+        // 오디오 스레드에서 호출됩니다. UI 스레드로 디스패치하여 Stop()을 안전하게 호출합니다.
+        // BeginInvoke(비동기)를 사용해야 합니다. Invoke(동기)를 사용하면 오디오 스레드가
+        // UI 스레드를 기다리고, UI 스레드가 Stop()→WaveOut.Join()으로 오디오 스레드를
+        // 기다리는 교착 상태가 발생합니다.
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+        {
+            if (!AudioEngine.IsPlaying) return;
+            AudioEngine.Stop();
+            IsPlaying = false;
+            Timeline.IsPlaying = false;
+            StatusMessage = "재생 완료";
+            OnPropertyChanged(nameof(PlayheadTimeDisplay));
         });
     }
 

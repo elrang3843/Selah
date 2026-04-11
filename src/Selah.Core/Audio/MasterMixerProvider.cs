@@ -17,11 +17,15 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
     private readonly object _lock = new();
     private float[] _temp = Array.Empty<float>();
     private bool _disposed;
+    private bool _endReported;
 
     public WaveFormat WaveFormat { get; }
 
     /// <summary>재생 위치가 갱신될 때마다 발생. 인자는 현재 프레임 위치.</summary>
     public event EventHandler<long>? PlayheadAdvanced;
+
+    /// <summary>재생 가능한 클립이 모두 끝났을 때 발생합니다.</summary>
+    public event EventHandler? PlaybackEnded;
 
     public MasterMixerProvider(Project project)
     {
@@ -47,6 +51,7 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
                 mixer.Seek(_positionFrames);
                 _trackMixers.Add(mixer);
             }
+            _endReported = false;
         }
     }
 
@@ -55,9 +60,37 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
         lock (_lock)
         {
             _positionFrames = positionFrames;
+            _endReported = false;
             foreach (var m in _trackMixers) m.Seek(positionFrames);
             _metronome.Seek(positionFrames);
         }
+    }
+
+    /// <summary>
+    /// 솔로/뮤트를 고려하여 재생 가능한 클립들의 최대 끝 프레임(프로젝트 SR 기준)을 반환합니다.
+    /// 재생 가능한 클립이 없으면 0을 반환합니다.
+    /// </summary>
+    private long GetPlayableEndFrame()
+    {
+        bool anySolo = _project.Tracks.Any(t => t.Solo);
+        long max = 0;
+        foreach (var track in _project.Tracks)
+        {
+            if (track.Muted) continue;
+            if (anySolo && !track.Solo) continue;
+            foreach (var clip in track.Clips)
+            {
+                if (clip.Muted) continue;
+                var src = _project.AudioSources.FirstOrDefault(s => s.Id == clip.SourceId);
+                // clip.LengthSamples는 소스 SR 기준 → 프로젝트 SR 기준으로 변환
+                long lenProjectFrames = (src == null || src.SampleRate == WaveFormat.SampleRate)
+                    ? clip.LengthSamples
+                    : (long)(clip.LengthSamples * (double)WaveFormat.SampleRate / src.SampleRate);
+                long end = clip.TimelineStartSamples + lenProjectFrames;
+                if (end > max) max = end;
+            }
+        }
+        return max;
     }
 
     public bool MetronomeEnabled
@@ -77,6 +110,7 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
         Array.Clear(buffer, offset, count);
 
         long currentPosition;
+        bool shouldFireEnded = false;
         lock (_lock)
         {
             if (_temp.Length < count)
@@ -112,12 +146,24 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
             int frames = count / WaveFormat.Channels;
             _positionFrames += frames;
             currentPosition = _positionFrames;
+
+            // 재생 가능한 클립이 모두 끝났는지 확인 (메트로놈 제외)
+            if (!_endReported)
+            {
+                long endFrame = GetPlayableEndFrame();
+                if (endFrame > 0 && currentPosition >= endFrame)
+                {
+                    _endReported = true;
+                    shouldFireEnded = true;
+                }
+            }
         }
 
-        // PlayheadAdvanced는 lock 밖에서 발생시킵니다.
+        // 이벤트는 lock 밖에서 발생시킵니다.
         // lock 안에서 호출하면 이벤트 핸들러가 UI 스레드 디스패치를 시도할 때
         // UI 스레드가 Stop()으로 오디오 스레드를 기다리고 있을 경우 교착 상태가 됩니다.
         PlayheadAdvanced?.Invoke(this, currentPosition);
+        if (shouldFireEnded) PlaybackEnded?.Invoke(this, EventArgs.Empty);
 
         return count;
     }

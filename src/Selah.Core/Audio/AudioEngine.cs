@@ -35,8 +35,11 @@ public sealed class AudioEngine : IDisposable
     /// <summary>재생 중 플레이헤드 위치 변경 이벤트 (프레임 단위)</summary>
     public event EventHandler<long>? PlayheadAdvanced;
 
-    /// <summary>재생 종료 이벤트</summary>
+    /// <summary>재생 종료 이벤트 (WavePlayer 수준)</summary>
     public event EventHandler? PlaybackStopped;
+
+    /// <summary>메트로놈을 제외한 모든 클립 재생이 끝났을 때 발생하는 이벤트</summary>
+    public event EventHandler? ContentEnded;
 
     public void LoadProject(Project project)
     {
@@ -47,6 +50,8 @@ public sealed class AudioEngine : IDisposable
         _masterMixer = new MasterMixerProvider(project);
         _masterMixer.PlayheadAdvanced += (s, frames) =>
             PlayheadAdvanced?.Invoke(this, frames);
+        _masterMixer.PlaybackEnded += (s, e) =>
+            ContentEnded?.Invoke(this, EventArgs.Empty);
     }
 
     public void Play()
