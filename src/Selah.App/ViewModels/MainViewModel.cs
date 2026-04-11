@@ -136,11 +136,11 @@ public class MainViewModel : ViewModelBase, IDisposable
     {
         get
         {
-            if (CurrentProject == null) return "00:00.0";
-            var s = Timeline.PlayheadSeconds;
-            int min = (int)(s / 60);
-            double sec = s % 60;
-            return $"{min:D2}:{sec:05.1f}";
+            if (CurrentProject == null) return "00:00.000";
+            var ts = TimeSpan.FromSeconds(Timeline.PlayheadSeconds);
+            // TimeSpan의 fff는 실제 밀리초 포매터입니다.
+            // C# double 포맷의 f/ff/fff는 밀리초가 아닌 리터럴 문자입니다.
+            return $"{(int)ts.TotalMinutes:D2}:{ts.Seconds:D2}.{ts.Milliseconds:D3}";
         }
     }
 
