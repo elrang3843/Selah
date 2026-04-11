@@ -9,7 +9,7 @@
         <!-- 눈금자 높이에 맞춘 헤더 여백 -->
         <Border DockPanel.Dock="Top" Height="28" Background="#181825"
                 BorderBrush="#313244" BorderThickness="0,0,0,1">
-            <TextBlock Text="트랙" Foreground="#6C7086" FontSize="11"
+            <TextBlock Text="{DynamicResource Track_Header}" Foreground="#6C7086" FontSize="11"
                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Border>
 
@@ -23,7 +23,7 @@
                            Fill="#888888"/>
                 <TextBlock Text="0" Foreground="#CDD6F4" FontWeight="SemiBold" FontSize="12"
                            VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <TextBlock Text="메트로놈" Foreground="#6C7086" FontSize="11"
+                <TextBlock Text="{DynamicResource Track_Metronome}" Foreground="#6C7086" FontSize="11"
                            VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
@@ -60,13 +60,13 @@
 
                             <!-- 뮤트 / 솔로 버튼 -->
                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,4">
-                                <ToggleButton Content="M" ToolTip="음소거 (Mute)"
+                                <ToggleButton Content="M" ToolTip="{DynamicResource Track_Tooltip_Mute}"
                                               IsChecked="{Binding Muted}"
                                               Command="{Binding MuteCommand}"
                                               Width="24" Height="20" FontSize="10"
                                               Foreground="{Binding Muted,
                                                   Converter={StaticResource MuteColorConverter}}"/>
-                                <ToggleButton Content="S" ToolTip="솔로 (Solo)"
+                                <ToggleButton Content="S" ToolTip="{DynamicResource Track_Tooltip_Solo}"
                                               IsChecked="{Binding Solo}"
                                               Command="{Binding SoloCommand}"
                                               Width="24" Height="20" FontSize="10"
@@ -77,7 +77,7 @@
 
                             <!-- 볼륨 슬라이더 -->
                             <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="볼" Foreground="#6C7086" FontSize="10"
+                                <TextBlock Text="{DynamicResource Track_Vol}" Foreground="#6C7086" FontSize="10"
                                            VerticalAlignment="Center" Margin="0,0,3,0"/>
                                 <Slider Minimum="-60" Maximum="12"
                                         Value="{Binding GainDb}"

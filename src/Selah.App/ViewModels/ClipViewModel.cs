@@ -98,7 +98,7 @@ public class ClipViewModel : ViewModelBase
         get
         {
             var src = _project.AudioSources.FirstOrDefault(s => s.Id == _clip.SourceId);
-            return src?.Name ?? "알 수 없는 소스";
+            return src?.Name ?? Loc.Get("Clip_UnknownSource");
         }
     }
 

@@ -84,7 +84,7 @@ public class ProjectViewModel : ViewModelBase
         CancellationToken ct = default)
     {
         if (_project.FilePath == null)
-            throw new InvalidOperationException("프로젝트를 먼저 저장하세요.");
+            throw new InvalidOperationException(Loc.Get("Project_SaveFirst"));
 
         var ext = Path.GetExtension(filePath).ToLowerInvariant();
         var audioDir = Path.Combine(_project.FilePath, "audio");
@@ -147,9 +147,7 @@ public class ProjectViewModel : ViewModelBase
         }
         else
         {
-            throw new NotSupportedException(
-                $"'{ext}' 형식을 지원하려면 FFmpeg가 필요합니다.\n" +
-                "FFmpeg를 설치하거나 WAV 파일을 사용하세요.");
+            throw new NotSupportedException(Loc.Format("Project_FFmpegRequired", ext));
         }
 
         var source = new AudioSource
@@ -173,7 +171,7 @@ public class ProjectViewModel : ViewModelBase
     public async Task SaveAsync()
     {
         if (_project.FilePath == null)
-            throw new InvalidOperationException("저장 경로가 지정되지 않았습니다.");
+            throw new InvalidOperationException(Loc.Get("Project_NoSavePath"));
         await _projectService.SaveAsync(_project, _project.FilePath);
         OnPropertyChanged(nameof(IsDirty));
     }

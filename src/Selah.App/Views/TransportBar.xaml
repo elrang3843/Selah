@@ -22,7 +22,7 @@
 
         <!-- ① 이동 버튼 -->
         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
-            <Button Content="⏮" ToolTip="처음으로 (Home)"
+            <Button Content="⏮" ToolTip="{DynamicResource Transport_Tooltip_ReturnToStart}"
                     Command="{Binding ReturnToStartCommand}"
                     Style="{StaticResource IconButton}" Width="36" Height="36"/>
         </StackPanel>
@@ -30,14 +30,14 @@
         <!-- ② 재생 / 정지 -->
         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
             <Button x:Name="BtnPlay"
-                    ToolTip="재생/정지 (Space)"
+                    ToolTip="{DynamicResource Transport_Tooltip_PlayStop}"
                     Command="{Binding PlayCommand}"
                     Width="44" Height="36"
                     Style="{StaticResource AccentButton}">
                 <TextBlock Text="{Binding IsPlaying, Converter={StaticResource PlayPauseConverter}}"
                            FontSize="16"/>
             </Button>
-            <Button Content="⏹" ToolTip="정지 + 처음으로 (Shift+Space)"
+            <Button Content="⏹" ToolTip="{DynamicResource Transport_Tooltip_Stop}"
                     Command="{Binding StopCommand}"
                     Width="36" Height="36" Margin="4,0,0,0"
                     Style="{StaticResource IconButton}"/>
@@ -64,7 +64,7 @@
                      VerticalContentAlignment="Center"
                      TextAlignment="Center"
                      IsEnabled="{Binding HasProject}"/>
-            <TextBlock Text="박자" Foreground="#A6ADC8" FontSize="11"
+            <TextBlock Text="{DynamicResource Transport_Beat}" Foreground="#A6ADC8" FontSize="11"
                        VerticalAlignment="Center" Margin="8,0,4,0"/>
             <TextBox Width="40" Height="28"
                      Text="{Binding CurrentProject.Model.TempoMap.Numerator,
@@ -83,11 +83,13 @@
 
         <!-- ⑥ 메트로놈 / 스냅 -->
         <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
-            <ToggleButton Content="♩ 메트로놈" ToolTip="메트로놈 켜기/끄기 (M)"
+            <ToggleButton Content="{DynamicResource Transport_Metronome}"
+                          ToolTip="{DynamicResource Transport_Tooltip_Metronome}"
                           IsChecked="{Binding IsMetronomeOn, Mode=OneWay}"
                           Command="{Binding ToggleMetronomeCommand}"
                           Height="28" Margin="0,0,4,0"/>
-            <ToggleButton Content="⊞ 스냅" ToolTip="스냅 켜기/끄기 (N)"
+            <ToggleButton Content="{DynamicResource Transport_Snap}"
+                          ToolTip="{DynamicResource Transport_Tooltip_Snap}"
                           IsChecked="{Binding Timeline.SnapEnabled, Mode=OneWay}"
                           Command="{Binding ToggleSnapCommand}"
                           Height="28"/>
@@ -95,12 +97,14 @@
 
         <!-- ⑦ 줌 -->
         <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
-            <Button Content="－" ToolTip="줌 아웃 (Ctrl+-)" Click="BtnZoomOut_Click"
+            <Button Content="－" ToolTip="{DynamicResource Transport_Tooltip_ZoomOut}"
+                    Click="BtnZoomOut_Click"
                     Style="{StaticResource IconButton}" Width="28" Height="28"/>
             <TextBlock Text="{Binding Timeline.PixelsPerSecond, StringFormat='{}{0:F0}px/s'}"
                        Foreground="#A6ADC8" FontSize="11" VerticalAlignment="Center"
                        Margin="4,0" Width="60" TextAlignment="Center"/>
-            <Button Content="＋" ToolTip="줌 인 (Ctrl++)" Click="BtnZoomIn_Click"
+            <Button Content="＋" ToolTip="{DynamicResource Transport_Tooltip_ZoomIn}"
+                    Click="BtnZoomIn_Click"
                     Style="{StaticResource IconButton}" Width="28" Height="28"/>
         </StackPanel>
     </Grid>

@@ -20,7 +20,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     public readonly AudioRenderer AudioRenderer = new();
 
     private ProjectViewModel? _currentProject;
-    private string _statusMessage = "준비됨";
+    private string _statusMessage;
     private bool _isBusy;
     private HardwareInfo? _hardwareInfo;
     private bool _disposed;
@@ -35,6 +35,8 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     public MainViewModel()
     {
+        _statusMessage = Loc.Get("Status_Ready");
+
         FFmpegService.Detect();
         _hardwareInfo = HardwareDetectionService.Detect();
 
@@ -61,6 +63,8 @@ public class MainViewModel : ViewModelBase, IDisposable
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
         AudioEngine.PlaybackStopped += OnPlaybackStopped;
         AudioEngine.ContentEnded += OnContentEnded;
+
+        Loc.LanguageChanged += OnLanguageChanged;
     }
 
     // ── 프로퍼티 ──
@@ -95,8 +99,8 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     public string WindowTitle =>
         CurrentProject == null
-            ? "셀라(Selah) - 찬양사역용 MR편집기"
-            : $"{CurrentProject.Name}{(CurrentProject.IsDirty ? " *" : "")} - 셀라";
+            ? Loc.Get("WindowTitle_Default")
+            : $"{CurrentProject.Name}{(CurrentProject.IsDirty ? " *" : "")}{Loc.Get("WindowTitle_Suffix")}";
 
     public string StatusMessage
     {
@@ -114,7 +118,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     public bool IsFFmpegAvailable => FFmpegService.IsAvailable;
 
     public string HardwareStatusText =>
-        _hardwareInfo?.BackendDisplayName ?? "진단 중...";
+        _hardwareInfo?.BackendDisplayName ?? Loc.Get("Status_Detecting");
 
     public string SampleRateText =>
         CurrentProject != null ? $"{CurrentProject.SampleRate / 1000.0:G4} kHz" : "";
@@ -139,8 +143,6 @@ public class MainViewModel : ViewModelBase, IDisposable
         {
             if (CurrentProject == null) return "00:00.000";
             var ts = TimeSpan.FromSeconds(Timeline.PlayheadSeconds);
-            // TimeSpan의 fff는 실제 밀리초 포매터입니다.
-            // C# double 포맷의 f/ff/fff는 밀리초가 아닌 리터럴 문자입니다.
             return $"{(int)ts.TotalMinutes:D2}:{ts.Seconds:D2}.{ts.Milliseconds:D3}";
         }
     }
@@ -167,10 +169,8 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private async Task OnNewProject()
     {
-        // 이벤트를 통해 UI가 다이얼로그를 처리하고 결과를 반환
         if (NewProjectRequested != null)
             await NewProjectRequested((string.Empty, 0));
-        // 실제 생성은 CreateProject() 공개 메서드에서 처리
     }
 
     public void CreateProject(string name, int sampleRate)
@@ -183,7 +183,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         AudioEngine.LoadProject(project);
         Timeline.PlayheadFrames = 0;
         Timeline.IsPlaying = false;
-        StatusMessage = $"새 프로젝트 '{name}' 생성됨 ({sampleRate / 1000.0:G4} kHz)";
+        StatusMessage = Loc.Format("Status_NewProject", name, sampleRate / 1000.0);
     }
 
     private async Task OnOpenProject()
@@ -197,7 +197,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     public async Task LoadProjectFromFolderAsync(string folder)
     {
         IsBusy = true;
-        StatusMessage = "프로젝트 불러오는 중...";
+        StatusMessage = Loc.Get("Status_Loading");
         try
         {
             var project = await ProjectService.LoadAsync(folder);
@@ -206,11 +206,11 @@ public class MainViewModel : ViewModelBase, IDisposable
             SelectedTrack = vm.Tracks.FirstOrDefault();
             AudioEngine.LoadProject(project);
             Timeline.PlayheadFrames = 0;
-            StatusMessage = $"'{project.Name}' 불러오기 완료";
+            StatusMessage = Loc.Format("Status_LoadComplete", project.Name);
         }
         catch (Exception ex)
         {
-            StatusMessage = $"열기 실패: {ex.Message}";
+            StatusMessage = Loc.Format("Status_OpenFailed", ex.Message);
             ErrorOccurred?.Invoke(ex.Message);
         }
         finally { IsBusy = false; }
@@ -237,16 +237,16 @@ public class MainViewModel : ViewModelBase, IDisposable
     {
         if (CurrentProject == null) return;
         IsBusy = true;
-        StatusMessage = "저장 중...";
+        StatusMessage = Loc.Get("Status_Saving");
         try
         {
             await CurrentProject.SaveAsync();
             OnPropertyChanged(nameof(WindowTitle));
-            StatusMessage = "저장 완료";
+            StatusMessage = Loc.Get("Status_Saved");
         }
         catch (Exception ex)
         {
-            StatusMessage = $"저장 실패: {ex.Message}";
+            StatusMessage = Loc.Format("Status_SaveFailed", ex.Message);
             ErrorOccurred?.Invoke(ex.Message);
         }
         finally { IsBusy = false; }
@@ -277,11 +277,11 @@ public class MainViewModel : ViewModelBase, IDisposable
 
         foreach (var file in files)
         {
-            StatusMessage = $"불러오는 중: {Path.GetFileName(file)}";
+            StatusMessage = Loc.Format("Status_Importing", Path.GetFileName(file));
             try
             {
                 var source = await CurrentProject.ImportAudioAsync(file,
-                    new Progress<double>(p => StatusMessage = $"변환 중: {p:P0}"));
+                    new Progress<double>(p => StatusMessage = Loc.Format("Status_Converting", p.ToString("P0"))));
 
                 var clip = new Clip
                 {
@@ -292,18 +292,18 @@ public class MainViewModel : ViewModelBase, IDisposable
                 };
                 source.AbsolutePath ??= Path.Combine(CurrentProject.Model.FilePath!, source.RelPath);
                 targetTrack.AddClip(new ClipViewModel(clip, CurrentProject.Model));
-                insertPosition += source.LengthSamples; // 다음 클립은 현재 클립 끝에 이어서
+                insertPosition += source.LengthSamples;
                 imported++;
             }
             catch (Exception ex)
             {
-                StatusMessage = $"오류: {ex.Message}";
+                StatusMessage = Loc.Format("Status_Error", ex.Message);
                 ErrorOccurred?.Invoke(ex.Message);
             }
         }
         AudioEngine.RebuildMixers();
         IsBusy = false;
-        StatusMessage = $"{imported}개 파일 임포트 완료";
+        StatusMessage = Loc.Format("Status_ImportComplete", imported);
     }
 
     private void OnAddTrack()
@@ -342,7 +342,7 @@ public class MainViewModel : ViewModelBase, IDisposable
             AudioEngine.Stop();
             IsPlaying = false;
             Timeline.IsPlaying = false;
-            StatusMessage = "정지";
+            StatusMessage = Loc.Get("Status_Stopped");
         }
         else
         {
@@ -351,7 +351,7 @@ public class MainViewModel : ViewModelBase, IDisposable
             bool playing = AudioEngine.IsPlaying;
             IsPlaying = playing;
             Timeline.IsPlaying = playing;
-            StatusMessage = playing ? "재생 중..." : "재생할 콘텐츠가 없습니다";
+            StatusMessage = playing ? Loc.Get("Status_Playing") : Loc.Get("Status_NoContent");
         }
     }
 
@@ -362,7 +362,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         Timeline.UpdatePlayhead(0, CurrentProject?.SampleRate ?? 48000);
         IsPlaying = false;
         Timeline.IsPlaying = false;
-        StatusMessage = "정지";
+        StatusMessage = Loc.Get("Status_Stopped");
         OnPropertyChanged(nameof(PlayheadTimeDisplay));
     }
 
@@ -383,7 +383,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         if (path == null) return;
 
         IsBusy = true;
-        StatusMessage = "렌더링 중...";
+        StatusMessage = Loc.Get("Status_Rendering");
         try
         {
             await AudioRenderer.RenderToWavAsync(
@@ -393,14 +393,14 @@ public class MainViewModel : ViewModelBase, IDisposable
                 includeMetronome: false,
                 progress: new Progress<double>(p =>
                 {
-                    StatusMessage = $"렌더링 중... {p:P0}";
+                    StatusMessage = Loc.Format("Status_RenderProgress", p.ToString("P0"));
                     OnPropertyChanged(nameof(StatusMessage));
                 }));
-            StatusMessage = $"내보내기 완료: {Path.GetFileName(path)}";
+            StatusMessage = Loc.Format("Status_ExportComplete", Path.GetFileName(path));
         }
         catch (Exception ex)
         {
-            StatusMessage = $"내보내기 실패: {ex.Message}";
+            StatusMessage = Loc.Format("Status_ExportFailed", ex.Message);
             ErrorOccurred?.Invoke(ex.Message);
         }
         finally { IsBusy = false; }
@@ -419,7 +419,6 @@ public class MainViewModel : ViewModelBase, IDisposable
     /// </summary>
     private static long ResolveInsertPosition(TrackViewModel track, long playheadFrame)
     {
-        // TimelineEndProjectFrame: 소스 SR → 프로젝트 SR 변환이 반영된 끝 위치
         var overlapping = track.Clips.FirstOrDefault(c =>
             playheadFrame >= c.TimelineStartSamples && playheadFrame < c.TimelineEndProjectFrame);
         return overlapping?.TimelineEndProjectFrame ?? playheadFrame;
@@ -429,14 +428,11 @@ public class MainViewModel : ViewModelBase, IDisposable
     {
         IsMetronomeOn = !IsMetronomeOn;
         AudioEngine.MetronomeEnabled = IsMetronomeOn;
-        StatusMessage = IsMetronomeOn ? "메트로놈 켜짐" : "메트로놈 꺼짐";
+        StatusMessage = IsMetronomeOn ? Loc.Get("Status_MetronomeOn") : Loc.Get("Status_MetronomeOff");
     }
 
     private void OnPlayheadAdvanced(object? s, long frames)
     {
-        // BeginInvoke(비동기)를 사용해야 합니다.
-        // Invoke(동기)를 사용하면 오디오 스레드가 UI 스레드를 기다리는 동안
-        // UI 스레드가 Stop()→WaveOut.Join()으로 오디오 스레드를 기다려 교착 상태가 발생합니다.
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
             int sr = CurrentProject?.SampleRate ?? 48000;
@@ -456,25 +452,29 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private void OnContentEnded(object? s, EventArgs e)
     {
-        // 오디오 스레드에서 호출됩니다. UI 스레드로 디스패치하여 Stop()을 안전하게 호출합니다.
-        // BeginInvoke(비동기)를 사용해야 합니다. Invoke(동기)를 사용하면 오디오 스레드가
-        // UI 스레드를 기다리고, UI 스레드가 Stop()→WaveOut.Join()으로 오디오 스레드를
-        // 기다리는 교착 상태가 발생합니다.
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
             if (!AudioEngine.IsPlaying) return;
             AudioEngine.Stop();
             IsPlaying = false;
             Timeline.IsPlaying = false;
-            StatusMessage = "재생 완료";
+            StatusMessage = Loc.Get("Status_PlaybackEnded");
             OnPropertyChanged(nameof(PlayheadTimeDisplay));
         });
+    }
+
+    private void OnLanguageChanged()
+    {
+        OnPropertyChanged(nameof(WindowTitle));
+        OnPropertyChanged(nameof(HardwareStatusText));
+        StatusMessage = Loc.Get("Status_Ready");
     }
 
     public void Dispose()
     {
         if (_disposed) return;
         _disposed = true;
+        Loc.LanguageChanged -= OnLanguageChanged;
         AudioEngine.Dispose();
     }
 }

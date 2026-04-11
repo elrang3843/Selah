@@ -9,11 +9,12 @@ public class ModelManagerViewModel : ViewModelBase
 {
     private readonly ModelManagerService _service;
     private ModelInfo? _selectedModel;
-    private string _statusMessage = "모델 관리자";
+    private string _statusMessage;
     private bool _isBusy;
 
     public ModelManagerViewModel(ModelManagerService service)
     {
+        _statusMessage = Loc.Get("Status_ModelManager");
         _service = service;
         Models = new ObservableCollection<ModelInfo>(service.GetCatalog());
 
@@ -57,23 +58,23 @@ public class ModelManagerViewModel : ViewModelBase
         foreach (var m in _service.GetCatalog())
             Models.Add(m);
         OnPropertyChanged(nameof(AnyModelInstalled));
-        StatusMessage = "모델 목록 새로고침 완료";
+        StatusMessage = Loc.Get("Status_ModelRefreshed");
     }
 
     private async Task InstallDemucsAsync()
     {
         IsBusy = true;
-        StatusMessage = "Demucs 설치 준비 중...";
+        StatusMessage = Loc.Get("Status_DemucsInstalling");
         try
         {
             await _service.InstallDemucsAsync(
                 new Progress<string>(msg => StatusMessage = msg));
             Refresh();
-            StatusMessage = "Demucs 설치 완료! MR 추출 기능을 사용할 수 있습니다.";
+            StatusMessage = Loc.Get("Status_DemucsInstalled");
         }
         catch (Exception ex)
         {
-            StatusMessage = $"설치 실패: {ex.Message}";
+            StatusMessage = Loc.Format("Status_InstallFailed", ex.Message);
         }
         finally
         {

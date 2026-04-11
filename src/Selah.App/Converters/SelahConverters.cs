@@ -110,7 +110,7 @@ public class InstalledTextBrushConverter : IValueConverter
 public class InstalledStatusConverter : IValueConverter
 {
     public object Convert(object value, Type t, object p, CultureInfo c)
-        => value is bool b && b ? "설치됨" : "미설치";
+        => value is bool b && b ? Loc.Get("Model_Installed") : Loc.Get("Model_NotInstalled");
 
     public object ConvertBack(object value, Type t, object p, CultureInfo c)
         => DependencyProperty.UnsetValue;
