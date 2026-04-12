@@ -1,0 +1,39 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Catppuccin Latte (Light) -->
+    <Color x:Key="BgColor">#EFF1F5</Color>
+    <Color x:Key="SurfaceColor">#E6E9EF</Color>
+    <Color x:Key="Surface1Color">#CCD0DA</Color>
+    <Color x:Key="Surface2Color">#BCC0CC</Color>
+    <Color x:Key="TextColor">#4C4F69</Color>
+    <Color x:Key="SubtextColor">#5C5F77</Color>
+    <Color x:Key="Overlay0Color">#9CA0B0</Color>
+    <Color x:Key="DeepBgColor">#DCE0E8</Color>
+    <Color x:Key="MetronomeSurfaceColor">#DCE0E8</Color>
+    <Color x:Key="AccentColor">#1E66F5</Color>
+    <Color x:Key="GreenColor">#40A02B</Color>
+    <Color x:Key="RedColor">#D20F39</Color>
+    <Color x:Key="YellowColor">#DF8E1D</Color>
+    <Color x:Key="PeachColor">#FE640B</Color>
+    <Color x:Key="WarningSurfaceColor">#FEF9E7</Color>
+    <Color x:Key="SuccessSurfaceColor">#E8F5E9</Color>
+
+    <SolidColorBrush x:Key="BgBrush"               Color="{StaticResource BgColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush"          Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="Surface1Brush"         Color="{StaticResource Surface1Color}"/>
+    <SolidColorBrush x:Key="Surface2Brush"         Color="{StaticResource Surface2Color}"/>
+    <SolidColorBrush x:Key="TextBrush"             Color="{StaticResource TextColor}"/>
+    <SolidColorBrush x:Key="SubtextBrush"          Color="{StaticResource SubtextColor}"/>
+    <SolidColorBrush x:Key="Overlay0Brush"         Color="{StaticResource Overlay0Color}"/>
+    <SolidColorBrush x:Key="DeepBgBrush"           Color="{StaticResource DeepBgColor}"/>
+    <SolidColorBrush x:Key="MetronomeSurfaceBrush" Color="{StaticResource MetronomeSurfaceColor}"/>
+    <SolidColorBrush x:Key="AccentBrush"           Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="GreenBrush"            Color="{StaticResource GreenColor}"/>
+    <SolidColorBrush x:Key="RedBrush"              Color="{StaticResource RedColor}"/>
+    <SolidColorBrush x:Key="YellowBrush"           Color="{StaticResource YellowColor}"/>
+    <SolidColorBrush x:Key="PeachBrush"            Color="{StaticResource PeachColor}"/>
+    <SolidColorBrush x:Key="WarningSurfaceBrush"   Color="{StaticResource WarningSurfaceColor}"/>
+    <SolidColorBrush x:Key="SuccessSurfaceBrush"   Color="{StaticResource SuccessSurfaceColor}"/>
+
+</ResourceDictionary>

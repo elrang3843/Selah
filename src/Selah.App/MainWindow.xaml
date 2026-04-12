@@ -6,7 +6,7 @@
         Title="{Binding WindowTitle}"
         Width="1280" Height="800"
         MinWidth="800" MinHeight="500"
-        Background="#1E1E2E">
+        Background="{DynamicResource BgBrush}">
 
     <!-- 키보드 단축키 -->
     <Window.InputBindings>
@@ -25,7 +25,7 @@
 
     <DockPanel>
         <!-- ═══ 메뉴바 ═══ -->
-        <Menu DockPanel.Dock="Top" Background="#181825"
+        <Menu DockPanel.Dock="Top" Background="{DynamicResource SurfaceBrush}"
               FontFamily="Segoe UI, Malgun Gothic" FontSize="13">
             <MenuItem Header="{DynamicResource Menu_File}">
                 <MenuItem Header="{DynamicResource Menu_File_New}" Command="{Binding NewProjectCommand}"
@@ -54,6 +54,8 @@
                           InputGestureText="S"/>
                 <MenuItem Header="{DynamicResource Menu_Edit_Delete}" Command="{Binding DeleteCommand}"
                           InputGestureText="Del"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Separate}" Command="{Binding SeparateClipCommand}"/>
             </MenuItem>
 
             <MenuItem Header="{DynamicResource Menu_Track}">
@@ -82,9 +84,9 @@
         </Menu>
 
         <!-- ═══ 상태바 ═══ -->
-        <StatusBar DockPanel.Dock="Bottom" Background="#181825" Height="24">
+        <StatusBar DockPanel.Dock="Bottom" Background="{DynamicResource SurfaceBrush}" Height="24">
             <StatusBarItem>
-                <TextBlock Text="{Binding StatusMessage}" Foreground="#A6ADC8" FontSize="11"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SubtextBrush}" FontSize="11"/>
             </StatusBarItem>
             <StatusBarItem>
                 <ProgressBar Width="100" Height="6"
@@ -95,10 +97,10 @@
             <StatusBarItem HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding SampleRateText}"
-                               Foreground="#6C7086" FontSize="11" Margin="0,0,12,0"
+                               Foreground="{DynamicResource Overlay0Brush}" FontSize="11" Margin="0,0,12,0"
                                Visibility="{Binding HasProject, Converter={StaticResource BoolToVis}}"/>
                     <TextBlock Text="{Binding HardwareStatusText}"
-                               Foreground="#6C7086" FontSize="11"/>
+                               Foreground="{DynamicResource Overlay0Brush}" FontSize="11"/>
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>

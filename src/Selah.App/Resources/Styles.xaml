@@ -1,53 +1,27 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ═══ 색상 팔레트 (Catppuccin Mocha) ═══ -->
-    <Color x:Key="BgColor">#1E1E2E</Color>
-    <Color x:Key="SurfaceColor">#181825</Color>
-    <Color x:Key="Surface1Color">#313244</Color>
-    <Color x:Key="Surface2Color">#45475A</Color>
-    <Color x:Key="TextColor">#CDD6F4</Color>
-    <Color x:Key="SubtextColor">#A6ADC8</Color>
-    <Color x:Key="AccentColor">#89B4FA</Color>
-    <Color x:Key="GreenColor">#A6E3A1</Color>
-    <Color x:Key="RedColor">#F38BA8</Color>
-    <Color x:Key="YellowColor">#F9E2AF</Color>
-    <Color x:Key="PeachColor">#FAB387</Color>
-
-    <SolidColorBrush x:Key="BgBrush" Color="{StaticResource BgColor}"/>
-    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-    <SolidColorBrush x:Key="Surface1Brush" Color="{StaticResource Surface1Color}"/>
-    <SolidColorBrush x:Key="Surface2Brush" Color="{StaticResource Surface2Color}"/>
-    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>
-    <SolidColorBrush x:Key="SubtextBrush" Color="{StaticResource SubtextColor}"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
-    <SolidColorBrush x:Key="GreenBrush" Color="{StaticResource GreenColor}"/>
-    <SolidColorBrush x:Key="RedBrush" Color="{StaticResource RedColor}"/>
-    <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource YellowColor}"/>
+    <!--
+        색상 팔레트는 Resources/Themes/Dark.xaml · Light.xaml에 정의됩니다.
+        이 파일의 모든 브러시 참조는 {DynamicResource}를 사용해 런타임 테마 전환을 지원합니다.
+    -->
 
     <!-- ═══ 메뉴 스타일 ═══ -->
-    <!--
-        Foreground는 상속 프로퍼티이므로 TopLevelHeader에 CDD6F4를 설정하면
-        팝업 자식 MenuItem까지 상속됨. 이를 막기 위해 SubmenuItem/SubmenuHeader도
-        명시적으로 SystemColors.MenuTextBrush를 지정해 상속 체인을 차단.
-    -->
     <Style TargetType="MenuItem">
         <Style.Triggers>
-            <!-- 메뉴바(어두운 배경) → 밝은 텍스트 -->
             <Trigger Property="Role" Value="TopLevelHeader">
-                <Setter Property="Foreground" Value="#CDD6F4"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             </Trigger>
             <Trigger Property="Role" Value="TopLevelItem">
-                <Setter Property="Foreground" Value="#CDD6F4"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             </Trigger>
-            <!-- 팝업(시스템 흰 배경) → 시스템 기본 텍스트: 상속 차단 -->
+            <!-- 팝업(시스템 배경) → 시스템 기본 텍스트로 상속 차단 -->
             <Trigger Property="Role" Value="SubmenuHeader">
                 <Setter Property="Foreground" Value="{x:Static SystemColors.MenuTextBrush}"/>
             </Trigger>
             <Trigger Property="Role" Value="SubmenuItem">
                 <Setter Property="Foreground" Value="{x:Static SystemColors.MenuTextBrush}"/>
             </Trigger>
-            <!-- 비활성 Submenu: Foreground + Opacity 모두 적용 (시스템 색상 무관) -->
             <MultiTrigger>
                 <MultiTrigger.Conditions>
                     <Condition Property="Role" Value="SubmenuItem"/>
@@ -69,16 +43,16 @@
 
     <!-- ═══ 기본 텍스트 스타일 ═══ -->
     <Style TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
         <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
         <Setter Property="FontSize" Value="13"/>
     </Style>
 
     <!-- ═══ 버튼 기본 ═══ -->
     <Style TargetType="Button" x:Key="DefaultButton">
-        <Setter Property="Background" Value="{StaticResource Surface1Brush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Surface2Brush}"/>
+        <Setter Property="Background" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="12,6"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -96,10 +70,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource Surface2Brush}"/>
+                            <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.4"/>
@@ -110,20 +84,20 @@
         </Setter>
     </Style>
 
-    <!-- 강조 버튼 (재생/녹음 등) -->
+    <!-- 강조 버튼 -->
     <Style TargetType="Button" x:Key="AccentButton" BasedOn="{StaticResource DefaultButton}">
-        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource SurfaceBrush}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
-    <!-- 위험 버튼 (삭제 등) -->
+    <!-- 위험 버튼 -->
     <Style TargetType="Button" x:Key="DangerButton" BasedOn="{StaticResource DefaultButton}">
-        <Setter Property="Background" Value="{StaticResource RedBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource RedBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource SurfaceBrush}"/>
     </Style>
 
-    <!-- 아이콘 버튼 (텍스트 없이 아이콘만) -->
+    <!-- 아이콘 버튼 -->
     <Style TargetType="Button" x:Key="IconButton" BasedOn="{StaticResource DefaultButton}">
         <Setter Property="Width" Value="32"/>
         <Setter Property="Height" Value="32"/>
@@ -134,9 +108,9 @@
 
     <!-- ToggleButton -->
     <Style TargetType="ToggleButton">
-        <Setter Property="Background" Value="{StaticResource Surface1Brush}"/>
-        <Setter Property="Foreground" Value="{StaticResource SubtextBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Surface2Brush}"/>
+        <Setter Property="Background" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="10,5"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -154,11 +128,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-                            <Setter Property="Foreground" Value="{StaticResource SurfaceBrush}"/>
+                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource SurfaceBrush}"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -168,76 +142,76 @@
 
     <!-- Slider -->
     <Style TargetType="Slider">
-        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
     </Style>
 
     <!-- TextBox -->
     <Style TargetType="TextBox">
-        <Setter Property="Background" Value="{StaticResource Surface1Brush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Surface2Brush}"/>
+        <Setter Property="Background" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="6,4"/>
         <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
         <Setter Property="FontSize" Value="13"/>
-        <Setter Property="CaretBrush" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="SelectionBrush" Value="{StaticResource AccentBrush}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}"/>
     </Style>
 
     <!-- ComboBox -->
     <Style TargetType="ComboBox">
-        <Setter Property="Background" Value="{StaticResource Surface1Brush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Surface2Brush}"/>
+        <Setter Property="Background" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
         <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
         <Setter Property="FontSize" Value="13"/>
     </Style>
 
     <!-- ListBox -->
     <Style TargetType="ListBox">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Surface2Brush}"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
         <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
     </Style>
 
     <!-- Separator -->
     <Style TargetType="Separator">
-        <Setter Property="Background" Value="{StaticResource Surface2Brush}"/>
+        <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
         <Setter Property="Height" Value="1"/>
     </Style>
 
     <!-- Label -->
     <Style TargetType="Label">
-        <Setter Property="Foreground" Value="{StaticResource SubtextBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}"/>
         <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
         <Setter Property="FontSize" Value="12"/>
     </Style>
 
     <!-- GroupBox -->
     <Style TargetType="GroupBox">
-        <Setter Property="Foreground" Value="{StaticResource SubtextBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Surface2Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource SubtextBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
         <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
     </Style>
 
     <!-- ProgressBar -->
     <Style TargetType="ProgressBar">
-        <Setter Property="Background" Value="{StaticResource Surface1Brush}"/>
-        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Height" Value="6"/>
     </Style>
 
-    <!-- ScrollBar 다크 테마 -->
+    <!-- ScrollBar -->
     <Style TargetType="ScrollBar">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
     </Style>
 
-    <!-- Window 기본 배경 -->
+    <!-- Window -->
     <Style TargetType="Window">
-        <Setter Property="Background" Value="{StaticResource BgBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource BgBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
         <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
     </Style>
 

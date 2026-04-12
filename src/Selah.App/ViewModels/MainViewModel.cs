@@ -18,6 +18,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     public readonly HardwareDetectionService HardwareDetectionService = new();
     public readonly AudioEngine AudioEngine = new();
     public readonly AudioRenderer AudioRenderer = new();
+    public readonly StemSeparatorService StemSeparator;
 
     private ProjectViewModel? _currentProject;
     private string _statusMessage;
@@ -39,6 +40,7 @@ public class MainViewModel : ViewModelBase, IDisposable
 
         FFmpegService.Detect();
         _hardwareInfo = HardwareDetectionService.Detect();
+        StemSeparator = new StemSeparatorService(ModelManagerService);
 
         Timeline = new TimelineViewModel();
         ModelManager = new ModelManagerViewModel(ModelManagerService);
@@ -59,6 +61,8 @@ public class MainViewModel : ViewModelBase, IDisposable
         ToggleMetronomeCommand = new RelayCommand(OnToggleMetronome, () => CurrentProject != null);
         ToggleSnapCommand = new RelayCommand(() => Timeline.SnapEnabled = !Timeline.SnapEnabled);
         DeleteCommand = new RelayCommand(OnDelete, () => CurrentProject != null);
+        SeparateClipCommand = new AsyncRelayCommand(SeparateClipAsync,
+            () => CurrentProject != null && SelectedClip != null && StemSeparator.IsPythonAvailable);
 
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
         AudioEngine.PlaybackStopped += OnPlaybackStopped;
@@ -96,7 +100,11 @@ public class MainViewModel : ViewModelBase, IDisposable
     public ClipViewModel? SelectedClip
     {
         get => _selectedClip;
-        set => SetField(ref _selectedClip, value);
+        set
+        {
+            SetField(ref _selectedClip, value);
+            System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+        }
     }
 
     public TimelineViewModel Timeline { get; }
@@ -169,6 +177,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     public ICommand ToggleMetronomeCommand { get; }
     public ICommand ToggleSnapCommand { get; }
     public ICommand DeleteCommand { get; }
+    public ICommand SeparateClipCommand { get; }
 
     // ── 커맨드 핸들러 ──
 
@@ -467,6 +476,130 @@ public class MainViewModel : ViewModelBase, IDisposable
             OnPropertyChanged(nameof(PlayheadTimeDisplay));
         });
     }
+
+    private async Task SeparateClipAsync()
+    {
+        if (CurrentProject == null || SelectedClip == null) return;
+
+        var clip = SelectedClip;
+        var proj = CurrentProject;
+
+        // 소스 파일 확인
+        var src = proj.Model.AudioSources.FirstOrDefault(s => s.Id == clip.Model.SourceId);
+        if (src?.AbsolutePath == null || !File.Exists(src.AbsolutePath))
+        {
+            ErrorOccurred?.Invoke(Loc.Get("Status_Separate_NoSource"));
+            return;
+        }
+
+        // 설치된 모델 탐색 (첫 번째 설치된 모델 사용)
+        var model = ModelManagerService.GetCatalog().FirstOrDefault(m => m.IsInstalled);
+        if (model == null)
+        {
+            ErrorOccurred?.Invoke(Loc.Get("Status_Separate_NoModel"));
+            return;
+        }
+
+        // 프로젝트 저장 경로 확보
+        if (proj.Model.FilePath == null)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "Selah", proj.Model.Id);
+            proj.Model.FilePath = tempDir;
+            Directory.CreateDirectory(tempDir);
+        }
+
+        var outputDir = Path.Combine(proj.Model.FilePath, "audio", "stems",
+            Path.GetFileNameWithoutExtension(src.Name) + "_" +
+            DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+        IsBusy = true;
+        StatusMessage = Loc.Get("Status_Separating");
+
+        try
+        {
+            var progress = new Progress<SeparationProgress>(p =>
+                System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+                    StatusMessage = $"{p.Phase} {p.Percent:P0}"));
+
+            var result = await StemSeparator.SeparateAsync(
+                src.AbsolutePath, outputDir, model, model.StemType, progress);
+
+            if (!result.Success)
+            {
+                ErrorOccurred?.Invoke(Loc.Format("Status_SeparateFailed", result.Error ?? ""));
+                return;
+            }
+
+            string origName = src.Name;
+            int stemIndex = 1;
+
+            foreach (var (stemKey, stemPath) in result.OutputFiles)
+            {
+                string stemName = $"{origName}-{stemIndex++}";
+                string trackName = GetStemTrackName(stemKey);
+
+                // 스템 WAV 정보 읽기
+                long stemLengthSamples;
+                int stemSr, stemCh;
+                using (var wr = new WaveFileReader(stemPath))
+                {
+                    stemLengthSamples = wr.SampleCount;
+                    stemSr = wr.WaveFormat.SampleRate;
+                    stemCh = wr.WaveFormat.Channels;
+                }
+
+                // AudioSource 등록
+                var stemSource = new AudioSource
+                {
+                    Name = stemName,
+                    RelPath = Path.GetRelativePath(proj.Model.FilePath!, stemPath),
+                    AbsolutePath = stemPath,
+                    SampleRate = stemSr,
+                    Channels = stemCh,
+                    LengthSamples = stemLengthSamples,
+                    SourceType = SourceType.Separated
+                };
+                proj.Model.AudioSources.Add(stemSource);
+
+                // 동일 이름 트랙 찾거나 새로 생성
+                var trackVm = proj.Tracks.FirstOrDefault(t => t.Name == trackName)
+                              ?? proj.AddTrack(trackName);
+
+                // 원본 클립과 동일한 타임라인 위치에 배치
+                var stemClip = new Clip
+                {
+                    SourceId = stemSource.Id,
+                    TimelineStartSamples = clip.TimelineStartSamples,
+                    SourceInSamples = clip.SourceInSamples,
+                    SourceOutSamples = Math.Min(clip.SourceOutSamples, stemLengthSamples)
+                };
+                trackVm.AddClip(new ClipViewModel(stemClip, proj.Model));
+            }
+
+            proj.Model.IsDirty = true;
+            AudioEngine.RebuildMixers();
+            StatusMessage = Loc.Format("Status_SeparateComplete", origName, result.OutputFiles.Count);
+        }
+        catch (Exception ex)
+        {
+            ErrorOccurred?.Invoke(ex.Message);
+            StatusMessage = Loc.Format("Status_Error", ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private static string GetStemTrackName(string stemKey) => stemKey switch
+    {
+        "vocals"    => Loc.Get("Stem_Vocals"),
+        "no_vocals" => Loc.Get("Stem_NoVocals"),
+        "drums"     => Loc.Get("Stem_Drums"),
+        "bass"      => Loc.Get("Stem_Bass"),
+        "other"     => Loc.Get("Stem_Other"),
+        _           => stemKey
+    };
 
     private void OnLanguageChanged()
     {

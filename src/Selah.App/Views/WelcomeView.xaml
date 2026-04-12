@@ -1,7 +1,7 @@
 <UserControl x:Class="Selah.App.Views.WelcomeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="#1E1E2E">
+             Background="{DynamicResource BgBrush}">
 
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -10,12 +10,12 @@
             <!-- 로고 영역 -->
             <TextBlock Text="{DynamicResource Welcome_Title}"
                        FontSize="42" FontWeight="Light"
-                       Foreground="#89B4FA"
+                       Foreground="{DynamicResource AccentBrush}"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,8"/>
             <TextBlock Text="{DynamicResource Welcome_Subtitle}"
                        FontSize="16"
-                       Foreground="#A6ADC8"
+                       Foreground="{DynamicResource SubtextBrush}"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,40"/>
 
@@ -33,34 +33,34 @@
             </StackPanel>
 
             <!-- 설명 카드 -->
-            <Border Background="#181825" CornerRadius="8" Padding="24,16" Margin="0,0,0,16">
+            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="8" Padding="24,16" Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="{DynamicResource Welcome_Feature1_Title}"
                                FontSize="14" FontWeight="SemiBold"
-                               Foreground="#CDD6F4" Margin="0,0,0,4"/>
-                    <TextBlock TextWrapping="Wrap" Foreground="#7F849C" FontSize="12"
+                               Foreground="{DynamicResource TextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource Overlay0Brush}" FontSize="12"
                                Text="{DynamicResource Welcome_Feature1_Desc}"/>
                 </StackPanel>
             </Border>
 
-            <Border Background="#181825" CornerRadius="8" Padding="24,16" Margin="0,0,0,16">
+            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="8" Padding="24,16" Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="{DynamicResource Welcome_Feature2_Title}"
                                FontSize="14" FontWeight="SemiBold"
-                               Foreground="#CDD6F4" Margin="0,0,0,4"/>
-                    <TextBlock TextWrapping="Wrap" Foreground="#7F849C" FontSize="12"
+                               Foreground="{DynamicResource TextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource Overlay0Brush}" FontSize="12"
                                Text="{DynamicResource Welcome_Feature2_Desc}"/>
                 </StackPanel>
             </Border>
 
             <!-- 단축키 힌트 -->
             <TextBlock Text="{DynamicResource Welcome_Shortcuts}"
-                       FontSize="11" Foreground="#45475A"
+                       FontSize="11" Foreground="{DynamicResource Surface2Brush}"
                        HorizontalAlignment="Center"
                        Margin="0,24,0,0"/>
 
             <!-- 라이선스 안내 -->
-            <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#45475A"
+            <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Surface2Brush}"
                        HorizontalAlignment="Center" TextAlignment="Center"
                        Margin="0,12,0,0"
                        Text="{DynamicResource Welcome_License}"/>

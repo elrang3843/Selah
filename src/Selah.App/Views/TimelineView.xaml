@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:views="clr-namespace:Selah.App.Views"
              xmlns:controls="clr-namespace:Selah.App.Controls"
-             Background="#1E1E2E">
+             Background="{DynamicResource BgBrush}">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -20,7 +20,7 @@
         <!-- 분리선 (드래그 가능) -->
         <GridSplitter Grid.Column="1"
                       HorizontalAlignment="Stretch"
-                      Background="#313244"
+                      Background="{DynamicResource Surface1Brush}"
                       Cursor="SizeWE"/>
 
         <!-- 타임라인 캔버스 영역 -->
@@ -28,7 +28,7 @@
                       x:Name="TimelineScroll"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
-                      Background="#1E1E2E"
+                      Background="{DynamicResource BgBrush}"
                       ScrollChanged="TimelineScroll_ScrollChanged">
             <controls:TimelineCanvas
                 x:Name="Canvas"

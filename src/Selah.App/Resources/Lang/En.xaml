@@ -20,6 +20,7 @@
     <sys:String x:Key="Menu_Edit_Redo">Redo</sys:String>
     <sys:String x:Key="Menu_Edit_Split">Split Clip</sys:String>
     <sys:String x:Key="Menu_Edit_Delete">Delete Selection</sys:String>
+    <sys:String x:Key="Menu_Edit_Separate">Separate Stems (Selected Clip)...</sys:String>
     <sys:String x:Key="Menu_Track">Track(_T)</sys:String>
     <sys:String x:Key="Menu_Track_Add">Add Track</sys:String>
     <sys:String x:Key="Menu_Track_Delete">Delete Selected Track</sys:String>
@@ -120,6 +121,17 @@
     <sys:String x:Key="Status_MetronomeOn">Metronome on</sys:String>
     <sys:String x:Key="Status_MetronomeOff">Metronome off</sys:String>
     <sys:String x:Key="Status_PlaybackEnded">Playback complete</sys:String>
+    <sys:String x:Key="Status_Separating">Separating stems...</sys:String>
+    <sys:String x:Key="Status_SeparateComplete">'{0}' separation complete ({1} stems)</sys:String>
+    <sys:String x:Key="Status_SeparateFailed">Separation failed: {0}</sys:String>
+    <sys:String x:Key="Status_Separate_NoSource">Source file not found.</sys:String>
+    <sys:String x:Key="Status_Separate_NoPython">Python is not installed. Install from python.org.</sys:String>
+    <sys:String x:Key="Status_Separate_NoModel">No separation model installed. Install from Model Manager.</sys:String>
+    <sys:String x:Key="Stem_Vocals">Vocals</sys:String>
+    <sys:String x:Key="Stem_NoVocals">Backing</sys:String>
+    <sys:String x:Key="Stem_Drums">Drums</sys:String>
+    <sys:String x:Key="Stem_Bass">Bass</sys:String>
+    <sys:String x:Key="Stem_Other">Other</sys:String>
     <sys:String x:Key="Status_DemucsInstalling">Preparing Demucs installation...</sys:String>
     <sys:String x:Key="Status_DemucsInstalled">Demucs installed! MR extraction is now available.</sys:String>
     <sys:String x:Key="Status_ModelRefreshed">Model list refreshed</sys:String>

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Selah.App.Services;
 using Selah.App.ViewModels;
 using Selah.Core.Audio;
 using Selah.Core.Models;
@@ -123,44 +124,122 @@ public class TimelineCanvas : FrameworkElement
             InvalidateVisual();
     }
 
-    // ── 브러시 ──
+    // ── 브러시 / 펜 (테마에 따라 ApplyTheme에서 교체됩니다) ──
 
-    private static readonly Brush RulerBg = new SolidColorBrush(Color.FromRgb(0x18, 0x18, 0x25));
-    private static readonly Brush RulerText = new SolidColorBrush(Color.FromRgb(0xA6, 0xAD, 0xC8));
-    private static readonly Brush RulerTick = new SolidColorBrush(Color.FromRgb(0x45, 0x47, 0x5A));
-    private static readonly Brush TrackBg = new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x2E));
-    private static readonly Brush TrackSep = new SolidColorBrush(Color.FromRgb(0x31, 0x32, 0x44));
-    private static readonly Brush PlayheadBrush = new SolidColorBrush(Color.FromRgb(0xF3, 0x8B, 0xA8));
-    private static readonly Brush ClipText = new SolidColorBrush(Colors.White);
-    private static readonly Brush ClipDimText = new SolidColorBrush(Color.FromArgb(180, 255, 255, 255));
-    private static readonly Brush ClipLabelBg = new SolidColorBrush(Color.FromArgb(90, 0, 0, 0));
-    private static readonly Brush MetronomeBg = new SolidColorBrush(Color.FromRgb(0x15, 0x15, 0x20));
-    private static readonly Brush SelectedClipBorderBrush = new SolidColorBrush(Colors.White);
-    private static readonly Brush DropTargetHighlight = new SolidColorBrush(Color.FromArgb(40, 0xA6, 0xE3, 0xA1));
-    private static readonly Pen PlayheadPen = new(PlayheadBrush, 1.5);
-    private static readonly Pen TrackSepPen = new(TrackSep, 1);
-    private static readonly Pen RulerTickPen = new(RulerTick, 1);
-    private static readonly Pen RulerMidTickPen = new(new SolidColorBrush(Color.FromArgb(160, 0x45, 0x47, 0x5A)), 1);
-    private static readonly Pen RulerSubTickPen = new(new SolidColorBrush(Color.FromArgb(90, 0x45, 0x47, 0x5A)), 1);
-    private static readonly Pen SelectedClipPen = new(SelectedClipBorderBrush, 2);
-    private static readonly Pen DropTargetPen = new(new SolidColorBrush(Color.FromArgb(120, 0xA6, 0xE3, 0xA1)), 1.5);
-    private static readonly Pen WaveformPen = new(new SolidColorBrush(Color.FromArgb(170, 0xCA, 0xD3, 0xF5)), 1.0);
+    private static Brush RulerBg = null!;
+    private static Brush RulerText = null!;
+    private static Brush RulerTick = null!;
+    private static Brush TrackBg = null!;
+    private static Brush TrackSep = null!;
+    private static Brush PlayheadBrush = null!;
+    private static Brush MetronomeBg = null!;
+    private static Brush DropTargetHighlight = null!;
+
+    // 테마에 무관한 브러시
+    private static readonly Brush ClipText = Frozen(new SolidColorBrush(Colors.White));
+    private static readonly Brush ClipDimText = Frozen(new SolidColorBrush(Color.FromArgb(180, 255, 255, 255)));
+    private static readonly Brush ClipLabelBg = Frozen(new SolidColorBrush(Color.FromArgb(90, 0, 0, 0)));
+    private static readonly Brush SelectedClipBorderBrush = Frozen(new SolidColorBrush(Colors.White));
+    private static readonly Pen SelectedClipPen = FrozenPen(Color.FromArgb(255, 255, 255, 255), 2);
+
+    // DrawTracks에서 직접 Color를 사용하는 필드
+    private static Color TrackRowBg;
+    private static Color TrackMutedBg;
+
+    // 펜 (ApplyTheme에서 재생성됨)
+    private static Pen PlayheadPen = null!;
+    private static Pen TrackSepPen = null!;
+    private static Pen RulerTickPen = null!;
+    private static Pen RulerMidTickPen = null!;
+    private static Pen RulerSubTickPen = null!;
+    private static Pen DropTargetPen = null!;
+    private static Pen WaveformPen = null!;
 
     static TimelineCanvas()
     {
-        PlayheadPen.Freeze();
-        TrackSepPen.Freeze();
-        RulerTickPen.Freeze();
-        RulerMidTickPen.Freeze();
-        RulerSubTickPen.Freeze();
-        SelectedClipPen.Freeze();
-        DropTargetPen.Freeze();
-        WaveformPen.Freeze();
-        RulerBg.Freeze(); RulerText.Freeze(); RulerTick.Freeze();
-        TrackBg.Freeze(); TrackSep.Freeze(); PlayheadBrush.Freeze();
-        ClipText.Freeze(); ClipDimText.Freeze(); ClipLabelBg.Freeze();
-        MetronomeBg.Freeze(); SelectedClipBorderBrush.Freeze();
-        DropTargetHighlight.Freeze();
+        // 기본 테마(Dark)로 초기화
+        ApplyTheme(true);
+    }
+
+    /// <summary>테마 전환 시 모든 인스턴스에 적용되는 정적 색상 세트를 교체합니다.</summary>
+    public static void ApplyTheme(bool isDark)
+    {
+        if (isDark)
+        {
+            RulerBg             = Frozen(new SolidColorBrush(Color.FromRgb(0x18, 0x18, 0x25)));
+            RulerText           = Frozen(new SolidColorBrush(Color.FromRgb(0xA6, 0xAD, 0xC8)));
+            RulerTick           = Frozen(new SolidColorBrush(Color.FromRgb(0x45, 0x47, 0x5A)));
+            TrackBg             = Frozen(new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x2E)));
+            TrackSep            = Frozen(new SolidColorBrush(Color.FromRgb(0x31, 0x32, 0x44)));
+            PlayheadBrush       = Frozen(new SolidColorBrush(Color.FromRgb(0xF3, 0x8B, 0xA8)));
+            MetronomeBg         = Frozen(new SolidColorBrush(Color.FromRgb(0x15, 0x15, 0x20)));
+            DropTargetHighlight = Frozen(new SolidColorBrush(Color.FromArgb(40, 0xA6, 0xE3, 0xA1)));
+            TrackRowBg          = Color.FromRgb(0x24, 0x24, 0x3A);
+            TrackMutedBg        = Color.FromArgb(40, 0x45, 0x47, 0x5A);
+
+            PlayheadPen    = FrozenPen(PlayheadBrush, 1.5);
+            TrackSepPen    = FrozenPen(TrackSep, 1);
+            RulerTickPen   = FrozenPen(RulerTick, 1);
+            RulerMidTickPen = FrozenPen(Color.FromArgb(160, 0x45, 0x47, 0x5A), 1);
+            RulerSubTickPen = FrozenPen(Color.FromArgb(90, 0x45, 0x47, 0x5A), 1);
+            DropTargetPen  = FrozenPen(Color.FromArgb(120, 0xA6, 0xE3, 0xA1), 1.5);
+            WaveformPen    = FrozenPen(Color.FromArgb(170, 0xCA, 0xD3, 0xF5), 1.0);
+        }
+        else
+        {
+            RulerBg             = Frozen(new SolidColorBrush(Color.FromRgb(0xE6, 0xE9, 0xEF)));
+            RulerText           = Frozen(new SolidColorBrush(Color.FromRgb(0x5C, 0x5F, 0x77)));
+            RulerTick           = Frozen(new SolidColorBrush(Color.FromRgb(0xBC, 0xC0, 0xCC)));
+            TrackBg             = Frozen(new SolidColorBrush(Color.FromRgb(0xEF, 0xF1, 0xF5)));
+            TrackSep            = Frozen(new SolidColorBrush(Color.FromRgb(0xCC, 0xD0, 0xDA)));
+            PlayheadBrush       = Frozen(new SolidColorBrush(Color.FromRgb(0xD2, 0x0F, 0x39)));
+            MetronomeBg         = Frozen(new SolidColorBrush(Color.FromRgb(0xDC, 0xE0, 0xE8)));
+            DropTargetHighlight = Frozen(new SolidColorBrush(Color.FromArgb(40, 0x40, 0xA0, 0x2B)));
+            TrackRowBg          = Color.FromRgb(0xE8, 0xEB, 0xF2);
+            TrackMutedBg        = Color.FromArgb(40, 0xBC, 0xC0, 0xCC);
+
+            PlayheadPen    = FrozenPen(PlayheadBrush, 1.5);
+            TrackSepPen    = FrozenPen(TrackSep, 1);
+            RulerTickPen   = FrozenPen(RulerTick, 1);
+            RulerMidTickPen = FrozenPen(Color.FromArgb(160, 0xBC, 0xC0, 0xCC), 1);
+            RulerSubTickPen = FrozenPen(Color.FromArgb(90, 0xBC, 0xC0, 0xCC), 1);
+            DropTargetPen  = FrozenPen(Color.FromArgb(120, 0x40, 0xA0, 0x2B), 1.5);
+            WaveformPen    = FrozenPen(Color.FromArgb(170, 0x4C, 0x4F, 0x69), 1.0);
+        }
+    }
+
+    private static Brush Frozen(SolidColorBrush b) { b.Freeze(); return b; }
+
+    private static Pen FrozenPen(Brush brush, double thickness)
+    {
+        var pen = new Pen(brush, thickness);
+        pen.Freeze();
+        return pen;
+    }
+
+    private static Pen FrozenPen(Color color, double thickness)
+    {
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+        return FrozenPen(brush, thickness);
+    }
+
+    // ── 생성자 (테마 구독) ──
+
+    public TimelineCanvas()
+    {
+        Loaded += (_, _) =>
+        {
+            ApplyTheme(SystemThemeService.IsDarkTheme);
+            SystemThemeService.ThemeChanged += OnThemeChanged;
+        };
+        Unloaded += (_, _) => SystemThemeService.ThemeChanged -= OnThemeChanged;
+    }
+
+    private void OnThemeChanged(bool isDark)
+    {
+        ApplyTheme(isDark);
+        InvalidateVisual();
     }
 
     // ── 웨이브폼 캐시 ──
@@ -290,8 +369,8 @@ public class TimelineCanvas : FrameworkElement
             double trackH = track.HeightPixels;
 
             var trackBg = track.Muted
-                ? new SolidColorBrush(Color.FromArgb(40, 0x45, 0x47, 0x5A))
-                : new SolidColorBrush(Color.FromRgb(0x24, 0x24, 0x3A));
+                ? new SolidColorBrush(TrackMutedBg)
+                : new SolidColorBrush(TrackRowBg);
             dc.DrawRectangle(trackBg, null, new Rect(0, y, w, trackH));
 
             // 드래그 드롭 대상 트랙 하이라이트

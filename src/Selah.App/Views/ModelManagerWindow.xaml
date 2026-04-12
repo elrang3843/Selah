@@ -5,7 +5,7 @@
         Title="{DynamicResource ModelManager_Title}"
         Width="780" Height="580"
         WindowStartupLocation="CenterOwner"
-        Background="#1E1E2E"
+        Background="{DynamicResource BgBrush}"
         ShowInTaskbar="False">
 
     <!-- 앱 전역 컨버터 사용 (App.xaml에 등록됨) -->
@@ -13,9 +13,9 @@
     <DockPanel Margin="0">
 
         <!-- 상태 바 -->
-        <StatusBar DockPanel.Dock="Bottom" Background="#181825" Height="28">
+        <StatusBar DockPanel.Dock="Bottom" Background="{DynamicResource SurfaceBrush}" Height="28">
             <StatusBarItem>
-                <TextBlock Text="{Binding StatusMessage}" Foreground="#A6ADC8" FontSize="12"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SubtextBrush}" FontSize="12"/>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <ProgressBar Width="120" Height="6"
@@ -25,7 +25,7 @@
         </StatusBar>
 
         <!-- 상단 툴바 -->
-        <Border DockPanel.Dock="Top" Background="#181825" Padding="16,10">
+        <Border DockPanel.Dock="Top" Background="{DynamicResource SurfaceBrush}" Padding="16,10">
             <StackPanel Orientation="Horizontal">
                 <Button Content="{DynamicResource ModelManager_Refresh}"
                         Command="{Binding RefreshCommand}"
@@ -36,7 +36,7 @@
                         Style="{StaticResource AccentButton}" Width="160" Height="30"
                         IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
                         Margin="0,0,16,0"/>
-                <TextBlock VerticalAlignment="Center" Foreground="#7F849C" FontSize="11"
+                <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource Overlay0Brush}" FontSize="11"
                            Text="{DynamicResource ModelManager_PipHint}"/>
             </StackPanel>
         </Border>
@@ -53,22 +53,22 @@
             <ListBox Grid.Column="0"
                      ItemsSource="{Binding Models}"
                      SelectedItem="{Binding SelectedModel}"
-                     Background="#181825"
+                     Background="{DynamicResource SurfaceBrush}"
                      BorderThickness="0"
                      Padding="0">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="Foreground" Value="#CDD6F4"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
                         <Setter Property="Padding" Value="12,10"/>
                         <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                        <Setter Property="BorderBrush" Value="#313244"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource Surface1Brush}"/>
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#313244"/>
+                                <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#262637"/>
+                                <Setter Property="Background" Value="{DynamicResource Surface1Brush}"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -85,9 +85,9 @@
                                     </Ellipse.Fill>
                                 </Ellipse>
                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
-                                           FontSize="13" Foreground="#CDD6F4"/>
+                                           FontSize="13" Foreground="{DynamicResource TextBrush}"/>
                             </StackPanel>
-                            <TextBlock Text="{Binding License}" Foreground="#7F849C"
+                            <TextBlock Text="{Binding License}" Foreground="{DynamicResource Overlay0Brush}"
                                        FontSize="11" Margin="14,0,0,0"/>
                             <StackPanel Orientation="Horizontal" Margin="14,2,0,0">
                                 <TextBlock Foreground="{Binding IsInstalled,
@@ -95,9 +95,9 @@
                                            FontSize="11"
                                            Text="{Binding IsInstalled,
                                                Converter={StaticResource InstalledStatusConverter}}"/>
-                                <TextBlock Text=" · " Foreground="#45475A" FontSize="11"/>
+                                <TextBlock Text=" · " Foreground="{DynamicResource Surface2Brush}" FontSize="11"/>
                                 <TextBlock Text="{Binding SizeDisplay}"
-                                           Foreground="#6C7086" FontSize="11"/>
+                                           Foreground="{DynamicResource Overlay0Brush}" FontSize="11"/>
                             </StackPanel>
                         </StackPanel>
                     </DataTemplate>
@@ -105,29 +105,29 @@
             </ListBox>
 
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch"
-                          Background="#313244" Cursor="SizeWE"/>
+                          Background="{DynamicResource Surface1Brush}" Cursor="SizeWE"/>
 
             <!-- 상세 정보 -->
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto"
-                          Background="#1E1E2E" Padding="20">
+                          Background="{DynamicResource BgBrush}" Padding="20">
                 <StackPanel Visibility="{Binding SelectedModel,
                     Converter={StaticResource NullToVisibilityConverter}}">
 
                     <TextBlock Text="{Binding SelectedModel.Name}"
                                FontSize="20" FontWeight="SemiBold"
-                               Foreground="#89B4FA" Margin="0,0,0,4"/>
+                               Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,4"/>
 
                     <!-- 버전: 레이블 + 값 분리 (DynamicResource 사용) -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                         <TextBlock Text="{DynamicResource ModelManager_Version}"
-                                   Foreground="#A6ADC8" FontSize="12"/>
+                                   Foreground="{DynamicResource SubtextBrush}" FontSize="12"/>
                         <TextBlock Text="{Binding SelectedModel.Version}"
-                                   Foreground="#A6ADC8" FontSize="12"/>
+                                   Foreground="{DynamicResource SubtextBrush}" FontSize="12"/>
                     </StackPanel>
 
                     <!-- 설명 -->
                     <TextBlock Text="{Binding SelectedModel.Description}"
-                               TextWrapping="Wrap" Foreground="#CDD6F4"
+                               TextWrapping="Wrap" Foreground="{DynamicResource TextBrush}"
                                LineHeight="22" Margin="0,0,0,20"/>
 
                     <!-- 스템 타입 / 엔진 / 라이선스 -->
@@ -143,31 +143,31 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource ModelManager_StemType}"
-                                   Foreground="#6C7086" FontSize="12"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="#CDD6F4" FontSize="12"
+                                   Foreground="{DynamicResource Overlay0Brush}" FontSize="12"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{DynamicResource TextBrush}" FontSize="12"
                                    Text="{Binding SelectedModel.StemType}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource ModelManager_Engine}"
-                                   Foreground="#6C7086" FontSize="12" Margin="0,4,0,0"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="#CDD6F4" FontSize="12"
+                                   Foreground="{DynamicResource Overlay0Brush}" FontSize="12" Margin="0,4,0,0"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource TextBrush}" FontSize="12"
                                    Margin="0,4,0,0" Text="{Binding SelectedModel.Engine}"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource ModelManager_License}"
-                                   Foreground="#6C7086" FontSize="12" Margin="0,4,0,0"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="#A6E3A1" FontSize="12"
+                                   Foreground="{DynamicResource Overlay0Brush}" FontSize="12" Margin="0,4,0,0"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="{DynamicResource GreenBrush}" FontSize="12"
                                    FontWeight="SemiBold" Margin="0,4,0,0"
                                    Text="{Binding SelectedModel.License}"/>
                     </Grid>
 
                     <!-- 예배 주의사항 -->
-                    <Border Background="#2A2A1A" BorderBrush="#F9E2AF"
+                    <Border Background="{DynamicResource WarningSurfaceBrush}" BorderBrush="{DynamicResource YellowBrush}"
                             BorderThickness="1" CornerRadius="4" Padding="12,8" Margin="0,0,0,16">
                         <StackPanel>
                             <TextBlock Text="{DynamicResource ModelManager_Copyright}"
-                                       Foreground="#F9E2AF" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource YellowBrush}" FontWeight="SemiBold"
                                        FontSize="12" Margin="0,0,0,6"/>
                             <TextBlock Text="{Binding SelectedModel.WorshipNote}"
-                                       TextWrapping="Wrap" Foreground="#F9E2AF"
+                                       TextWrapping="Wrap" Foreground="{DynamicResource YellowBrush}"
                                        FontSize="11" LineHeight="18"/>
                         </StackPanel>
                     </Border>
@@ -190,24 +190,24 @@
                     <Border CornerRadius="4" Padding="12,8">
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="Background" Value="#1A2A1A"/>
-                                <Setter Property="BorderBrush" Value="#A6E3A1"/>
+                                <Setter Property="Background" Value="{DynamicResource SuccessSurfaceBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}"/>
                                 <Setter Property="BorderThickness" Value="1"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SelectedModel.IsInstalled}" Value="False">
-                                        <Setter Property="Background" Value="#1E1E2E"/>
-                                        <Setter Property="BorderBrush" Value="#45475A"/>
+                                        <Setter Property="Background" Value="{DynamicResource BgBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
                         <StackPanel>
                             <TextBlock Text="{DynamicResource ModelManager_Installed}"
-                                       FontSize="13" FontWeight="SemiBold" Foreground="#A6E3A1"
+                                       FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource GreenBrush}"
                                        Visibility="{Binding SelectedModel.IsInstalled,
                                            Converter={StaticResource BoolToVis}}"/>
                             <TextBlock Text="{DynamicResource ModelManager_NotInstalled}"
-                                       FontSize="13" FontWeight="SemiBold" Foreground="#A6ADC8"
+                                       FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SubtextBrush}"
                                        Visibility="{Binding SelectedModel.IsInstalled,
                                            Converter={StaticResource InvBoolToVis}}"/>
                         </StackPanel>
