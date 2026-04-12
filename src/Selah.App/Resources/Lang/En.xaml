@@ -170,6 +170,13 @@
     <sys:String x:Key="Dialog_UnsavedChanges_Message">Project '{0}' has unsaved changes.&#x0a;Do you want to save?</sys:String>
     <sys:String x:Key="Dialog_UnsavedChanges_Title">Selah</sys:String>
 
+    <!-- ── Startup dependency guide ── -->
+    <sys:String x:Key="Startup_Setup_Title">Selah Setup Guide</sys:String>
+    <sys:String x:Key="Startup_Setup_Intro">The following tools are not installed. Some features are unavailable.</sys:String>
+    <sys:String x:Key="Startup_Python_Guide">❌  Python not installed → Stem separation (MR extraction) unavailable&#x0a;   1. Install Python 3.10 or later from https://www.python.org/downloads/&#x0a;      (Make sure to check "Add Python to PATH" during installation.)&#x0a;   2. Restart Selah.&#x0a;   3. Click 'Install Demucs' in Tools &gt; Model Manager.</sys:String>
+    <sys:String x:Key="Startup_FFmpeg_Guide">⚠️  FFmpeg not installed → MP3, MP4 and other non-WAV import unavailable&#x0a;   See Tools &gt; FFmpeg Install Guide for instructions.</sys:String>
+    <sys:String x:Key="Startup_Setup_Footer">This notice will not appear again once the required tools are installed.&#x0a;You can still edit WAV files without installing anything.</sys:String>
+
     <!-- ── Misc ── -->
     <sys:String x:Key="Clip_UnknownSource">Unknown source</sys:String>
     <sys:String x:Key="Project_SaveFirst">Please save the project first.</sys:String>

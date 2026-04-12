@@ -24,6 +24,40 @@ public partial class MainWindow : Window
 
         KeyDown += MainWindow_KeyDown;
         Closing += MainWindow_Closing;
+        Loaded += MainWindow_Loaded;
+    }
+
+    // ── 시작 시 의존성 확인 ──
+
+    private void MainWindow_Loaded(object s, RoutedEventArgs e)
+    {
+        bool pythonMissing = !_vm.StemSeparator.IsPythonAvailable;
+        bool ffmpegMissing = !_vm.IsFFmpegAvailable;
+
+        if (!pythonMissing && !ffmpegMissing) return;
+
+        var lines = new System.Text.StringBuilder();
+        lines.AppendLine(Loc.Get("Startup_Setup_Intro"));
+        lines.AppendLine();
+
+        if (pythonMissing)
+        {
+            lines.AppendLine(Loc.Get("Startup_Python_Guide"));
+            lines.AppendLine();
+        }
+        if (ffmpegMissing)
+        {
+            lines.AppendLine(Loc.Get("Startup_FFmpeg_Guide"));
+            lines.AppendLine();
+        }
+
+        lines.Append(Loc.Get("Startup_Setup_Footer"));
+
+        MessageBox.Show(
+            lines.ToString(),
+            Loc.Get("Startup_Setup_Title"),
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     // ── 다이얼로그 핸들러 ──
