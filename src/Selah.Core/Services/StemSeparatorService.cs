@@ -100,6 +100,9 @@ public class StemSeparatorService
             ? ["vocals", "no_vocals"]
             : ["vocals", "drums", "bass", "other"];
 
+    public static IReadOnlyList<string> StemKeys(StemType stemType) =>
+        GetExpectedStems(stemType).ToList();
+
     private static async Task<int> RunSeparationAsync(
         string python, string args,
         IProgress<SeparationProgress>? progress,
@@ -115,24 +118,46 @@ public class StemSeparatorService
 
         using var proc = new Process { StartInfo = psi };
 
+        double lastPct = 0;
+
         proc.OutputDataReceived += (_, e) =>
         {
             if (e.Data == null) return;
+
             if (e.Data.StartsWith("PROGRESS:", StringComparison.Ordinal) &&
                 double.TryParse(e.Data[9..],
                     System.Globalization.NumberStyles.Float,
                     System.Globalization.CultureInfo.InvariantCulture, out var pct))
             {
+                lastPct = pct;
                 progress?.Report(new SeparationProgress
                 {
                     Phase = "분리 중...",
                     Percent = pct / 100.0
                 });
             }
+            else if (e.Data.StartsWith("STEM:", StringComparison.Ordinal))
+            {
+                // Format: STEM:<key>=<absolute-path>
+                int eq = e.Data.IndexOf('=');
+                if (eq > 5)
+                    progress?.Report(new SeparationProgress
+                    {
+                        Phase   = "분리 중...",
+                        Percent = lastPct / 100.0,
+                        StemKey  = e.Data[5..eq],
+                        StemPath = e.Data[(eq + 1)..],
+                    });
+            }
         };
+
+        // CRITICAL: drain stderr asynchronously — without this, when demucs writes
+        // enough debug output to fill the OS pipe buffer the process deadlocks.
+        proc.ErrorDataReceived += (_, _) => { };
 
         proc.Start();
         proc.BeginOutputReadLine();
+        proc.BeginErrorReadLine();
         await proc.WaitForExitAsync(ct);
         return proc.ExitCode;
     }
@@ -140,8 +165,12 @@ public class StemSeparatorService
 
 public class SeparationProgress
 {
-    public string Phase { get; set; } = string.Empty;
+    public string Phase   { get; set; } = string.Empty;
     public double Percent { get; set; }
+    /// <summary>Stem key (e.g. "vocals", "drums"). Non-null when a stem WAV is ready.</summary>
+    public string? StemKey  { get; set; }
+    /// <summary>Absolute path to the ready stem WAV file.</summary>
+    public string? StemPath { get; set; }
 }
 
 public class SeparationResult

@@ -125,6 +125,10 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
             dst = Path(output_dir) / dst_name
             shutil.move(str(src), str(dst))
             print(f"[Selah] 저장됨: {dst}", file=sys.stderr)
+            # Notify C# that this stem WAV is ready for immediate clip creation.
+            # Format: STEM:<key>=<absolute-path>  (written to stdout)
+            stem_key = src_name.replace(".wav", "")
+            print(f"STEM:{stem_key}={dst}", flush=True)
             moved += 1
 
     if moved == 0:

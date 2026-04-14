@@ -512,73 +512,124 @@ public class MainViewModel : ViewModelBase, IDisposable
             Path.GetFileNameWithoutExtension(src.Name) + "_" +
             DateTime.Now.ToString("yyyyMMddHHmmss"));
 
+        // Pre-create stem tracks immediately so the user sees them before demucs finishes
+        var stemKeys = StemSeparatorService.StemKeys(model.StemType);
+        var stemTracks = new Dictionary<string, TrackViewModel>(StringComparer.OrdinalIgnoreCase);
+        foreach (var stemKey in stemKeys)
+        {
+            string trackName = GetStemTrackName(stemKey);
+            var tv = proj.Tracks.FirstOrDefault(t => t.Name == trackName)
+                     ?? proj.AddTrack(trackName);
+            stemTracks[stemKey] = tv;
+        }
+
         IsBusy = true;
         StatusMessage = Loc.Get("Status_Separating");
+
+        string origName = src.Name;
+        int stemIndex = 1;
+        var addedStems = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         try
         {
             var progress = new Progress<SeparationProgress>(p =>
-                System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
-                    StatusMessage = $"{p.Phase} {p.Percent:P0}"));
+            {
+                StatusMessage = $"{p.Phase} {p.Percent:P0}";
+
+                // Add clip to its track the moment each stem WAV is ready
+                if (p.StemKey != null && p.StemPath != null
+                    && !addedStems.Contains(p.StemKey)
+                    && stemTracks.TryGetValue(p.StemKey, out var trackVm))
+                {
+                    addedStems.Add(p.StemKey);
+                    try
+                    {
+                        string stemName = $"{origName}-{stemIndex++}";
+                        long stemLengthSamples;
+                        int stemSr, stemCh;
+                        using (var wr = new WaveFileReader(p.StemPath))
+                        {
+                            stemLengthSamples = wr.SampleCount;
+                            stemSr = wr.WaveFormat.SampleRate;
+                            stemCh = wr.WaveFormat.Channels;
+                        }
+                        var stemSource = new AudioSource
+                        {
+                            Name = stemName,
+                            RelPath = Path.GetRelativePath(proj.Model.FilePath!, p.StemPath),
+                            AbsolutePath = p.StemPath,
+                            SampleRate = stemSr,
+                            Channels = stemCh,
+                            LengthSamples = stemLengthSamples,
+                            SourceType = SourceType.Separated
+                        };
+                        proj.Model.AudioSources.Add(stemSource);
+                        var stemClip = new Clip
+                        {
+                            SourceId = stemSource.Id,
+                            TimelineStartSamples = clip.TimelineStartSamples,
+                            SourceInSamples = clip.SourceInSamples,
+                            SourceOutSamples = Math.Min(clip.SourceOutSamples, stemLengthSamples)
+                        };
+                        trackVm.AddClip(new ClipViewModel(stemClip, proj.Model));
+                        AudioEngine.RebuildMixers();
+                    }
+                    catch { /* ignore per-stem errors */ }
+                }
+            });
 
             var result = await StemSeparator.SeparateAsync(
                 src.AbsolutePath, outputDir, model, model.StemType, progress);
 
-            if (!result.Success)
+            if (!result.Success && addedStems.Count == 0)
             {
                 ErrorOccurred?.Invoke(Loc.Format("Status_SeparateFailed", result.Error ?? ""));
                 return;
             }
 
-            string origName = src.Name;
-            int stemIndex = 1;
-
+            // Fallback: add any stems not already added via STEM: progress
             foreach (var (stemKey, stemPath) in result.OutputFiles)
             {
-                string stemName = $"{origName}-{stemIndex++}";
-                string trackName = GetStemTrackName(stemKey);
-
-                // 스템 WAV 정보 읽기
-                long stemLengthSamples;
-                int stemSr, stemCh;
-                using (var wr = new WaveFileReader(stemPath))
+                if (addedStems.Contains(stemKey)) continue;
+                if (!stemTracks.TryGetValue(stemKey, out var trackVm)) continue;
+                try
                 {
-                    stemLengthSamples = wr.SampleCount;
-                    stemSr = wr.WaveFormat.SampleRate;
-                    stemCh = wr.WaveFormat.Channels;
+                    string stemName = $"{origName}-{stemIndex++}";
+                    long stemLengthSamples;
+                    int stemSr, stemCh;
+                    using (var wr = new WaveFileReader(stemPath))
+                    {
+                        stemLengthSamples = wr.SampleCount;
+                        stemSr = wr.WaveFormat.SampleRate;
+                        stemCh = wr.WaveFormat.Channels;
+                    }
+                    var stemSource = new AudioSource
+                    {
+                        Name = stemName,
+                        RelPath = Path.GetRelativePath(proj.Model.FilePath!, stemPath),
+                        AbsolutePath = stemPath,
+                        SampleRate = stemSr,
+                        Channels = stemCh,
+                        LengthSamples = stemLengthSamples,
+                        SourceType = SourceType.Separated
+                    };
+                    proj.Model.AudioSources.Add(stemSource);
+                    var stemClip = new Clip
+                    {
+                        SourceId = stemSource.Id,
+                        TimelineStartSamples = clip.TimelineStartSamples,
+                        SourceInSamples = clip.SourceInSamples,
+                        SourceOutSamples = Math.Min(clip.SourceOutSamples, stemLengthSamples)
+                    };
+                    trackVm.AddClip(new ClipViewModel(stemClip, proj.Model));
                 }
-
-                // AudioSource 등록
-                var stemSource = new AudioSource
-                {
-                    Name = stemName,
-                    RelPath = Path.GetRelativePath(proj.Model.FilePath!, stemPath),
-                    AbsolutePath = stemPath,
-                    SampleRate = stemSr,
-                    Channels = stemCh,
-                    LengthSamples = stemLengthSamples,
-                    SourceType = SourceType.Separated
-                };
-                proj.Model.AudioSources.Add(stemSource);
-
-                // 동일 이름 트랙 찾거나 새로 생성
-                var trackVm = proj.Tracks.FirstOrDefault(t => t.Name == trackName)
-                              ?? proj.AddTrack(trackName);
-
-                // 원본 클립과 동일한 타임라인 위치에 배치
-                var stemClip = new Clip
-                {
-                    SourceId = stemSource.Id,
-                    TimelineStartSamples = clip.TimelineStartSamples,
-                    SourceInSamples = clip.SourceInSamples,
-                    SourceOutSamples = Math.Min(clip.SourceOutSamples, stemLengthSamples)
-                };
-                trackVm.AddClip(new ClipViewModel(stemClip, proj.Model));
+                catch { }
             }
 
             proj.Model.IsDirty = true;
             AudioEngine.RebuildMixers();
-            StatusMessage = Loc.Format("Status_SeparateComplete", origName, result.OutputFiles.Count);
+            int total = addedStems.Count + result.OutputFiles.Keys.Count(k => !addedStems.Contains(k));
+            StatusMessage = Loc.Format("Status_SeparateComplete", origName, total);
         }
         catch (Exception ex)
         {
