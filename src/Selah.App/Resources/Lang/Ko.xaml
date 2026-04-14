@@ -132,6 +132,7 @@
     <sys:String x:Key="Status_Separate_NoPython">Python이 설치되어 있지 않습니다. python.org에서 설치하세요.</sys:String>
     <sys:String x:Key="Status_Separate_NoModel">설치된 분리 모델이 없습니다. 모델 관리자에서 설치하세요.</sys:String>
     <sys:String x:Key="Status_Separate_NeedTorchCodec">스템 분리에 TorchCodec 패키지가 필요합니다.&#x0a;&#x0a;명령 프롬프트(CMD)에서 다음 명령을 실행하세요:&#x0a;&#x0a;    pip install torchcodec&#x0a;&#x0a;설치 후 다시 시도해 주세요.</sys:String>
+    <sys:String x:Key="Status_Separate_TorchCodecBroken">TorchCodec이 설치되어 있지만 DLL을 로드할 수 없습니다.&#x0a;&#x0a;명령 프롬프트(CMD)에서 다음 명령으로 제거한 후 다시 시도해 주세요:&#x0a;&#x0a;    pip uninstall torchcodec</sys:String>
     <sys:String x:Key="Stem_Vocals">보컬</sys:String>
     <sys:String x:Key="Stem_NoVocals">반주</sys:String>
     <sys:String x:Key="Stem_Drums">드럼</sys:String>

@@ -585,6 +585,8 @@ public class MainViewModel : ViewModelBase, IDisposable
             {
                 if (result.IsTorchCodecMissing)
                     ErrorOccurred?.Invoke(Loc.Get("Status_Separate_NeedTorchCodec"));
+                else if (result.IsTorchCodecBroken)
+                    ErrorOccurred?.Invoke(Loc.Get("Status_Separate_TorchCodecBroken"));
                 else
                     ErrorOccurred?.Invoke(Loc.Format("Status_SeparateFailed", result.Error ?? ""));
                 return;

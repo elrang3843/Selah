@@ -103,8 +103,18 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
             "no module named" in line.lower() and "torchcodec" in line.lower()
             for line in last_lines
         )
+        # Detect a broken torchcodec install: DLL present but fails to load.
+        # torchaudio 2.6+ imports torchcodec at module level regardless of
+        # TORCHAUDIO_BACKEND; a broken DLL causes an OSError at import time.
+        torchcodec_broken = not torchcodec_missing and any(
+            "libtorchcodec" in line.lower() or
+            ("could not" in line.lower() and "torchcodec" in line.lower())
+            for line in last_lines
+        )
         if torchcodec_missing:
             print("LOG:TORCHCODEC_MISSING", flush=True)
+        elif torchcodec_broken:
+            print("LOG:TORCHCODEC_BROKEN", flush=True)
         else:
             # Forward captured output to C# so the user can see the actual error
             for log_line in last_lines:

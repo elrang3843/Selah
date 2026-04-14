@@ -71,15 +71,18 @@ public class StemSeparatorService
 
         if (exitCode != 0)
         {
-            // Only flag torchcodec missing when the Python script emits the specific
-            // TORCHCODEC_MISSING marker — not on any log line that merely mentions the word.
+            // Only flag torchcodec issues when the Python script emits the specific
+            // markers — not on any log line that merely mentions the word.
             bool torchcodecMissing =
                 errorDetail.Contains("TORCHCODEC_MISSING", StringComparison.Ordinal);
+            bool torchcodecBroken =
+                errorDetail.Contains("TORCHCODEC_BROKEN", StringComparison.Ordinal);
 
             return new SeparationResult
             {
                 Success = false,
                 IsTorchCodecMissing = torchcodecMissing,
+                IsTorchCodecBroken  = torchcodecBroken,
                 Error = string.IsNullOrWhiteSpace(errorDetail)
                     ? $"분리 엔진 종료 코드: {exitCode}"
                     : $"분리 엔진 오류 (코드 {exitCode}):\n\n{errorDetail}"
@@ -196,4 +199,6 @@ public class SeparationResult
     public string? Error { get; set; }
     /// <summary>True when the failure is specifically a missing TorchCodec package.</summary>
     public bool IsTorchCodecMissing { get; set; }
+    /// <summary>True when TorchCodec is installed but its native DLL fails to load.</summary>
+    public bool IsTorchCodecBroken  { get; set; }
 }
