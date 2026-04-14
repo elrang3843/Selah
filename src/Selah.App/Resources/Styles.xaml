@@ -8,6 +8,24 @@
 
     <!-- ═══ 메뉴 스타일 ═══ -->
     <Style TargetType="MenuItem">
+        <!-- Style.Resources 는 Aero2 ControlTemplate 의 StaticResource 조회 체인에 포함됩니다.
+             Application MergedDictionaries 의 문자열 키 오버라이드(Dark/Light.xaml)는
+             테마 BAML StaticResource 에 도달하지 못하지만, 여기서는 확실히 적용됩니다. -->
+        <Style.Resources>
+            <SolidColorBrush x:Key="Menu.Static.Background"                 Color="{DynamicResource Surface1Color}"/>
+            <SolidColorBrush x:Key="Menu.Static.Border"                     Color="{DynamicResource Surface2Color}"/>
+            <SolidColorBrush x:Key="Menu.Static.Foreground"                 Color="{DynamicResource TextColor}"/>
+            <SolidColorBrush x:Key="Menu.Static.Separator"                  Color="{DynamicResource Surface2Color}"/>
+            <SolidColorBrush x:Key="Menu.Disabled.Foreground"               Color="{DynamicResource Overlay0Color}"/>
+            <SolidColorBrush x:Key="MenuItem.SubMenu.Background"            Color="{DynamicResource Surface1Color}"/>
+            <SolidColorBrush x:Key="MenuItem.SubMenu.Border"                Color="{DynamicResource Surface2Color}"/>
+            <SolidColorBrush x:Key="MenuItem.Selected.Background"           Color="{DynamicResource Surface2Color}"/>
+            <SolidColorBrush x:Key="MenuItem.Selected.Border"               Color="{DynamicResource AccentColor}"/>
+            <SolidColorBrush x:Key="MenuItem.Highlight.Background"          Color="{DynamicResource Surface2Color}"/>
+            <SolidColorBrush x:Key="MenuItem.Highlight.Border"              Color="{DynamicResource AccentColor}"/>
+            <SolidColorBrush x:Key="MenuItem.Highlight.Disabled.Background" Color="Transparent"/>
+            <SolidColorBrush x:Key="MenuItem.Highlight.Disabled.Border"     Color="{DynamicResource Surface2Color}"/>
+        </Style.Resources>
         <Style.Triggers>
             <Trigger Property="Role" Value="TopLevelHeader">
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
