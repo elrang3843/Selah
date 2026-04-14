@@ -96,16 +96,17 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
         return 1
 
     if exit_code != 0:
-        # Check specifically for the torchcodec ImportError so C# can show
-        # a targeted install guide.  A mere mention of "torchcodec" in a log
-        # line is NOT sufficient — only "No module named" counts.
+        # Detect torchcodec-not-available in two forms:
+        #   1. "No module named 'torchcodec'"  — package missing
+        #   2. "TorchCodec is required for save_with_torchcodec" — torchaudio 2.6+
+        #      calls torchcodec explicitly for WAV save regardless of TORCHAUDIO_BACKEND
         torchcodec_missing = any(
-            "no module named" in line.lower() and "torchcodec" in line.lower()
+            ("no module named" in line.lower() and "torchcodec" in line.lower()) or
+            "torchcodec is required" in line.lower() or
+            "please install torchcodec" in line.lower()
             for line in last_lines
         )
         # Detect a broken torchcodec install: DLL present but fails to load.
-        # torchaudio 2.6+ imports torchcodec at module level regardless of
-        # TORCHAUDIO_BACKEND; a broken DLL causes an OSError at import time.
         torchcodec_broken = not torchcodec_missing and any(
             "libtorchcodec" in line.lower() or
             ("could not" in line.lower() and "torchcodec" in line.lower())
