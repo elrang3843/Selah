@@ -43,11 +43,34 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
     """
     os.makedirs(output_dir, exist_ok=True)
 
+    # torchaudio 2.6+ routes torchaudio.save() through save_with_torchcodec()
+    # for WAV files regardless of TORCHAUDIO_BACKEND.  The only reliable fix
+    # is to monkey-patch torchaudio.save before demucs imports torchaudio.
+    # We achieve this by running demucs via `python -c <inline_code>` so the
+    # patch executes first; sys.argv[1:] after the -c argument is parsed by
+    # demucs's argparse exactly as with `python -m demucs`.
+    _PATCH = (
+        "import sys\n"
+        "try:\n"
+        "    import torchaudio as _ta, soundfile as _sf\n"
+        "    def _save(uri, src, sr, channels_first=True,\n"
+        "              bits_per_sample=None, encoding=None, **kw):\n"
+        "        w = src.numpy()\n"
+        "        if channels_first and w.ndim == 2: w = w.T\n"
+        "        sub = ('PCM_24' if bits_per_sample == 24\n"
+        "               else 'FLOAT' if bits_per_sample == 32\n"
+        "               else 'PCM_16')\n"
+        "        _sf.write(str(uri), w, sr, subtype=sub)\n"
+        "    _ta.save = _save\n"
+        "except Exception:\n"
+        "    pass\n"
+        "from demucs.__main__ import main; sys.exit(main())\n"
+    )
+
     cmd = [
-        sys.executable, "-m", "demucs",
+        sys.executable, "-c", _PATCH,
         "--name", model,
         "--out", output_dir,
-        # --float32 removed: not supported by all demucs versions
         input_path,
     ]
 
@@ -56,10 +79,7 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
 
     log_progress(5.0)
 
-    # torchaudio >= 2.6 changed its default save backend to torchcodec which
-    # requires a separate install. Force soundfile (bundled with demucs) instead.
     env = os.environ.copy()
-    env["TORCHAUDIO_BACKEND"] = "soundfile"
 
     try:
         proc = subprocess.Popen(
