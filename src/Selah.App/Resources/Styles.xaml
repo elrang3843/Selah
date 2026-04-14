@@ -7,10 +7,154 @@
     -->
 
     <!-- ═══ 메뉴 스타일 ═══ -->
+
+    <!-- 팝업 항목 하이라이트 템플릿 (SubmenuItem)
+         Aero2 트리거의 {StaticResource} 는 Style.Resources 에 도달하지 못하므로
+         DynamicResource 를 직접 사용하는 커스텀 ControlTemplate 으로 대체합니다. -->
+    <ControlTemplate x:Key="MenuItemSubmenuItemTemplate" TargetType="{x:Type MenuItem}">
+        <Border x:Name="Bd"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="1"
+                Padding="4,3"
+                SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="22" SharedSizeGroup="MenuItemIconColumnGroup" Width="Auto"/>
+                    <ColumnDefinition Width="6"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition SharedSizeGroup="MenuItemIGTColumnGroup" Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <ContentPresenter x:Name="Icon"
+                                  Grid.Column="0"
+                                  ContentSource="Icon"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Width="16" Height="16"
+                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                <ContentPresenter Grid.Column="2"
+                                  ContentSource="Header"
+                                  RecognizesAccessKey="True"
+                                  VerticalAlignment="Center"
+                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                <TextBlock Grid.Column="3"
+                           Margin="16,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource Overlay0Brush}"
+                           Text="{TemplateBinding InputGestureText}"/>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="Bd" Property="Background"  Value="{DynamicResource Surface2Brush}"/>
+                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource Overlay0Brush}"/>
+                <Setter Property="Opacity"    Value="0.5"/>
+            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsHighlighted" Value="True"/>
+                    <Condition Property="IsEnabled"     Value="False"/>
+                </MultiTrigger.Conditions>
+                <Setter TargetName="Bd" Property="Background"  Value="Transparent"/>
+                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
+            </MultiTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- SubmenuHeader (하위 메뉴를 갖는 팝업 항목) -->
+    <ControlTemplate x:Key="MenuItemSubmenuHeaderTemplate" TargetType="{x:Type MenuItem}">
+        <Border x:Name="Bd"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="1"
+                Padding="4,3"
+                SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="22" SharedSizeGroup="MenuItemIconColumnGroup" Width="Auto"/>
+                    <ColumnDefinition Width="6"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition SharedSizeGroup="MenuItemIGTColumnGroup" Width="Auto"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <ContentPresenter x:Name="Icon"
+                                  Grid.Column="0"
+                                  ContentSource="Icon"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Width="16" Height="16"
+                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                <ContentPresenter Grid.Column="2"
+                                  ContentSource="Header"
+                                  RecognizesAccessKey="True"
+                                  VerticalAlignment="Center"
+                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                <TextBlock Grid.Column="3"
+                           Margin="16,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource Overlay0Brush}"
+                           Text="{TemplateBinding InputGestureText}"/>
+                <!-- 화살표 -->
+                <Path Grid.Column="4"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Fill="{DynamicResource SubtextBrush}"
+                      Data="M0,0 L0,7 L4,3.5 z"/>
+                <Popup x:Name="PART_Popup"
+                       AllowsTransparency="True"
+                       Focusable="False"
+                       HorizontalOffset="-4"
+                       IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                       Placement="Right"
+                       PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+                    <Border x:Name="SubMenuBorder"
+                            Background="{DynamicResource Surface1Brush}"
+                            BorderBrush="{DynamicResource Surface2Brush}"
+                            BorderThickness="1"
+                            Padding="2">
+                        <ScrollViewer x:Name="SubMenuScrollViewer">
+                            <Grid RenderOptions.ClearTypeHint="Enabled">
+                                <Canvas HorizontalAlignment="Left"
+                                        Height="0" VerticalAlignment="Top" Width="0">
+                                    <Rectangle x:Name="OpaqueRect"
+                                               Fill="{Binding Background, ElementName=SubMenuBorder}"
+                                               Height="{Binding ActualHeight, ElementName=SubMenuBorder}"
+                                               Width="{Binding ActualWidth, ElementName=SubMenuBorder}"/>
+                                </Canvas>
+                                <ItemsPresenter x:Name="ItemsPresenter"
+                                                Grid.IsSharedSizeScope="True"
+                                                KeyboardNavigation.DirectionalNavigation="Cycle"
+                                                KeyboardNavigation.TabNavigation="Cycle"
+                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </Grid>
+                        </ScrollViewer>
+                    </Border>
+                </Popup>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="Bd" Property="Background"  Value="{DynamicResource Surface2Brush}"/>
+                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource Overlay0Brush}"/>
+                <Setter Property="Opacity"    Value="0.5"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
     <Style TargetType="MenuItem">
-        <!-- Style.Resources 는 Aero2 ControlTemplate 의 StaticResource 조회 체인에 포함됩니다.
-             Application MergedDictionaries 의 문자열 키 오버라이드(Dark/Light.xaml)는
-             테마 BAML StaticResource 에 도달하지 못하지만, 여기서는 확실히 적용됩니다. -->
+        <!-- Style.Resources: Aero2 팝업 컨테이너 배경 오버라이드 (StaticResource 조회 체인에 포함) -->
         <Style.Resources>
             <SolidColorBrush x:Key="Menu.Static.Background"                 Color="{DynamicResource Surface1Color}"/>
             <SolidColorBrush x:Key="Menu.Static.Border"                     Color="{DynamicResource Surface2Color}"/>
@@ -33,29 +177,15 @@
             <Trigger Property="Role" Value="TopLevelItem">
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             </Trigger>
-            <!-- 팝업 아이템 — DynamicResource 로 테마 전환 반영 -->
-            <Trigger Property="Role" Value="SubmenuHeader">
-                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-            </Trigger>
+            <!-- SubmenuItem / SubmenuHeader: 커스텀 템플릿으로 DynamicResource 하이라이트 적용 -->
             <Trigger Property="Role" Value="SubmenuItem">
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                <Setter Property="Template"   Value="{StaticResource MenuItemSubmenuItemTemplate}"/>
             </Trigger>
-            <MultiTrigger>
-                <MultiTrigger.Conditions>
-                    <Condition Property="Role" Value="SubmenuItem"/>
-                    <Condition Property="IsEnabled" Value="False"/>
-                </MultiTrigger.Conditions>
-                <Setter Property="Foreground" Value="{DynamicResource Overlay0Brush}"/>
-                <Setter Property="Opacity" Value="0.5"/>
-            </MultiTrigger>
-            <MultiTrigger>
-                <MultiTrigger.Conditions>
-                    <Condition Property="Role" Value="SubmenuHeader"/>
-                    <Condition Property="IsEnabled" Value="False"/>
-                </MultiTrigger.Conditions>
-                <Setter Property="Foreground" Value="{DynamicResource Overlay0Brush}"/>
-                <Setter Property="Opacity" Value="0.5"/>
-            </MultiTrigger>
+            <Trigger Property="Role" Value="SubmenuHeader">
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                <Setter Property="Template"   Value="{StaticResource MenuItemSubmenuHeaderTemplate}"/>
+            </Trigger>
         </Style.Triggers>
     </Style>
 
