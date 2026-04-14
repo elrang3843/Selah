@@ -40,7 +40,7 @@
                 <TextBlock Grid.Column="3"
                            Margin="16,0,0,0"
                            VerticalAlignment="Center"
-                           Foreground="{DynamicResource Overlay0Brush}"
+                           Foreground="{DynamicResource SubtextBrush}"
                            Text="{TemplateBinding InputGestureText}"/>
             </Grid>
         </Border>
@@ -98,7 +98,7 @@
                 <TextBlock Grid.Column="3"
                            Margin="16,0,0,0"
                            VerticalAlignment="Center"
-                           Foreground="{DynamicResource Overlay0Brush}"
+                           Foreground="{DynamicResource SubtextBrush}"
                            Text="{TemplateBinding InputGestureText}"/>
                 <!-- 화살표 -->
                 <Path Grid.Column="4"
@@ -153,29 +153,95 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
+    <!-- TopLevelHeader: 메뉴바의 드롭다운 항목 — 팝업 배경을 DynamicResource 로 직접 지정 -->
+    <ControlTemplate x:Key="MenuItemTopLevelHeaderTemplate" TargetType="{x:Type MenuItem}">
+        <Border x:Name="Bd"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="1"
+                Padding="{TemplateBinding Padding}"
+                SnapsToDevicePixels="True">
+            <Grid>
+                <ContentPresenter ContentSource="Header"
+                                  RecognizesAccessKey="True"
+                                  VerticalAlignment="Center"
+                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                <Popup x:Name="PART_Popup"
+                       AllowsTransparency="True"
+                       Focusable="False"
+                       IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                       Placement="Bottom"
+                       PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+                    <Border x:Name="PopupBorder"
+                            Background="{DynamicResource Surface1Brush}"
+                            BorderBrush="{DynamicResource Surface2Brush}"
+                            BorderThickness="1"
+                            Padding="2"
+                            SnapsToDevicePixels="True">
+                        <Grid RenderOptions.ClearTypeHint="Enabled">
+                            <Canvas HorizontalAlignment="Left" Height="0" VerticalAlignment="Top" Width="0">
+                                <Rectangle Fill="{Binding Background, ElementName=PopupBorder}"
+                                           Height="{Binding ActualHeight, ElementName=PopupBorder}"
+                                           Width="{Binding ActualWidth, ElementName=PopupBorder}"/>
+                            </Canvas>
+                            <ItemsPresenter x:Name="ItemsPresenter"
+                                            Grid.IsSharedSizeScope="True"
+                                            KeyboardNavigation.DirectionalNavigation="Cycle"
+                                            KeyboardNavigation.TabNavigation="Cycle"
+                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </Grid>
+                    </Border>
+                </Popup>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface1Brush}"/>
+            </Trigger>
+            <Trigger Property="IsSubmenuOpen" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface1Brush}"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource Overlay0Brush}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- TopLevelItem: 메뉴바의 팝업 없는 항목 -->
+    <ControlTemplate x:Key="MenuItemTopLevelItemTemplate" TargetType="{x:Type MenuItem}">
+        <Border x:Name="Bd"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="1"
+                Padding="{TemplateBinding Padding}"
+                SnapsToDevicePixels="True">
+            <ContentPresenter ContentSource="Header"
+                              RecognizesAccessKey="True"
+                              VerticalAlignment="Center"
+                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface1Brush}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface2Brush}"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource Overlay0Brush}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
     <Style TargetType="MenuItem">
-        <!-- Style.Resources: Aero2 팝업 컨테이너 배경 오버라이드 (StaticResource 조회 체인에 포함) -->
-        <Style.Resources>
-            <SolidColorBrush x:Key="Menu.Static.Background"                 Color="{DynamicResource Surface1Color}"/>
-            <SolidColorBrush x:Key="Menu.Static.Border"                     Color="{DynamicResource Surface2Color}"/>
-            <SolidColorBrush x:Key="Menu.Static.Foreground"                 Color="{DynamicResource TextColor}"/>
-            <SolidColorBrush x:Key="Menu.Static.Separator"                  Color="{DynamicResource Surface2Color}"/>
-            <SolidColorBrush x:Key="Menu.Disabled.Foreground"               Color="{DynamicResource Overlay0Color}"/>
-            <SolidColorBrush x:Key="MenuItem.SubMenu.Background"            Color="{DynamicResource Surface1Color}"/>
-            <SolidColorBrush x:Key="MenuItem.SubMenu.Border"                Color="{DynamicResource Surface2Color}"/>
-            <SolidColorBrush x:Key="MenuItem.Selected.Background"           Color="{DynamicResource Surface2Color}"/>
-            <SolidColorBrush x:Key="MenuItem.Selected.Border"               Color="{DynamicResource AccentColor}"/>
-            <SolidColorBrush x:Key="MenuItem.Highlight.Background"          Color="{DynamicResource Surface2Color}"/>
-            <SolidColorBrush x:Key="MenuItem.Highlight.Border"              Color="{DynamicResource AccentColor}"/>
-            <SolidColorBrush x:Key="MenuItem.Highlight.Disabled.Background" Color="Transparent"/>
-            <SolidColorBrush x:Key="MenuItem.Highlight.Disabled.Border"     Color="{DynamicResource Surface2Color}"/>
-        </Style.Resources>
         <Style.Triggers>
             <Trigger Property="Role" Value="TopLevelHeader">
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                <Setter Property="Template"   Value="{StaticResource MenuItemTopLevelHeaderTemplate}"/>
             </Trigger>
             <Trigger Property="Role" Value="TopLevelItem">
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                <Setter Property="Template"   Value="{StaticResource MenuItemTopLevelItemTemplate}"/>
             </Trigger>
             <!-- SubmenuItem / SubmenuHeader: 커스텀 템플릿으로 DynamicResource 하이라이트 적용 -->
             <Trigger Property="Role" Value="SubmenuItem">
