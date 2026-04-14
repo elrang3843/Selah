@@ -1,30 +1,28 @@
-using Microsoft.Win32;
 using System.Windows;
 
 namespace Selah.App.Services;
 
 /// <summary>
-/// Windows 시스템 테마(다크/라이트) 변경을 감지하고 앱 리소스를 교체합니다.
+/// 앱 테마(다크/라이트) 전환을 관리합니다.
 /// </summary>
 public static class SystemThemeService
 {
     /// <summary>테마가 바뀔 때 발생합니다. bool = isDark</summary>
     public static event Action<bool>? ThemeChanged;
 
-    public static bool IsDarkTheme => ReadIsDark();
+    /// <summary>현재 테마가 다크이면 true.</summary>
+    public static bool IsDarkTheme { get; private set; } = true;
 
     // ── 초기화 / 종료 ──
 
     public static void Initialize()
     {
-        SystemEvents.UserPreferenceChanged += OnPreferenceChanged;
-        Apply(ReadIsDark());
+        // 다크 테마를 기본값으로 적용합니다.
+        // OS 테마 자동 감지는 사용하지 않습니다 — 사용자가 메뉴에서 직접 전환합니다.
+        Apply(true);
     }
 
-    public static void Shutdown()
-    {
-        SystemEvents.UserPreferenceChanged -= OnPreferenceChanged;
-    }
+    public static void Shutdown() { }
 
     // ── 테마 적용 ──
 
@@ -45,30 +43,7 @@ public static class SystemThemeService
         merged.Add(newDict);
         if (old != null) merged.Remove(old);
 
+        IsDarkTheme = isDark;
         ThemeChanged?.Invoke(isDark);
-    }
-
-    // ── 내부 ──
-
-    private static bool ReadIsDark()
-    {
-        try
-        {
-            using var key = Registry.CurrentUser.OpenSubKey(
-                @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-            // AppsUseLightTheme: 0 = dark, 1 = light
-            return key?.GetValue("AppsUseLightTheme") is not int v || v == 0;
-        }
-        catch
-        {
-            return true; // 레지스트리 읽기 실패 시 다크 기본
-        }
-    }
-
-    private static void OnPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
-    {
-        if (e.Category != UserPreferenceCategory.General) return;
-        bool dark = ReadIsDark();
-        Application.Current?.Dispatcher.BeginInvoke(() => Apply(dark));
     }
 }
