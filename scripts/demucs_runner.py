@@ -47,7 +47,7 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
         sys.executable, "-m", "demucs",
         "--name", model,
         "--out", output_dir,
-        "--float32",        # float32 WAV 출력
+        # --float32 removed: not supported by all demucs versions
         input_path,
     ]
 
@@ -55,7 +55,6 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
         cmd += ["--two-stems", "vocals"]
 
     log_progress(5.0)
-    print(f"[Selah] 실행 명령: {' '.join(cmd)}", file=sys.stderr)
 
     try:
         proc = subprocess.Popen(
@@ -66,9 +65,13 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
             bufsize=1,
         )
 
+        last_lines: list[str] = []   # rolling buffer for error reporting
+
         for line in proc.stdout:  # type: ignore[union-attr]
             line = line.rstrip()
-            print(f"[demucs] {line}", file=sys.stderr, flush=True)
+            last_lines.append(line)
+            if len(last_lines) > 25:
+                last_lines.pop(0)
 
             # Demucs 출력에서 진행률 파싱 (예: "  0%|          |")
             if "%" in line:
@@ -83,12 +86,15 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
         exit_code = proc.returncode
 
     except FileNotFoundError:
-        print("[Selah] 오류: demucs 명령을 찾을 수 없습니다. pip install demucs 를 실행하세요.",
-              file=sys.stderr)
+        print("LOG:demucs 명령을 찾을 수 없습니다. pip install demucs 를 실행하세요.", flush=True)
         return 1
 
     if exit_code != 0:
-        print(f"[Selah] Demucs 오류 (종료 코드 {exit_code})", file=sys.stderr)
+        # Forward captured output to C# so the user can see the actual error
+        for log_line in last_lines:
+            stripped = log_line.strip()
+            if stripped:
+                print(f"LOG:{stripped}", flush=True)
         return exit_code
 
     # Demucs는 output_dir/<model>/<track_name>/ 구조로 저장

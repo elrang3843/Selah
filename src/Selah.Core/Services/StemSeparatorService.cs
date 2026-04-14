@@ -67,14 +67,16 @@ public class StemSeparatorService
 
         progress?.Report(new SeparationProgress { Phase = "분리 시작 중...", Percent = 0 });
 
-        int exitCode = await RunSeparationAsync(_pythonPath, args, progress, ct);
+        var (exitCode, errorDetail) = await RunSeparationAsync(_pythonPath, args, progress, ct);
 
         if (exitCode != 0)
         {
             return new SeparationResult
             {
                 Success = false,
-                Error = $"분리 엔진 종료 코드: {exitCode}"
+                Error = string.IsNullOrWhiteSpace(errorDetail)
+                    ? $"분리 엔진 종료 코드: {exitCode}"
+                    : $"분리 엔진 오류 (코드 {exitCode}):\n\n{errorDetail}"
             };
         }
 
@@ -103,7 +105,7 @@ public class StemSeparatorService
     public static IReadOnlyList<string> StemKeys(StemType stemType) =>
         GetExpectedStems(stemType).ToList();
 
-    private static async Task<int> RunSeparationAsync(
+    private static async Task<(int ExitCode, string ErrorDetail)> RunSeparationAsync(
         string python, string args,
         IProgress<SeparationProgress>? progress,
         CancellationToken ct)
@@ -119,6 +121,8 @@ public class StemSeparatorService
         using var proc = new Process { StartInfo = psi };
 
         double lastPct = 0;
+        var logLines = new List<string>();
+        var logLock  = new object();
 
         proc.OutputDataReceived += (_, e) =>
         {
@@ -130,24 +134,26 @@ public class StemSeparatorService
                     System.Globalization.CultureInfo.InvariantCulture, out var pct))
             {
                 lastPct = pct;
-                progress?.Report(new SeparationProgress
-                {
-                    Phase = "분리 중...",
-                    Percent = pct / 100.0
-                });
+                progress?.Report(new SeparationProgress { Phase = "분리 중...", Percent = pct / 100.0 });
             }
             else if (e.Data.StartsWith("STEM:", StringComparison.Ordinal))
             {
-                // Format: STEM:<key>=<absolute-path>
                 int eq = e.Data.IndexOf('=');
                 if (eq > 5)
                     progress?.Report(new SeparationProgress
                     {
-                        Phase   = "분리 중...",
-                        Percent = lastPct / 100.0,
+                        Phase    = "분리 중...",
+                        Percent  = lastPct / 100.0,
                         StemKey  = e.Data[5..eq],
                         StemPath = e.Data[(eq + 1)..],
                     });
+            }
+            else if (e.Data.StartsWith("LOG:", StringComparison.Ordinal))
+            {
+                var msg = e.Data[4..];
+                lock (logLock) logLines.Add(msg);
+                // Show in status bar so user can see what demucs is doing
+                progress?.Report(new SeparationProgress { Phase = msg, Percent = lastPct / 100.0 });
             }
         };
 
@@ -159,7 +165,10 @@ public class StemSeparatorService
         proc.BeginOutputReadLine();
         proc.BeginErrorReadLine();
         await proc.WaitForExitAsync(ct);
-        return proc.ExitCode;
+
+        string errorDetail;
+        lock (logLock) errorDetail = string.Join("\n", logLines.TakeLast(15));
+        return (proc.ExitCode, errorDetail);
     }
 }
 
