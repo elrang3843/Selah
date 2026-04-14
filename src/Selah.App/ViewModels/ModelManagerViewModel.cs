@@ -11,6 +11,8 @@ public class ModelManagerViewModel : ViewModelBase
     private ModelInfo? _selectedModel;
     private string _statusMessage;
     private bool _isBusy;
+    private string _installLog = string.Empty;
+    private bool _showInstallLog;
 
     public ModelManagerViewModel(ModelManagerService service)
     {
@@ -46,6 +48,20 @@ public class ModelManagerViewModel : ViewModelBase
 
     public bool AnyModelInstalled => Models.Any(m => m.IsInstalled);
 
+    /// <summary>pip 설치 출력 로그 (설치 중/후 오른쪽 패널에 표시)</summary>
+    public string InstallLog
+    {
+        get => _installLog;
+        private set => SetField(ref _installLog, value);
+    }
+
+    /// <summary>설치 로그 패널 표시 여부 (Refresh 시 false로 초기화)</summary>
+    public bool ShowInstallLog
+    {
+        get => _showInstallLog;
+        private set => SetField(ref _showInstallLog, value);
+    }
+
     public ICommand InstallDemucsCommand { get; }
     public ICommand RefreshCommand { get; }
     public ICommand OpenSourceUrlCommand { get; }
@@ -59,21 +75,49 @@ public class ModelManagerViewModel : ViewModelBase
             Models.Add(m);
         OnPropertyChanged(nameof(AnyModelInstalled));
         StatusMessage = Loc.Get("Status_ModelRefreshed");
+        // 새로고침 시 로그 패널 닫기
+        ShowInstallLog = false;
+        InstallLog = string.Empty;
     }
 
     private async Task InstallDemucsAsync()
     {
         IsBusy = true;
-        StatusMessage = Loc.Get("Status_DemucsInstalling");
+        InstallLog = string.Empty;
+        ShowInstallLog = true;
+
+        void AppendLog(string line)
+        {
+            InstallLog += line + "\n";
+            StatusMessage = line;
+        }
+
+        AppendLog("▶ pip install demucs");
+        AppendLog(string.Empty);
+
         try
         {
             await _service.InstallDemucsAsync(
-                new Progress<string>(msg => StatusMessage = msg));
-            Refresh();
+                new Progress<string>(AppendLog));
+
+            AppendLog(string.Empty);
+            AppendLog("✓ " + Loc.Get("Status_DemucsInstalled"));
             StatusMessage = Loc.Get("Status_DemucsInstalled");
+
+            // 설치 완료 후 모델 목록 갱신 (로그 패널은 유지)
+            _service.RefreshInstallStatus();
+            var updatedCatalog = _service.GetCatalog();
+            for (int i = 0; i < Models.Count && i < updatedCatalog.Count; i++)
+            {
+                Models[i].IsInstalled = updatedCatalog[i].IsInstalled;
+                Models[i].LocalPath  = updatedCatalog[i].LocalPath;
+            }
+            OnPropertyChanged(nameof(AnyModelInstalled));
         }
         catch (Exception ex)
         {
+            AppendLog(string.Empty);
+            AppendLog("✗ " + Loc.Format("Status_InstallFailed", ex.Message));
             StatusMessage = Loc.Format("Status_InstallFailed", ex.Message);
         }
         finally

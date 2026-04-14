@@ -107,113 +107,145 @@
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch"
                           Background="{DynamicResource Surface1Brush}" Cursor="SizeWE"/>
 
-            <!-- 상세 정보 -->
-            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto"
-                          Background="{DynamicResource BgBrush}" Padding="20">
-                <StackPanel Visibility="{Binding SelectedModel,
-                    Converter={StaticResource NullToVisibilityConverter}}">
+            <!-- 오른쪽 패널: 설치 로그(설치 중/후) 또는 모델 상세 정보 -->
+            <Grid Grid.Column="2">
 
-                    <TextBlock Text="{Binding SelectedModel.Name}"
-                               FontSize="20" FontWeight="SemiBold"
-                               Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,4"/>
+                <!-- ① 설치 출력 로그 패널 (ShowInstallLog=True 일 때) -->
+                <Grid Visibility="{Binding ShowInstallLog, Converter={StaticResource BoolToVis}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- 버전: 레이블 + 값 분리 (DynamicResource 사용) -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                        <TextBlock Text="{DynamicResource ModelManager_Version}"
-                                   Foreground="{DynamicResource SubtextBrush}" FontSize="12"/>
-                        <TextBlock Text="{Binding SelectedModel.Version}"
-                                   Foreground="{DynamicResource SubtextBrush}" FontSize="12"/>
-                    </StackPanel>
+                    <TextBlock Grid.Row="0"
+                               Text="{DynamicResource ModelManager_InstallLog_Title}"
+                               Foreground="{DynamicResource Overlay0Brush}" FontSize="11"
+                               Margin="16,12,16,6" TextWrapping="Wrap"/>
 
-                    <!-- 설명 -->
-                    <TextBlock Text="{Binding SelectedModel.Description}"
-                               TextWrapping="Wrap" Foreground="{DynamicResource TextBrush}"
-                               LineHeight="22" Margin="0,0,0,20"/>
+                    <TextBox Grid.Row="1" x:Name="LogBox"
+                             Text="{Binding InstallLog, Mode=OneWay}"
+                             IsReadOnly="True"
+                             TextWrapping="NoWrap"
+                             HorizontalScrollBarVisibility="Auto"
+                             VerticalScrollBarVisibility="Auto"
+                             FontFamily="Consolas, Courier New" FontSize="11"
+                             Background="{DynamicResource SurfaceBrush}"
+                             Foreground="{DynamicResource TextBrush}"
+                             BorderThickness="0"
+                             Padding="12,8"
+                             Margin="8,0,8,8"/>
+                </Grid>
 
-                    <!-- 스템 타입 / 엔진 / 라이선스 -->
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                <!-- ② 모델 상세 정보 패널 (ShowInstallLog=False 일 때) -->
+                <ScrollViewer Visibility="{Binding ShowInstallLog, Converter={StaticResource InvBoolToVis}}"
+                              VerticalScrollBarVisibility="Auto"
+                              Background="{DynamicResource BgBrush}" Padding="20">
+                    <StackPanel Visibility="{Binding SelectedModel,
+                        Converter={StaticResource NullToVisibilityConverter}}">
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource ModelManager_StemType}"
-                                   Foreground="{DynamicResource Overlay0Brush}" FontSize="12"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{DynamicResource TextBrush}" FontSize="12"
-                                   Text="{Binding SelectedModel.StemType}"/>
+                        <TextBlock Text="{Binding SelectedModel.Name}"
+                                   FontSize="20" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,4"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource ModelManager_Engine}"
-                                   Foreground="{DynamicResource Overlay0Brush}" FontSize="12" Margin="0,4,0,0"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource TextBrush}" FontSize="12"
-                                   Margin="0,4,0,0" Text="{Binding SelectedModel.Engine}"/>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource ModelManager_License}"
-                                   Foreground="{DynamicResource Overlay0Brush}" FontSize="12" Margin="0,4,0,0"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="{DynamicResource GreenBrush}" FontSize="12"
-                                   FontWeight="SemiBold" Margin="0,4,0,0"
-                                   Text="{Binding SelectedModel.License}"/>
-                    </Grid>
-
-                    <!-- 예배 주의사항 -->
-                    <Border Background="{DynamicResource WarningSurfaceBrush}" BorderBrush="{DynamicResource YellowBrush}"
-                            BorderThickness="1" CornerRadius="4" Padding="12,8" Margin="0,0,0,16">
-                        <StackPanel>
-                            <TextBlock Text="{DynamicResource ModelManager_Copyright}"
-                                       Foreground="{DynamicResource YellowBrush}" FontWeight="SemiBold"
-                                       FontSize="12" Margin="0,0,0,6"/>
-                            <TextBlock Text="{Binding SelectedModel.WorshipNote}"
-                                       TextWrapping="Wrap" Foreground="{DynamicResource YellowBrush}"
-                                       FontSize="11" LineHeight="18"/>
+                        <!-- 버전 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <TextBlock Text="{DynamicResource ModelManager_Version}"
+                                       Foreground="{DynamicResource SubtextBrush}" FontSize="12"/>
+                            <TextBlock Text="{Binding SelectedModel.Version}"
+                                       Foreground="{DynamicResource SubtextBrush}" FontSize="12"/>
                         </StackPanel>
-                    </Border>
 
-                    <!-- 링크 버튼 -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                        <Button Content="{DynamicResource ModelManager_OpenSource}"
-                                Command="{Binding OpenSourceUrlCommand}"
-                                CommandParameter="{Binding SelectedModel.SourceUrl}"
-                                Style="{StaticResource DefaultButton}"
-                                Height="30" Margin="0,0,8,0"/>
-                        <Button Content="{DynamicResource ModelManager_OpenLicense}"
-                                Command="{Binding OpenLicenseUrlCommand}"
-                                CommandParameter="{Binding SelectedModel.LicenseUrl}"
-                                Style="{StaticResource DefaultButton}"
-                                Height="30"/>
-                    </StackPanel>
+                        <!-- 설명 -->
+                        <TextBlock Text="{Binding SelectedModel.Description}"
+                                   TextWrapping="Wrap" Foreground="{DynamicResource TextBrush}"
+                                   LineHeight="22" Margin="0,0,0,20"/>
 
-                    <!-- 설치 상태 표시: Style 트리거 대신 두 TextBlock + Visibility 전환 -->
-                    <Border CornerRadius="4" Padding="12,8">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Background" Value="{DynamicResource SuccessSurfaceBrush}"/>
-                                <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}"/>
-                                <Setter Property="BorderThickness" Value="1"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedModel.IsInstalled}" Value="False">
-                                        <Setter Property="Background" Value="{DynamicResource BgBrush}"/>
-                                        <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <StackPanel>
-                            <TextBlock Text="{DynamicResource ModelManager_Installed}"
-                                       FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource GreenBrush}"
-                                       Visibility="{Binding SelectedModel.IsInstalled,
-                                           Converter={StaticResource BoolToVis}}"/>
-                            <TextBlock Text="{DynamicResource ModelManager_NotInstalled}"
-                                       FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SubtextBrush}"
-                                       Visibility="{Binding SelectedModel.IsInstalled,
-                                           Converter={StaticResource InvBoolToVis}}"/>
+                        <!-- 스템 타입 / 엔진 / 라이선스 -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource ModelManager_StemType}"
+                                       Foreground="{DynamicResource Overlay0Brush}" FontSize="12"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{DynamicResource TextBrush}" FontSize="12"
+                                       Text="{Binding SelectedModel.StemType}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource ModelManager_Engine}"
+                                       Foreground="{DynamicResource Overlay0Brush}" FontSize="12" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource TextBrush}" FontSize="12"
+                                       Margin="0,4,0,0" Text="{Binding SelectedModel.Engine}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource ModelManager_License}"
+                                       Foreground="{DynamicResource Overlay0Brush}" FontSize="12" Margin="0,4,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Foreground="{DynamicResource GreenBrush}" FontSize="12"
+                                       FontWeight="SemiBold" Margin="0,4,0,0"
+                                       Text="{Binding SelectedModel.License}"/>
+                        </Grid>
+
+                        <!-- 예배 주의사항 -->
+                        <Border Background="{DynamicResource WarningSurfaceBrush}" BorderBrush="{DynamicResource YellowBrush}"
+                                BorderThickness="1" CornerRadius="4" Padding="12,8" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource ModelManager_Copyright}"
+                                           Foreground="{DynamicResource YellowBrush}" FontWeight="SemiBold"
+                                           FontSize="12" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding SelectedModel.WorshipNote}"
+                                           TextWrapping="Wrap" Foreground="{DynamicResource YellowBrush}"
+                                           FontSize="11" LineHeight="18"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 링크 버튼 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <Button Content="{DynamicResource ModelManager_OpenSource}"
+                                    Command="{Binding OpenSourceUrlCommand}"
+                                    CommandParameter="{Binding SelectedModel.SourceUrl}"
+                                    Style="{StaticResource DefaultButton}"
+                                    Height="30" Margin="0,0,8,0"/>
+                            <Button Content="{DynamicResource ModelManager_OpenLicense}"
+                                    Command="{Binding OpenLicenseUrlCommand}"
+                                    CommandParameter="{Binding SelectedModel.LicenseUrl}"
+                                    Style="{StaticResource DefaultButton}"
+                                    Height="30"/>
                         </StackPanel>
-                    </Border>
-                </StackPanel>
-            </ScrollViewer>
+
+                        <!-- 설치 상태 표시 -->
+                        <Border CornerRadius="4" Padding="12,8">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{DynamicResource SuccessSurfaceBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource GreenBrush}"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedModel.IsInstalled}" Value="False">
+                                            <Setter Property="Background" Value="{DynamicResource BgBrush}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource ModelManager_Installed}"
+                                           FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource GreenBrush}"
+                                           Visibility="{Binding SelectedModel.IsInstalled,
+                                               Converter={StaticResource BoolToVis}}"/>
+                                <TextBlock Text="{DynamicResource ModelManager_NotInstalled}"
+                                           FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SubtextBrush}"
+                                           Visibility="{Binding SelectedModel.IsInstalled,
+                                               Converter={StaticResource InvBoolToVis}}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+            </Grid>
         </Grid>
     </DockPanel>
 </Window>

@@ -79,6 +79,7 @@
     <sys:String x:Key="ModelManager_OpenLicense">라이선스 원문 보기</sys:String>
     <sys:String x:Key="ModelManager_Installed">✓ 설치됨 — MR 추출 기능 사용 가능</sys:String>
     <sys:String x:Key="ModelManager_NotInstalled">미설치 — 위의 'Demucs 설치' 버튼을 클릭하거나 pip install demucs 를 실행하세요.</sys:String>
+    <sys:String x:Key="ModelManager_InstallLog_Title">설치 출력 로그 — 완료 후 '새로고침' 버튼을 누르면 닫힙니다.</sys:String>
     <sys:String x:Key="Model_Installed">설치됨</sys:String>
     <sys:String x:Key="Model_NotInstalled">미설치</sys:String>
 

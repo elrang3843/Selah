@@ -79,6 +79,7 @@
     <sys:String x:Key="ModelManager_OpenLicense">View License</sys:String>
     <sys:String x:Key="ModelManager_Installed">✓ Installed — MR extraction available</sys:String>
     <sys:String x:Key="ModelManager_NotInstalled">Not installed — click 'Install Demucs' above or run pip install demucs.</sys:String>
+    <sys:String x:Key="ModelManager_InstallLog_Title">Installation output log — click Refresh when done to close this panel.</sys:String>
     <sys:String x:Key="Model_Installed">Installed</sys:String>
     <sys:String x:Key="Model_NotInstalled">Not installed</sys:String>
 
