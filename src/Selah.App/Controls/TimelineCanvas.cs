@@ -260,7 +260,6 @@ public class TimelineCanvas : FrameworkElement
     public event EventHandler<long>? PlayheadSeeked;
     public event EventHandler<(TrackViewModel? Track, ClipViewModel? Clip)>? ClipSelected;
     public event EventHandler? ClipMoved;
-    public event EventHandler<(TrackViewModel Track, ClipViewModel Clip)>? ClipDeleteRequested;
 
     // ── 렌더링 ──
 

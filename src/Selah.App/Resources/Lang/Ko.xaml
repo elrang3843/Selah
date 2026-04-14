@@ -32,7 +32,9 @@
     <sys:String x:Key="Menu_Help_Shortcuts">단축키 목록</sys:String>
     <sys:String x:Key="Menu_Help_Ethics">윤리적 사용 가이드라인...</sys:String>
     <sys:String x:Key="Menu_Help_About">셀라(Selah) 정보...</sys:String>
-    <sys:String x:Key="Menu_Language">언어</sys:String>
+    <sys:String x:Key="Menu_Language">언어 / 테마</sys:String>
+    <sys:String x:Key="Menu_Theme_Dark">다크 테마</sys:String>
+    <sys:String x:Key="Menu_Theme_Light">라이트 테마</sys:String>
 
     <!-- ── 환영 화면 ── -->
     <sys:String x:Key="Welcome_Title">셀라 (Selah)</sys:String>

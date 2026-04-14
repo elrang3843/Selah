@@ -219,6 +219,12 @@ public partial class MainWindow : Window
     private void MenuLang_Ko_Click(object s, RoutedEventArgs e) => Loc.SetLanguage("ko");
     private void MenuLang_En_Click(object s, RoutedEventArgs e) => Loc.SetLanguage("en");
 
+    private void MenuTheme_Click(object s, RoutedEventArgs e)
+    {
+        bool dark = (s as System.Windows.Controls.MenuItem)?.Tag as string == "dark";
+        Services.SystemThemeService.Apply(dark);
+    }
+
     // ── 키보드 ──
 
     private void MainWindow_KeyDown(object s, System.Windows.Input.KeyEventArgs e)

@@ -32,7 +32,9 @@
     <sys:String x:Key="Menu_Help_Shortcuts">Keyboard Shortcuts</sys:String>
     <sys:String x:Key="Menu_Help_Ethics">Ethical Use Guidelines...</sys:String>
     <sys:String x:Key="Menu_Help_About">About Selah...</sys:String>
-    <sys:String x:Key="Menu_Language">Language</sys:String>
+    <sys:String x:Key="Menu_Language">Language / Theme</sys:String>
+    <sys:String x:Key="Menu_Theme_Dark">Dark Theme</sys:String>
+    <sys:String x:Key="Menu_Theme_Light">Light Theme</sys:String>
 
     <!-- ── Welcome ── -->
     <sys:String x:Key="Welcome_Title">Selah</sys:String>

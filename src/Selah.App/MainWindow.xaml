@@ -73,6 +73,9 @@
             <MenuItem Header="{DynamicResource Menu_Language}">
                 <MenuItem Header="한국어" Click="MenuLang_Ko_Click"/>
                 <MenuItem Header="English" Click="MenuLang_En_Click"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource Menu_Theme_Dark}"  Click="MenuTheme_Click" Tag="dark"/>
+                <MenuItem Header="{DynamicResource Menu_Theme_Light}" Click="MenuTheme_Click" Tag="light"/>
             </MenuItem>
 
             <MenuItem Header="{DynamicResource Menu_Help}">

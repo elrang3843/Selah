@@ -12,7 +12,6 @@ public partial class TimelineView : UserControl
         InitializeComponent();
         Canvas.ClipSelected += Canvas_ClipSelected;
         Canvas.ClipMoved += Canvas_ClipMoved;
-        Canvas.ClipDeleteRequested += Canvas_ClipDeleteRequested;
     }
 
     private MainViewModel? ViewModel => DataContext as MainViewModel;
@@ -43,15 +42,6 @@ public partial class TimelineView : UserControl
     private void Canvas_ClipMoved(object? sender, EventArgs e)
     {
         ViewModel?.AudioEngine.RebuildMixers();
-    }
-
-    private void Canvas_ClipDeleteRequested(object? sender,
-        (Selah.App.ViewModels.TrackViewModel Track, Selah.App.ViewModels.ClipViewModel Clip) e)
-    {
-        if (ViewModel == null) return;
-        e.Track.RemoveClip(e.Clip);
-        ViewModel.SelectedClip = null;
-        ViewModel.AudioEngine.RebuildMixers();
     }
 
     private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
