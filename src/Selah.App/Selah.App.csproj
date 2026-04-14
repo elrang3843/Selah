@@ -17,4 +17,11 @@
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- demucs_runner.py를 빌드 출력의 scripts/ 폴더에 복사 -->
+    <Content Include="..\..\scripts\demucs_runner.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>scripts\demucs_runner.py</TargetPath>
+    </Content>
+  </ItemGroup>
 </Project>
