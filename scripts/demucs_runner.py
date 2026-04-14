@@ -43,14 +43,27 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
     """
     os.makedirs(output_dir, exist_ok=True)
 
-    # torchaudio 2.6+ routes torchaudio.save() through save_with_torchcodec()
-    # for WAV files regardless of TORCHAUDIO_BACKEND.  The only reliable fix
-    # is to monkey-patch torchaudio.save before demucs imports torchaudio.
-    # We achieve this by running demucs via `python -c <inline_code>` so the
-    # patch executes first; sys.argv[1:] after the -c argument is parsed by
-    # demucs's argparse exactly as with `python -m demucs`.
+    # torchaudio 2.6+ routes torchaudio.save() through save_with_torchcodec().
+    # torchaudio 2.11+ declares torchcodec as a hard dependency and may eagerly
+    # import it at module-load time, so `import torchaudio` itself crashes when
+    # the torchcodec DLL is broken (Python 3.14 / pythoncore incompatibility).
+    #
+    # Fix: run demucs via `python -c <inline_code>` so two patches fire before
+    # anything else is imported:
+    #   1. MetaPathFinder stub — intercepts every `import torchcodec*` and
+    #      returns an empty module, preventing the broken DLL from ever loading.
+    #   2. torchaudio.save monkey-patch — replaces the save function with a
+    #      soundfile-based implementation so the torchcodec code path is skipped
+    #      even for the actual write call.
     _PATCH = (
-        "import sys\n"
+        "import sys, importlib.abc, importlib.machinery\n"
+        "class _TC(importlib.abc.MetaPathFinder, importlib.abc.Loader):\n"
+        "    def find_spec(self, n, p, t=None):\n"
+        "        if n.startswith('torchcodec'):\n"
+        "            return importlib.machinery.ModuleSpec(n, self)\n"
+        "    def create_module(self, s): return None\n"
+        "    def exec_module(self, m): pass\n"
+        "sys.meta_path.insert(0, _TC())\n"
         "try:\n"
         "    import torchaudio as _ta, soundfile as _sf\n"
         "    def _save(uri, src, sr, channels_first=True,\n"
