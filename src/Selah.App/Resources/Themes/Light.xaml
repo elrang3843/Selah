@@ -36,4 +36,19 @@
     <SolidColorBrush x:Key="WarningSurfaceBrush"   Color="{StaticResource WarningSurfaceColor}"/>
     <SolidColorBrush x:Key="SuccessSurfaceBrush"   Color="{StaticResource SuccessSurfaceColor}"/>
 
+    <!-- WPF Aero2 내부 메뉴/서브메뉴 팝업 리소스 키 재정의 -->
+    <SolidColorBrush x:Key="Menu.Static.Background"                  Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="Menu.Static.Border"                      Color="{StaticResource Surface1Color}"/>
+    <SolidColorBrush x:Key="Menu.Static.Foreground"                  Color="{StaticResource TextColor}"/>
+    <SolidColorBrush x:Key="Menu.Static.Separator"                   Color="{StaticResource Surface1Color}"/>
+    <SolidColorBrush x:Key="Menu.Disabled.Foreground"                Color="{StaticResource Overlay0Color}"/>
+    <SolidColorBrush x:Key="MenuItem.SubMenu.Background"             Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="MenuItem.SubMenu.Border"                 Color="{StaticResource Surface1Color}"/>
+    <SolidColorBrush x:Key="MenuItem.Selected.Background"            Color="{StaticResource Surface2Color}"/>
+    <SolidColorBrush x:Key="MenuItem.Selected.Border"                Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="MenuItem.Highlight.Background"           Color="{StaticResource Surface2Color}"/>
+    <SolidColorBrush x:Key="MenuItem.Highlight.Border"               Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="MenuItem.Highlight.Disabled.Background"  Color="Transparent"/>
+    <SolidColorBrush x:Key="MenuItem.Highlight.Disabled.Border"      Color="{StaticResource Surface1Color}"/>
+
 </ResourceDictionary>

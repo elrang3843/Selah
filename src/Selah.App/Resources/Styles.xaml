@@ -15,19 +15,19 @@
             <Trigger Property="Role" Value="TopLevelItem">
                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             </Trigger>
-            <!-- 팝업(시스템 배경) → 시스템 기본 텍스트로 상속 차단 -->
+            <!-- 팝업 아이템 — DynamicResource 로 테마 전환 반영 -->
             <Trigger Property="Role" Value="SubmenuHeader">
-                <Setter Property="Foreground" Value="{x:Static SystemColors.MenuTextBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             </Trigger>
             <Trigger Property="Role" Value="SubmenuItem">
-                <Setter Property="Foreground" Value="{x:Static SystemColors.MenuTextBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             </Trigger>
             <MultiTrigger>
                 <MultiTrigger.Conditions>
                     <Condition Property="Role" Value="SubmenuItem"/>
                     <Condition Property="IsEnabled" Value="False"/>
                 </MultiTrigger.Conditions>
-                <Setter Property="Foreground" Value="{x:Static SystemColors.GrayTextBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Overlay0Brush}"/>
                 <Setter Property="Opacity" Value="0.5"/>
             </MultiTrigger>
             <MultiTrigger>
@@ -35,7 +35,7 @@
                     <Condition Property="Role" Value="SubmenuHeader"/>
                     <Condition Property="IsEnabled" Value="False"/>
                 </MultiTrigger.Conditions>
-                <Setter Property="Foreground" Value="{x:Static SystemColors.GrayTextBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Overlay0Brush}"/>
                 <Setter Property="Opacity" Value="0.5"/>
             </MultiTrigger>
         </Style.Triggers>
