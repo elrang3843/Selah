@@ -56,6 +56,11 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
 
     log_progress(5.0)
 
+    # torchaudio >= 2.6 changed its default save backend to torchcodec which
+    # requires a separate install. Force soundfile (bundled with demucs) instead.
+    env = os.environ.copy()
+    env["TORCHAUDIO_BACKEND"] = "soundfile"
+
     try:
         proc = subprocess.Popen(
             cmd,
@@ -63,6 +68,7 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
+            env=env,
         )
 
         last_lines: list[str] = []   # rolling buffer for error reporting
