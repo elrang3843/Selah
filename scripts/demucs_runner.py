@@ -96,11 +96,21 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
         return 1
 
     if exit_code != 0:
-        # Forward captured output to C# so the user can see the actual error
-        for log_line in last_lines:
-            stripped = log_line.strip()
-            if stripped:
-                print(f"LOG:{stripped}", flush=True)
+        # Check specifically for the torchcodec ImportError so C# can show
+        # a targeted install guide.  A mere mention of "torchcodec" in a log
+        # line is NOT sufficient — only "No module named" counts.
+        torchcodec_missing = any(
+            "no module named" in line.lower() and "torchcodec" in line.lower()
+            for line in last_lines
+        )
+        if torchcodec_missing:
+            print("LOG:TORCHCODEC_MISSING", flush=True)
+        else:
+            # Forward captured output to C# so the user can see the actual error
+            for log_line in last_lines:
+                stripped = log_line.strip()
+                if stripped:
+                    print(f"LOG:{stripped}", flush=True)
         return exit_code
 
     # Demucs는 output_dir/<model>/<track_name>/ 구조로 저장

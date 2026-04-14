@@ -71,9 +71,10 @@ public class StemSeparatorService
 
         if (exitCode != 0)
         {
+            // Only flag torchcodec missing when the Python script emits the specific
+            // TORCHCODEC_MISSING marker — not on any log line that merely mentions the word.
             bool torchcodecMissing =
-                errorDetail.Contains("TorchCodec", StringComparison.OrdinalIgnoreCase) ||
-                errorDetail.Contains("torchcodec", StringComparison.OrdinalIgnoreCase);
+                errorDetail.Contains("TORCHCODEC_MISSING", StringComparison.Ordinal);
 
             return new SeparationResult
             {
