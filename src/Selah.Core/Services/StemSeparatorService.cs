@@ -71,9 +71,14 @@ public class StemSeparatorService
 
         if (exitCode != 0)
         {
+            bool torchcodecMissing =
+                errorDetail.Contains("TorchCodec", StringComparison.OrdinalIgnoreCase) ||
+                errorDetail.Contains("torchcodec", StringComparison.OrdinalIgnoreCase);
+
             return new SeparationResult
             {
                 Success = false,
+                IsTorchCodecMissing = torchcodecMissing,
                 Error = string.IsNullOrWhiteSpace(errorDetail)
                     ? $"분리 엔진 종료 코드: {exitCode}"
                     : $"분리 엔진 오류 (코드 {exitCode}):\n\n{errorDetail}"
@@ -188,4 +193,6 @@ public class SeparationResult
     public Dictionary<string, string> OutputFiles { get; set; } = new();
     public string OutputDir { get; set; } = string.Empty;
     public string? Error { get; set; }
+    /// <summary>True when the failure is specifically a missing TorchCodec package.</summary>
+    public bool IsTorchCodecMissing { get; set; }
 }

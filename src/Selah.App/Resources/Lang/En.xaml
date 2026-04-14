@@ -130,6 +130,7 @@
     <sys:String x:Key="Status_Separate_NoSource">Source file not found.</sys:String>
     <sys:String x:Key="Status_Separate_NoPython">Python is not installed. Install from python.org.</sys:String>
     <sys:String x:Key="Status_Separate_NoModel">No separation model installed. Install from Model Manager.</sys:String>
+    <sys:String x:Key="Status_Separate_NeedTorchCodec">Stem separation requires the TorchCodec package.&#x0a;&#x0a;Run the following command in a Command Prompt:&#x0a;&#x0a;    pip install torchcodec&#x0a;&#x0a;Then try again.</sys:String>
     <sys:String x:Key="Stem_Vocals">Vocals</sys:String>
     <sys:String x:Key="Stem_NoVocals">Backing</sys:String>
     <sys:String x:Key="Stem_Drums">Drums</sys:String>
