@@ -42,8 +42,12 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <!-- 트랙 이름 + 색상 표시 -->
+                            <!-- 트랙 이름 + 색상 표시 + 선택 체크박스 -->
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                                <CheckBox IsChecked="{Binding IsSelected}"
+                                          VerticalAlignment="Center"
+                                          ToolTip="{DynamicResource Track_Tooltip_Select}"
+                                          Margin="0,0,5,0"/>
                                 <Rectangle Width="4" Height="16" Margin="0,0,6,0"
                                            RadiusX="2" RadiusY="2">
                                     <Rectangle.Fill>
@@ -55,7 +59,7 @@
                                 <TextBox Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
                                          Background="Transparent" BorderThickness="0"
                                          Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold"
-                                         FontSize="12" MaxWidth="130"/>
+                                         FontSize="12" MaxWidth="118"/>
                             </StackPanel>
 
                             <!-- 뮤트 / 솔로 버튼 -->

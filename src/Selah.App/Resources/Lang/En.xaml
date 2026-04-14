@@ -66,6 +66,7 @@
     <sys:String x:Key="Track_Vol">Vol</sys:String>
     <sys:String x:Key="Track_Tooltip_Mute">Mute</sys:String>
     <sys:String x:Key="Track_Tooltip_Solo">Solo</sys:String>
+    <sys:String x:Key="Track_Tooltip_Select">Select / deselect track</sys:String>
 
     <!-- ── Model Manager ── -->
     <sys:String x:Key="ModelManager_Title">Model Manager</sys:String>
