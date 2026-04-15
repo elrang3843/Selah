@@ -1,0 +1,111 @@
+<UserControl x:Class="Selah.App.Views.TransportBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Selah.App.ViewModels"
+             Height="52"
+             Background="{DynamicResource SurfaceBrush}">
+
+    <UserControl.Resources>
+        <Style TargetType="Button" BasedOn="{StaticResource DefaultButton}"/>
+    </UserControl.Resources>
+
+    <Grid Margin="8,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>  <!-- 이동 버튼 -->
+            <ColumnDefinition Width="Auto"/>  <!-- 재생/녹음 -->
+            <ColumnDefinition Width="Auto"/>  <!-- 시간 표시 -->
+            <ColumnDefinition Width="Auto"/>  <!-- BPM/박자 -->
+            <ColumnDefinition Width="*"/>     <!-- 여백 -->
+            <ColumnDefinition Width="Auto"/>  <!-- 메트로놈/스냅 -->
+            <ColumnDefinition Width="Auto"/>  <!-- 줌 -->
+        </Grid.ColumnDefinitions>
+
+        <!-- ① 이동 버튼 -->
+        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+            <Button Content="⏮" ToolTip="{DynamicResource Transport_Tooltip_ReturnToStart}"
+                    Command="{Binding ReturnToStartCommand}"
+                    Style="{StaticResource IconButton}" Width="36" Height="36"/>
+        </StackPanel>
+
+        <!-- ② 재생 / 정지 -->
+        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+            <Button x:Name="BtnPlay"
+                    ToolTip="{DynamicResource Transport_Tooltip_PlayStop}"
+                    Command="{Binding PlayCommand}"
+                    Width="44" Height="36"
+                    Style="{StaticResource AccentButton}">
+                <TextBlock Text="{Binding IsPlaying, Converter={StaticResource PlayPauseConverter}}"
+                           FontSize="16"/>
+            </Button>
+            <Button Content="⏹" ToolTip="{DynamicResource Transport_Tooltip_Stop}"
+                    Command="{Binding StopCommand}"
+                    Width="36" Height="36" Margin="4,0,0,0"
+                    Style="{StaticResource IconButton}"/>
+        </StackPanel>
+
+        <!-- ③ 시간 표시 -->
+        <Border Grid.Column="2" Background="{DynamicResource DeepBgBrush}" CornerRadius="4"
+                Padding="10,4" Margin="0,0,16,0" VerticalAlignment="Center">
+            <TextBlock Text="{Binding PlayheadTimeDisplay}"
+                       FontFamily="Consolas, Courier New"
+                       FontSize="18" FontWeight="SemiBold"
+                       Foreground="{DynamicResource GreenBrush}"
+                       VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- ④ BPM / 박자 -->
+        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+            <TextBlock Text="BPM" Foreground="{DynamicResource SubtextBrush}" FontSize="11"
+                       VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <TextBox x:Name="TxtBpm"
+                     Width="56" Height="28"
+                     Text="{Binding CurrentProject.Model.TempoMap.Bpm,
+                                    StringFormat='{}{0:F1}', FallbackValue='120.0'}"
+                     VerticalContentAlignment="Center"
+                     TextAlignment="Center"
+                     IsEnabled="{Binding HasProject}"/>
+            <TextBlock Text="{DynamicResource Transport_Beat}" Foreground="{DynamicResource SubtextBrush}" FontSize="11"
+                       VerticalAlignment="Center" Margin="8,0,4,0"/>
+            <TextBox Width="40" Height="28"
+                     Text="{Binding CurrentProject.Model.TempoMap.Numerator,
+                                    FallbackValue='4'}"
+                     VerticalContentAlignment="Center"
+                     TextAlignment="Center"
+                     IsEnabled="{Binding HasProject}"/>
+            <TextBlock Text="/" Foreground="{DynamicResource SubtextBrush}" VerticalAlignment="Center" Margin="2,0"/>
+            <TextBox Width="40" Height="28"
+                     Text="{Binding CurrentProject.Model.TempoMap.Denominator,
+                                    FallbackValue='4'}"
+                     VerticalContentAlignment="Center"
+                     TextAlignment="Center"
+                     IsEnabled="{Binding HasProject}"/>
+        </StackPanel>
+
+        <!-- ⑥ 메트로놈 / 스냅 -->
+        <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+            <ToggleButton Content="{DynamicResource Transport_Metronome}"
+                          ToolTip="{DynamicResource Transport_Tooltip_Metronome}"
+                          IsChecked="{Binding IsMetronomeOn, Mode=OneWay}"
+                          Command="{Binding ToggleMetronomeCommand}"
+                          Height="28" Margin="0,0,4,0"/>
+            <ToggleButton Content="{DynamicResource Transport_Snap}"
+                          ToolTip="{DynamicResource Transport_Tooltip_Snap}"
+                          IsChecked="{Binding Timeline.SnapEnabled, Mode=OneWay}"
+                          Command="{Binding ToggleSnapCommand}"
+                          Height="28"/>
+        </StackPanel>
+
+        <!-- ⑦ 줌 -->
+        <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
+            <Button Content="－" ToolTip="{DynamicResource Transport_Tooltip_ZoomOut}"
+                    Click="BtnZoomOut_Click"
+                    Style="{StaticResource IconButton}" Width="28" Height="28"/>
+            <TextBlock Text="{Binding Timeline.PixelsPerSecond, StringFormat='{}{0:F0}px/s'}"
+                       Foreground="{DynamicResource SubtextBrush}" FontSize="11" VerticalAlignment="Center"
+                       Margin="4,0" Width="60" TextAlignment="Center"/>
+            <Button Content="＋" ToolTip="{DynamicResource Transport_Tooltip_ZoomIn}"
+                    Click="BtnZoomIn_Click"
+                    Style="{StaticResource IconButton}" Width="28" Height="28"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

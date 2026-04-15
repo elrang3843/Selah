@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+"""
+demucs_runner.py  —  셀라(Selah) MR 추출 스크립트
+
+Demucs CLI를 래핑하여 C# 애플리케이션에서 호출합니다.
+진행률은 stdout에 "PROGRESS:<0~100>" 형식으로 출력됩니다.
+
+사용법:
+    python demucs_runner.py \
+        --input  <입력 WAV 파일 경로> \
+        --output <출력 폴더 경로> \
+        --model  <모델 ID: htdemucs | htdemucs_ft | mdx_extra> \
+        --stems  <2 | 4>
+
+출력:
+    --stems 2 : vocals.wav, no_vocals.wav
+    --stems 4 : vocals.wav, drums.wav, bass.wav, other.wav
+
+라이선스:
+    이 스크립트 자체는 GPLv3 (셀라 프로젝트 전체 라이선스 준수).
+    Demucs 모델은 Meta AI / MIT License.
+    처리 대상 음원의 저작권은 사용자가 별도로 확인해야 합니다.
+"""
+
+import argparse
+import os
+import sys
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+
+
+def log_progress(value: float) -> None:
+    """C# 호출자에게 진행률 전송 (0.0 ~ 100.0)."""
+    print(f"PROGRESS:{value:.1f}", flush=True)
+
+
+def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
+    """
+    demucs CLI를 실행합니다.
+    두 가지 stem(2-stem)이면 --two-stems vocals 옵션을 사용합니다.
+    """
+    os.makedirs(output_dir, exist_ok=True)
+
+    # torchaudio 2.6+ routes torchaudio.save() through save_with_torchcodec().
+    # torchaudio 2.11+ declares torchcodec as a hard dependency and may eagerly
+    # import it at module-load time, so `import torchaudio` itself crashes when
+    # the torchcodec DLL is broken (Python 3.14 / pythoncore incompatibility).
+    #
+    # Fix: run demucs via `python -c <inline_code>` so two patches fire before
+    # anything else is imported:
+    #   1. MetaPathFinder stub — intercepts every `import torchcodec*` and
+    #      returns an empty module, preventing the broken DLL from ever loading.
+    #   2. torchaudio.save monkey-patch — replaces the save function with a
+    #      soundfile-based implementation so the torchcodec code path is skipped
+    #      even for the actual write call.
+    _PATCH = (
+        "import sys, importlib.abc, importlib.machinery\n"
+        "class _TC(importlib.abc.MetaPathFinder, importlib.abc.Loader):\n"
+        "    def find_spec(self, n, p, t=None):\n"
+        "        if n.startswith('torchcodec'):\n"
+        "            return importlib.machinery.ModuleSpec(n, self)\n"
+        "    def create_module(self, s): return None\n"
+        "    def exec_module(self, m): pass\n"
+        "sys.meta_path.insert(0, _TC())\n"
+        "try:\n"
+        "    import torchaudio as _ta, soundfile as _sf\n"
+        "    def _save(uri, src, sr, channels_first=True,\n"
+        "              bits_per_sample=None, encoding=None, **kw):\n"
+        "        w = src.numpy()\n"
+        "        if channels_first and w.ndim == 2: w = w.T\n"
+        "        sub = ('PCM_24' if bits_per_sample == 24\n"
+        "               else 'FLOAT' if bits_per_sample == 32\n"
+        "               else 'PCM_16')\n"
+        "        _sf.write(str(uri), w, sr, subtype=sub)\n"
+        "    _ta.save = _save\n"
+        "except Exception:\n"
+        "    pass\n"
+        "from demucs.__main__ import main; sys.exit(main())\n"
+    )
+
+    cmd = [
+        sys.executable, "-c", _PATCH,
+        "--name", model,
+        "--out", output_dir,
+        input_path,
+    ]
+
+    if stems == 2:
+        cmd += ["--two-stems", "vocals"]
+
+    log_progress(5.0)
+
+    env = os.environ.copy()
+
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            env=env,
+        )
+
+        last_lines: list[str] = []   # rolling buffer for error reporting
+
+        for line in proc.stdout:  # type: ignore[union-attr]
+            line = line.rstrip()
+            last_lines.append(line)
+            if len(last_lines) > 25:
+                last_lines.pop(0)
+
+            # Demucs 출력에서 진행률 파싱 (예: "  0%|          |")
+            if "%" in line:
+                try:
+                    pct_str = line.split("%")[0].split()[-1]
+                    pct = float(pct_str)
+                    log_progress(5.0 + pct * 0.9)  # 5~95% 구간 매핑
+                except (ValueError, IndexError):
+                    pass
+
+        proc.wait()
+        exit_code = proc.returncode
+
+    except FileNotFoundError:
+        print("LOG:demucs 명령을 찾을 수 없습니다. pip install demucs 를 실행하세요.", flush=True)
+        return 1
+
+    if exit_code != 0:
+        # Detect torchcodec-not-available in two forms:
+        #   1. "No module named 'torchcodec'"  — package missing
+        #   2. "TorchCodec is required for save_with_torchcodec" — torchaudio 2.6+
+        #      calls torchcodec explicitly for WAV save regardless of TORCHAUDIO_BACKEND
+        torchcodec_missing = any(
+            ("no module named" in line.lower() and "torchcodec" in line.lower()) or
+            "torchcodec is required" in line.lower() or
+            "please install torchcodec" in line.lower()
+            for line in last_lines
+        )
+        # Detect a broken torchcodec install: DLL present but fails to load.
+        torchcodec_broken = not torchcodec_missing and any(
+            "libtorchcodec" in line.lower() or
+            ("could not" in line.lower() and "torchcodec" in line.lower())
+            for line in last_lines
+        )
+        if torchcodec_missing:
+            print("LOG:TORCHCODEC_MISSING", flush=True)
+        elif torchcodec_broken:
+            print("LOG:TORCHCODEC_BROKEN", flush=True)
+        else:
+            # Forward captured output to C# so the user can see the actual error
+            for log_line in last_lines:
+                stripped = log_line.strip()
+                if stripped:
+                    print(f"LOG:{stripped}", flush=True)
+        return exit_code
+
+    # Demucs는 output_dir/<model>/<track_name>/ 구조로 저장
+    # 셀라가 기대하는 output_dir/vocals.wav, output_dir/no_vocals.wav 로 이동
+    input_name = Path(input_path).stem
+    demucs_out = Path(output_dir) / model / input_name
+
+    if not demucs_out.exists():
+        # htdemucs_ft 는 폴더 이름이 다를 수 있음 — 첫 번째 매칭 폴더 사용
+        parent = Path(output_dir) / model
+        if parent.exists():
+            candidates = list(parent.iterdir())
+            if candidates:
+                demucs_out = candidates[0]
+
+    if not demucs_out.exists():
+        print(f"[Selah] 출력 폴더를 찾을 수 없습니다: {demucs_out}", file=sys.stderr)
+        return 2
+
+    log_progress(97.0)
+
+    stem_map = {
+        "vocals.wav": "vocals.wav",
+        "no_vocals.wav": "no_vocals.wav",   # 2-stem
+        "bass.wav": "bass.wav",
+        "drums.wav": "drums.wav",
+        "other.wav": "other.wav",
+    }
+
+    moved = 0
+    for src_name, dst_name in stem_map.items():
+        src = demucs_out / src_name
+        if src.exists():
+            dst = Path(output_dir) / dst_name
+            shutil.move(str(src), str(dst))
+            print(f"[Selah] 저장됨: {dst}", file=sys.stderr)
+            # Notify C# that this stem WAV is ready for immediate clip creation.
+            # Format: STEM:<key>=<absolute-path>  (written to stdout)
+            stem_key = src_name.replace(".wav", "")
+            print(f"STEM:{stem_key}={dst}", flush=True)
+            moved += 1
+
+    if moved == 0:
+        print(f"[Selah] 경고: 출력 stem 파일을 찾을 수 없습니다.", file=sys.stderr)
+        return 3
+
+    log_progress(100.0)
+    print(f"[Selah] 완료. {moved}개 스템 저장됨.", file=sys.stderr)
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="셀라(Selah) Demucs MR 추출 스크립트"
+    )
+    parser.add_argument("--input",  required=True, help="입력 WAV 파일 경로")
+    parser.add_argument("--output", required=True, help="출력 폴더 경로")
+    parser.add_argument("--model",  default="htdemucs",
+                        choices=["htdemucs", "htdemucs_ft", "mdx_extra"],
+                        help="사용할 Demucs 모델")
+    parser.add_argument("--stems",  type=int, default=4, choices=[2, 4],
+                        help="분리할 스템 수 (2=보컬/반주, 4=드럼/베이스/기타/보컬)")
+    args = parser.parse_args()
+
+    if not os.path.isfile(args.input):
+        print(f"[Selah] 오류: 입력 파일이 없습니다: {args.input}", file=sys.stderr)
+        return 1
+
+    return run_demucs(args.input, args.output, args.model, args.stems)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
