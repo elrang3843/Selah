@@ -150,19 +150,47 @@ public class ModelManagerService
         catch { return false; }
     }
 
+    // ── Python 탐지 ───────────────────────────────────────────────
+
+    /// <summary>
+    /// 시스템 PATH 및 Windows py.exe 런처에서 Python 실행 파일을 찾습니다.
+    /// </summary>
+    internal static string? FindPython()
+    {
+        var pathVar = Environment.GetEnvironmentVariable("PATH") ?? "";
+        foreach (var dir in pathVar.Split(Path.PathSeparator))
+        {
+            foreach (var name in new[] { "python", "python3", "python.exe", "python3.exe" })
+            {
+                var full = Path.Combine(dir, name);
+                if (File.Exists(full)) return full;
+            }
+        }
+        // Windows py.exe 런처
+        var py = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows), "py.exe");
+        return File.Exists(py) ? py : null;
+    }
+
     // ── pip 런타임 설치 ───────────────────────────────────────────
 
     /// <summary>
-    /// ONNX Runtime 및 의존 패키지를 pip으로 설치합니다.
+    /// ONNX Runtime 및 의존 패키지를 "python -m pip"으로 설치합니다.
+    /// (pip 단독 실행 파일 대신 python -m pip 사용 → Windows PATH 문제 우회)
     /// </summary>
     public async Task InstallRuntimeAsync(
         IProgress<string>? progress = null,
         CancellationToken ct = default)
     {
+        var python = FindPython()
+            ?? throw new InvalidOperationException(
+                "Python을 찾을 수 없습니다.\n" +
+                "python.org에서 Python 3.10 이상을 설치하고 PATH에 추가하세요.");
+
         var packages = "onnxruntime numpy scipy";
         progress?.Report($"pip install {packages}");
 
-        var psi = new ProcessStartInfo("pip", $"install {packages}")
+        var psi = new ProcessStartInfo(python, $"-m pip install {packages}")
         {
             RedirectStandardOutput = true,
             RedirectStandardError  = true,

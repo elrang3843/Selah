@@ -21,22 +21,8 @@ public class StemSeparatorService
         DetectPython();
     }
 
-    private void DetectPython()
-    {
-        var pathVar = Environment.GetEnvironmentVariable("PATH") ?? "";
-        foreach (var dir in pathVar.Split(Path.PathSeparator))
-        {
-            foreach (var name in new[] { "python", "python3", "python.exe", "python3.exe" })
-            {
-                var full = Path.Combine(dir, name);
-                if (File.Exists(full)) { _pythonPath = full; return; }
-            }
-        }
-        // Windows py launcher
-        var py = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Windows), "py.exe");
-        if (File.Exists(py)) _pythonPath = py;
-    }
+    private void DetectPython() =>
+        _pythonPath = ModelManagerService.FindPython();
 
     public async Task<SeparationResult> SeparateAsync(
         string inputWavPath,
