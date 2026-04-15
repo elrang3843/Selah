@@ -154,19 +154,30 @@ public class ModelManagerService
 
     /// <summary>
     /// 시스템 PATH 및 Windows py.exe 런처에서 Python 실행 파일을 찾습니다.
+    /// Windows Store App Execution Alias(%LOCALAPPDATA%\Microsoft\WindowsApps\)는
+    /// CreateNoWindow=true 환경에서 9009로 종료되므로 건너뜁니다.
     /// </summary>
     internal static string? FindPython()
     {
+        // Windows Store 스텁 디렉터리 — CreateNoWindow 환경에서 9009 반환
+        var windowsAppsDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Microsoft", "WindowsApps");
+
         var pathVar = Environment.GetEnvironmentVariable("PATH") ?? "";
         foreach (var dir in pathVar.Split(Path.PathSeparator))
         {
+            // Windows Store App Execution Alias 건너뛰기
+            if (dir.StartsWith(windowsAppsDir, StringComparison.OrdinalIgnoreCase))
+                continue;
+
             foreach (var name in new[] { "python", "python3", "python.exe", "python3.exe" })
             {
                 var full = Path.Combine(dir, name);
                 if (File.Exists(full)) return full;
             }
         }
-        // Windows py.exe 런처
+        // Windows py.exe 런처 (python.org 설치 시 C:\Windows\py.exe)
         var py = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Windows), "py.exe");
         return File.Exists(py) ? py : null;
