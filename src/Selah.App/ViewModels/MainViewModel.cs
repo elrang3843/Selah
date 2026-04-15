@@ -583,7 +583,11 @@ public class MainViewModel : ViewModelBase, IDisposable
 
             if (!result.Success && addedStems.Count == 0)
             {
-                if (result.IsTorchCodecMissing)
+                if (result.IsOnnxRuntimeMissing)
+                    ErrorOccurred?.Invoke(Loc.Get("Status_Separate_OnnxRuntimeMissing"));
+                else if (result.IsOnnxModelMissing)
+                    ErrorOccurred?.Invoke(Loc.Get("Status_Separate_OnnxModelMissing"));
+                else if (result.IsTorchCodecMissing)
                     ErrorOccurred?.Invoke(Loc.Get("Status_Separate_NeedTorchCodec"));
                 else if (result.IsTorchCodecBroken)
                     ErrorOccurred?.Invoke(Loc.Get("Status_Separate_TorchCodecBroken"));

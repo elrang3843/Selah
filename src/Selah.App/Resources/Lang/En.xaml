@@ -71,8 +71,8 @@
     <!-- ── Model Manager ── -->
     <sys:String x:Key="ModelManager_Title">Model Manager</sys:String>
     <sys:String x:Key="ModelManager_Refresh">Refresh</sys:String>
-    <sys:String x:Key="ModelManager_InstallDemucs">Install Demucs (pip)</sys:String>
-    <sys:String x:Key="ModelManager_PipHint">Python + pip must be installed. Installation may take several minutes.</sys:String>
+    <sys:String x:Key="ModelManager_InstallDemucs">Install Model / Download</sys:String>
+    <sys:String x:Key="ModelManager_PipHint">Requires Python + pip. Installs ONNX Runtime then downloads model file (~300 MB).</sys:String>
     <sys:String x:Key="ModelManager_Version">Version: </sys:String>
     <sys:String x:Key="ModelManager_StemType">Stem Type</sys:String>
     <sys:String x:Key="ModelManager_Engine">Engine</sys:String>
@@ -81,7 +81,7 @@
     <sys:String x:Key="ModelManager_OpenSource">Open Source/GitHub</sys:String>
     <sys:String x:Key="ModelManager_OpenLicense">View License</sys:String>
     <sys:String x:Key="ModelManager_Installed">✓ Installed — MR extraction available</sys:String>
-    <sys:String x:Key="ModelManager_NotInstalled">Not installed — click 'Install Demucs' above or run pip install demucs.</sys:String>
+    <sys:String x:Key="ModelManager_NotInstalled">Not installed — click 'Install Model / Download' above.</sys:String>
     <sys:String x:Key="ModelManager_InstallLog_Title">Installation output log — click Refresh when done to close this panel.</sys:String>
     <sys:String x:Key="Model_Installed">Installed</sys:String>
     <sys:String x:Key="Model_NotInstalled">Not installed</sys:String>
@@ -133,13 +133,16 @@
     <sys:String x:Key="Status_Separate_NoModel">No separation model installed. Install from Model Manager.</sys:String>
     <sys:String x:Key="Status_Separate_NeedTorchCodec">Stem separation requires TorchCodec (torchaudio 2.6+).&#x0a;&#x0a;Run one of the following in a Command Prompt:&#x0a;&#x0a;① Install TorchCodec:&#x0a;    pip install torchcodec&#x0a;&#x0a;② Or downgrade torchaudio:&#x0a;    pip install "torchaudio&lt;2.6" --force-reinstall</sys:String>
     <sys:String x:Key="Status_Separate_TorchCodecBroken">TorchCodec is installed but its DLL could not be loaded.&#x0a;&#x0a;Remove it with the following command, then try again:&#x0a;&#x0a;    pip uninstall torchcodec</sys:String>
+    <sys:String x:Key="Status_Separate_OnnxRuntimeMissing">Stem separation requires ONNX Runtime.&#x0a;&#x0a;Run the following command in a Command Prompt:&#x0a;&#x0a;    pip install onnxruntime numpy scipy&#x0a;&#x0a;Or click 'Install Model / Download' in Tools &gt; Model Manager.</sys:String>
+    <sys:String x:Key="Status_Separate_OnnxModelMissing">ONNX model file not found.&#x0a;Download the model from Tools &gt; Model Manager.</sys:String>
     <sys:String x:Key="Stem_Vocals">Vocals</sys:String>
     <sys:String x:Key="Stem_NoVocals">Backing</sys:String>
     <sys:String x:Key="Stem_Drums">Drums</sys:String>
     <sys:String x:Key="Stem_Bass">Bass</sys:String>
     <sys:String x:Key="Stem_Other">Other</sys:String>
-    <sys:String x:Key="Status_DemucsInstalling">Preparing Demucs installation...</sys:String>
-    <sys:String x:Key="Status_DemucsInstalled">Demucs installed! MR extraction is now available.</sys:String>
+    <sys:String x:Key="Status_DemucsInstalling">Preparing model installation...</sys:String>
+    <sys:String x:Key="Status_DemucsInstalled">Model installed! MR extraction is now available.</sys:String>
+    <sys:String x:Key="Status_ModelSetupComplete">Model setup complete! MR extraction is now available.</sys:String>
     <sys:String x:Key="Status_ModelRefreshed">Model list refreshed</sys:String>
     <sys:String x:Key="Status_ModelManager">Model Manager</sys:String>
     <sys:String x:Key="Status_InstallFailed">Install failed: {0}</sys:String>
@@ -179,7 +182,7 @@
     <!-- ── Startup dependency guide ── -->
     <sys:String x:Key="Startup_Setup_Title">Selah Setup Guide</sys:String>
     <sys:String x:Key="Startup_Setup_Intro">The following tools are not installed. Some features are unavailable.</sys:String>
-    <sys:String x:Key="Startup_Python_Guide">❌  Python not installed → Stem separation (MR extraction) unavailable&#x0a;   1. Install Python 3.10 or later from https://www.python.org/downloads/&#x0a;      (Make sure to check "Add Python to PATH" during installation.)&#x0a;   2. Restart Selah.&#x0a;   3. Click 'Install Demucs' in Tools &gt; Model Manager.</sys:String>
+    <sys:String x:Key="Startup_Python_Guide">❌  Python not installed → Stem separation (MR extraction) unavailable&#x0a;   1. Install Python 3.10 or later from https://www.python.org/downloads/&#x0a;      (Make sure to check "Add Python to PATH" during installation.)&#x0a;   2. Restart Selah.&#x0a;   3. Click 'Install Model / Download' in Tools &gt; Model Manager.</sys:String>
     <sys:String x:Key="Startup_FFmpeg_Guide">⚠️  FFmpeg not installed → MP3, MP4 and other non-WAV import unavailable&#x0a;   See Tools &gt; FFmpeg Install Guide for instructions.</sys:String>
     <sys:String x:Key="Startup_Setup_Footer">This notice will not appear again once the required tools are installed.&#x0a;You can still edit WAV files without installing anything.</sys:String>
 

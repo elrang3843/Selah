@@ -13,6 +13,8 @@ public class ModelManagerViewModel : ViewModelBase
     private bool _isBusy;
     private string _installLog = string.Empty;
     private bool _showInstallLog;
+    private double _downloadProgress;   // 0~100, -1 = 숨김
+    private bool _showDownloadProgress;
 
     public ModelManagerViewModel(ModelManagerService service)
     {
@@ -20,9 +22,9 @@ public class ModelManagerViewModel : ViewModelBase
         _service = service;
         Models = new ObservableCollection<ModelInfo>(service.GetCatalog());
 
-        InstallDemucsCommand = new AsyncRelayCommand(InstallDemucsAsync, () => !IsBusy);
-        RefreshCommand = new RelayCommand(Refresh, () => !IsBusy);
-        OpenSourceUrlCommand = new RelayCommand<string>(OpenUrl);
+        InstallDemucsCommand = new AsyncRelayCommand(InstallSelectedAsync, () => !IsBusy);
+        RefreshCommand       = new RelayCommand(Refresh, () => !IsBusy);
+        OpenSourceUrlCommand  = new RelayCommand<string>(OpenUrl);
         OpenLicenseUrlCommand = new RelayCommand<string>(OpenUrl);
     }
 
@@ -48,18 +50,29 @@ public class ModelManagerViewModel : ViewModelBase
 
     public bool AnyModelInstalled => Models.Any(m => m.IsInstalled);
 
-    /// <summary>pip 설치 출력 로그 (설치 중/후 오른쪽 패널에 표시)</summary>
     public string InstallLog
     {
         get => _installLog;
         private set => SetField(ref _installLog, value);
     }
 
-    /// <summary>설치 로그 패널 표시 여부 (Refresh 시 false로 초기화)</summary>
     public bool ShowInstallLog
     {
         get => _showInstallLog;
         private set => SetField(ref _showInstallLog, value);
+    }
+
+    /// <summary>다운로드 진행률 (0~100). ShowDownloadProgress が true のとき表示。</summary>
+    public double DownloadProgress
+    {
+        get => _downloadProgress;
+        private set => SetField(ref _downloadProgress, value);
+    }
+
+    public bool ShowDownloadProgress
+    {
+        get => _showDownloadProgress;
+        private set => SetField(ref _showDownloadProgress, value);
     }
 
     public ICommand InstallDemucsCommand { get; }
@@ -75,44 +88,74 @@ public class ModelManagerViewModel : ViewModelBase
             Models.Add(m);
         OnPropertyChanged(nameof(AnyModelInstalled));
         StatusMessage = Loc.Get("Status_ModelRefreshed");
-        // 새로고침 시 로그 패널 닫기
-        ShowInstallLog = false;
-        InstallLog = string.Empty;
+        ShowInstallLog      = false;
+        ShowDownloadProgress = false;
+        InstallLog          = string.Empty;
     }
 
-    private async Task InstallDemucsAsync()
+    private async Task InstallSelectedAsync()
     {
-        IsBusy = true;
-        InstallLog = string.Empty;
-        ShowInstallLog = true;
+        // 모델이 선택되지 않았으면 첫 번째 ONNX 모델 사용
+        var target = SelectedModel
+            ?? Models.FirstOrDefault(m => m.Engine == ModelEngine.OnnxRuntime);
+
+        if (target == null)
+        {
+            StatusMessage = "설치할 모델이 없습니다.";
+            return;
+        }
+
+        IsBusy              = true;
+        InstallLog          = string.Empty;
+        ShowInstallLog      = true;
+        ShowDownloadProgress = false;
+        DownloadProgress    = 0;
 
         void AppendLog(string line)
         {
-            InstallLog += line + "\n";
-            StatusMessage = line;
+            // BYTES:<received>/<total> 형식 → 진행률 바 업데이트
+            if (line.StartsWith("BYTES:", StringComparison.Ordinal))
+            {
+                var parts = line[6..].Split('/');
+                if (parts.Length == 2 &&
+                    long.TryParse(parts[0].Split(' ')[0], out long recv) &&
+                    long.TryParse(parts[1].Split(' ')[0], out long total) &&
+                    total > 0)
+                {
+                    ShowDownloadProgress = true;
+                    DownloadProgress     = recv * 100.0 / total;
+                    StatusMessage        = line;
+                    return;
+                }
+            }
+            InstallLog    += line + "\n";
+            StatusMessage  = line;
         }
 
-        AppendLog("▶ pip install demucs");
+        AppendLog($"▶ {target.Name} 설치 시작");
         AppendLog(string.Empty);
 
         try
         {
-            await _service.InstallDemucsAsync(
-                new Progress<string>(AppendLog));
+            await _service.SetupModelAsync(target, new Progress<string>(AppendLog));
 
             AppendLog(string.Empty);
-            AppendLog("✓ " + Loc.Get("Status_DemucsInstalled"));
-            StatusMessage = Loc.Get("Status_DemucsInstalled");
+            AppendLog("✓ " + Loc.Get("Status_ModelSetupComplete"));
+            StatusMessage = Loc.Get("Status_ModelSetupComplete");
 
-            // 설치 완료 후 모델 목록 갱신 (로그 패널은 유지)
             _service.RefreshInstallStatus();
-            var updatedCatalog = _service.GetCatalog();
-            for (int i = 0; i < Models.Count && i < updatedCatalog.Count; i++)
+            var updated = _service.GetCatalog();
+            for (int i = 0; i < Models.Count && i < updated.Count; i++)
             {
-                Models[i].IsInstalled = updatedCatalog[i].IsInstalled;
-                Models[i].LocalPath  = updatedCatalog[i].LocalPath;
+                Models[i].IsInstalled = updated[i].IsInstalled;
+                Models[i].LocalPath   = updated[i].LocalPath;
             }
             OnPropertyChanged(nameof(AnyModelInstalled));
+        }
+        catch (OperationCanceledException)
+        {
+            AppendLog("✗ 설치가 취소되었습니다.");
+            StatusMessage = "설치 취소됨";
         }
         catch (Exception ex)
         {
@@ -122,7 +165,8 @@ public class ModelManagerViewModel : ViewModelBase
         }
         finally
         {
-            IsBusy = false;
+            IsBusy               = false;
+            ShowDownloadProgress = false;
         }
     }
 
@@ -133,7 +177,7 @@ public class ModelManagerViewModel : ViewModelBase
         {
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
-                FileName = url,
+                FileName        = url,
                 UseShellExecute = true
             });
         }
@@ -149,13 +193,13 @@ public class RelayCommand<T> : System.Windows.Input.ICommand
 
     public RelayCommand(Action<T?> execute, Func<T?, bool>? canExecute = null)
     {
-        _execute = execute;
+        _execute    = execute;
         _canExecute = canExecute;
     }
 
     public event EventHandler? CanExecuteChanged
     {
-        add => System.Windows.Input.CommandManager.RequerySuggested += value;
+        add    => System.Windows.Input.CommandManager.RequerySuggested += value;
         remove => System.Windows.Input.CommandManager.RequerySuggested -= value;
     }
 

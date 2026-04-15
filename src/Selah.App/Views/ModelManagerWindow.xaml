@@ -33,11 +33,17 @@
                         Margin="0,0,8,0"/>
                 <Button Content="{DynamicResource ModelManager_InstallDemucs}"
                         Command="{Binding InstallDemucsCommand}"
-                        Style="{StaticResource AccentButton}" Width="160" Height="30"
+                        Style="{StaticResource AccentButton}" Width="180" Height="30"
                         IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
                         Margin="0,0,16,0"/>
-                <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource Overlay0Brush}" FontSize="11"
-                           Text="{DynamicResource ModelManager_PipHint}"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Foreground="{DynamicResource Overlay0Brush}" FontSize="11"
+                               Text="{DynamicResource ModelManager_PipHint}"/>
+                    <ProgressBar Width="200" Height="6" Margin="0,4,0,0"
+                                 Value="{Binding DownloadProgress}"
+                                 Visibility="{Binding ShowDownloadProgress,
+                                     Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
             </StackPanel>
         </Border>
 
