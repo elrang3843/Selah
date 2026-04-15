@@ -21,43 +21,42 @@ public partial class MainWindow : Window
         _vm.ImportAudioRequested += OnImportAudioRequested;
         _vm.ExportPathRequested += OnExportPathRequested;
         _vm.ErrorOccurred += OnErrorOccurred;
+        _vm.SetupGuideRequested += OpenSetupGuide;
 
         KeyDown += MainWindow_KeyDown;
         Closing += MainWindow_Closing;
         Loaded += MainWindow_Loaded;
     }
 
-    // ── 시작 시 의존성 확인 ──
+    // ── 시작 시 첫 실행 확인 ──
+
+    private static readonly string _setupFlagFile = System.IO.Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "Selah", "setup_guide_shown");
 
     private void MainWindow_Loaded(object s, RoutedEventArgs e)
     {
-        bool pythonMissing = !_vm.StemSeparator.IsPythonAvailable;
-        bool ffmpegMissing = !_vm.IsFFmpegAvailable;
-
-        if (!pythonMissing && !ffmpegMissing) return;
-
-        var lines = new System.Text.StringBuilder();
-        lines.AppendLine(Loc.Get("Startup_Setup_Intro"));
-        lines.AppendLine();
-
-        if (pythonMissing)
+        if (!System.IO.File.Exists(_setupFlagFile))
         {
-            lines.AppendLine(Loc.Get("Startup_Python_Guide"));
-            lines.AppendLine();
+            // 첫 실행 — 설치 안내 페이지를 브라우저로 엽니다
+            try { System.IO.File.WriteAllText(_setupFlagFile, "1"); }
+            catch { /* 무시 */ }
+            OpenSetupGuide();
         }
-        if (ffmpegMissing)
+    }
+
+    // ── 설치 안내 페이지 열기 ──
+
+    private static void OpenSetupGuide()
+    {
+        var html = System.IO.Path.Combine(AppContext.BaseDirectory, "tools_setup.html");
+        if (!System.IO.File.Exists(html)) return;
+        try
         {
-            lines.AppendLine(Loc.Get("Startup_FFmpeg_Guide"));
-            lines.AppendLine();
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo(html) { UseShellExecute = true });
         }
-
-        lines.Append(Loc.Get("Startup_Setup_Footer"));
-
-        MessageBox.Show(
-            lines.ToString(),
-            Loc.Get("Startup_Setup_Title"),
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
+        catch { /* 무시 */ }
     }
 
     // ── 다이얼로그 핸들러 ──
@@ -172,14 +171,7 @@ public partial class MainWindow : Window
             MessageBoxImage.Information);
     }
 
-    private void MenuFFmpegGuide_Click(object s, RoutedEventArgs e)
-    {
-        MessageBox.Show(
-            Loc.Get("Dialog_FFmpegGuide_Message"),
-            Loc.Get("Dialog_FFmpegGuide_Title"),
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
-    }
+    private void MenuFFmpegGuide_Click(object s, RoutedEventArgs e) => OpenSetupGuide();
 
     private void MenuShortcuts_Click(object s, RoutedEventArgs e)
     {

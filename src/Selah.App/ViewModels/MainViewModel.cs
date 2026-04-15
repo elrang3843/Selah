@@ -33,6 +33,8 @@ public class MainViewModel : ViewModelBase, IDisposable
     public event Func<Task<string[]?>>? ImportAudioRequested;
     public event Func<Task<string?>>? ExportPathRequested;
     public event Action<string>? ErrorOccurred;
+    /// <summary>도구 미설치 오류 발생 시 설치 안내 페이지 열기를 요청합니다.</summary>
+    public event Action? SetupGuideRequested;
 
     public MainViewModel()
     {
@@ -492,11 +494,20 @@ public class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
+        // Python 가용성 확인
+        if (!StemSeparator.IsPythonAvailable)
+        {
+            StatusMessage = Loc.Get("Status_Separate_NoPython");
+            SetupGuideRequested?.Invoke();
+            return;
+        }
+
         // 설치된 모델 탐색 (첫 번째 설치된 모델 사용)
         var model = ModelManagerService.GetCatalog().FirstOrDefault(m => m.IsInstalled);
         if (model == null)
         {
-            ErrorOccurred?.Invoke(Loc.Get("Status_Separate_NoModel"));
+            StatusMessage = Loc.Get("Status_Separate_NoModel");
+            SetupGuideRequested?.Invoke();
             return;
         }
 
@@ -583,16 +594,17 @@ public class MainViewModel : ViewModelBase, IDisposable
 
             if (!result.Success && addedStems.Count == 0)
             {
-                if (result.IsOnnxRuntimeMissing)
-                    ErrorOccurred?.Invoke(Loc.Get("Status_Separate_OnnxRuntimeMissing"));
-                else if (result.IsOnnxModelMissing)
-                    ErrorOccurred?.Invoke(Loc.Get("Status_Separate_OnnxModelMissing"));
-                else if (result.IsTorchCodecMissing)
-                    ErrorOccurred?.Invoke(Loc.Get("Status_Separate_NeedTorchCodec"));
-                else if (result.IsTorchCodecBroken)
-                    ErrorOccurred?.Invoke(Loc.Get("Status_Separate_TorchCodecBroken"));
+                if (result.IsOnnxRuntimeMissing || result.IsOnnxModelMissing ||
+                    result.IsTorchCodecMissing  || result.IsTorchCodecBroken)
+                {
+                    // 도구/패키지 미설치 → 설치 안내 페이지 열기
+                    StatusMessage = Loc.Get("Status_SetupRequired");
+                    SetupGuideRequested?.Invoke();
+                }
                 else
+                {
                     ErrorOccurred?.Invoke(Loc.Format("Status_SeparateFailed", result.Error ?? ""));
+                }
                 return;
             }
 
