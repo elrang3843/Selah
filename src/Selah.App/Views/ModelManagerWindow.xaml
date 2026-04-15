@@ -40,7 +40,7 @@
                     <TextBlock Foreground="{DynamicResource Overlay0Brush}" FontSize="11"
                                Text="{DynamicResource ModelManager_PipHint}"/>
                     <ProgressBar Width="200" Height="6" Margin="0,4,0,0"
-                                 Value="{Binding DownloadProgress}"
+                                 Value="{Binding DownloadProgress, Mode=OneWay}"
                                  Visibility="{Binding ShowDownloadProgress,
                                      Converter={StaticResource BoolToVis}}"/>
                 </StackPanel>
