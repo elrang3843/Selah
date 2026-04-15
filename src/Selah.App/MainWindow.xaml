@@ -6,7 +6,7 @@
         Title="{Binding WindowTitle}"
         Width="1280" Height="800"
         MinWidth="800" MinHeight="500"
-        Background="#1E1E2E">
+        Background="{DynamicResource BgBrush}">
 
     <!-- 키보드 단축키 -->
     <Window.InputBindings>
@@ -20,66 +20,76 @@
         <KeyBinding Key="S"                    Command="{Binding SplitAtPlayheadCommand}"/>
         <KeyBinding Key="M"                    Command="{Binding ToggleMetronomeCommand}"/>
         <KeyBinding Key="N"                    Command="{Binding ToggleSnapCommand}"/>
-        <KeyBinding Gesture="Delete"          Command="{Binding DeleteSelectedTrackCommand}"/>
+        <KeyBinding Gesture="Delete"           Command="{Binding DeleteCommand}"/>
     </Window.InputBindings>
 
     <DockPanel>
         <!-- ═══ 메뉴바 ═══ -->
-        <Menu DockPanel.Dock="Top" Background="#181825"
+        <Menu DockPanel.Dock="Top" Background="{DynamicResource SurfaceBrush}"
               FontFamily="Segoe UI, Malgun Gothic" FontSize="13">
-            <MenuItem Header="파일(_F)">
-                <MenuItem Header="새 프로젝트(_N)..." Command="{Binding NewProjectCommand}"
+            <MenuItem Header="{DynamicResource Menu_File}">
+                <MenuItem Header="{DynamicResource Menu_File_New}" Command="{Binding NewProjectCommand}"
                           InputGestureText="Ctrl+N"/>
-                <MenuItem Header="열기(_O)..." Command="{Binding OpenProjectCommand}"
+                <MenuItem Header="{DynamicResource Menu_File_Open}" Command="{Binding OpenProjectCommand}"
                           InputGestureText="Ctrl+O"/>
                 <Separator/>
-                <MenuItem Header="저장" Command="{Binding SaveProjectCommand}"
+                <MenuItem Header="{DynamicResource Menu_File_Save}" Command="{Binding SaveProjectCommand}"
                           InputGestureText="Ctrl+S"/>
-                <MenuItem Header="다른 이름으로 저장..." Command="{Binding SaveAsCommand}"
+                <MenuItem Header="{DynamicResource Menu_File_SaveAs}" Command="{Binding SaveAsCommand}"
                           InputGestureText="Ctrl+Shift+S"/>
                 <Separator/>
-                <MenuItem Header="오디오/영상 불러오기..." Command="{Binding ImportAudioCommand}"/>
+                <MenuItem Header="{DynamicResource Menu_File_Import}" Command="{Binding ImportAudioCommand}"/>
                 <Separator/>
-                <MenuItem Header="WAV로 내보내기..." Command="{Binding ExportCommand}"
+                <MenuItem Header="{DynamicResource Menu_File_Export}" Command="{Binding ExportCommand}"
                           InputGestureText="Ctrl+E"/>
                 <Separator/>
-                <MenuItem Header="종료(_X)" Click="MenuExit_Click"/>
+                <MenuItem Header="{DynamicResource Menu_File_Exit}" Click="MenuExit_Click"/>
             </MenuItem>
 
-            <MenuItem Header="편집(_E)">
-                <MenuItem Header="실행 취소" InputGestureText="Ctrl+Z" IsEnabled="False"/>
-                <MenuItem Header="다시 실행" InputGestureText="Ctrl+Y" IsEnabled="False"/>
+            <MenuItem Header="{DynamicResource Menu_Edit}">
+                <MenuItem Header="{DynamicResource Menu_Edit_Undo}" InputGestureText="Ctrl+Z" IsEnabled="False"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Redo}" InputGestureText="Ctrl+Y" IsEnabled="False"/>
                 <Separator/>
-                <MenuItem Header="클립 분할" Command="{Binding SplitAtPlayheadCommand}"
+                <MenuItem Header="{DynamicResource Menu_Edit_Split}" Command="{Binding SplitAtPlayheadCommand}"
                           InputGestureText="S"/>
-                <MenuItem Header="선택 삭제" Command="{Binding DeleteSelectedTrackCommand}"
+                <MenuItem Header="{DynamicResource Menu_Edit_Delete}" Command="{Binding DeleteCommand}"
                           InputGestureText="Del"/>
-            </MenuItem>
-
-            <MenuItem Header="트랙(_T)">
-                <MenuItem Header="새 트랙 추가" Command="{Binding AddTrackCommand}"/>
-                <MenuItem Header="선택 트랙 삭제" Command="{Binding DeleteSelectedTrackCommand}"/>
-            </MenuItem>
-
-            <MenuItem Header="도구(_O)">
-                <MenuItem Header="모델 관리자..." Click="MenuModelManager_Click"/>
-                <MenuItem Header="하드웨어 진단..." Click="MenuHardwareDiag_Click"/>
                 <Separator/>
-                <MenuItem Header="FFmpeg 설치 안내..." Click="MenuFFmpegGuide_Click"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Separate}" Command="{Binding SeparateClipCommand}"/>
             </MenuItem>
 
-            <MenuItem Header="도움말(_H)">
-                <MenuItem Header="단축키 목록" Click="MenuShortcuts_Click" InputGestureText="F1"/>
+            <MenuItem Header="{DynamicResource Menu_Track}">
+                <MenuItem Header="{DynamicResource Menu_Track_Add}" Command="{Binding AddTrackCommand}"/>
+                <MenuItem Header="{DynamicResource Menu_Track_Delete}" Command="{Binding DeleteSelectedTrackCommand}"/>
+            </MenuItem>
+
+            <MenuItem Header="{DynamicResource Menu_Tools}">
+                <MenuItem Header="{DynamicResource Menu_Tools_ModelManager}" Click="MenuModelManager_Click"/>
+                <MenuItem Header="{DynamicResource Menu_Tools_HardwareDiag}" Click="MenuHardwareDiag_Click"/>
                 <Separator/>
-                <MenuItem Header="윤리적 사용 가이드라인..." Click="MenuEthics_Click"/>
-                <MenuItem Header="셀라(Selah) 정보..." Click="MenuAbout_Click"/>
+                <MenuItem Header="{DynamicResource Menu_Tools_FFmpegGuide}" Click="MenuFFmpegGuide_Click"/>
+            </MenuItem>
+
+            <MenuItem Header="{DynamicResource Menu_Language}">
+                <MenuItem Header="한국어" Click="MenuLang_Ko_Click"/>
+                <MenuItem Header="English" Click="MenuLang_En_Click"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource Menu_Theme_Dark}"  Click="MenuTheme_Click" Tag="dark"/>
+                <MenuItem Header="{DynamicResource Menu_Theme_Light}" Click="MenuTheme_Click" Tag="light"/>
+            </MenuItem>
+
+            <MenuItem Header="{DynamicResource Menu_Help}">
+                <MenuItem Header="{DynamicResource Menu_Help_Shortcuts}" Click="MenuShortcuts_Click" InputGestureText="F1"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource Menu_Help_Ethics}" Click="MenuEthics_Click"/>
+                <MenuItem Header="{DynamicResource Menu_Help_About}" Click="MenuAbout_Click"/>
             </MenuItem>
         </Menu>
 
         <!-- ═══ 상태바 ═══ -->
-        <StatusBar DockPanel.Dock="Bottom" Background="#181825" Height="24">
+        <StatusBar DockPanel.Dock="Bottom" Background="{DynamicResource SurfaceBrush}" Height="24">
             <StatusBarItem>
-                <TextBlock Text="{Binding StatusMessage}" Foreground="#A6ADC8" FontSize="11"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SubtextBrush}" FontSize="11"/>
             </StatusBarItem>
             <StatusBarItem>
                 <ProgressBar Width="100" Height="6"
@@ -90,10 +100,10 @@
             <StatusBarItem HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding SampleRateText}"
-                               Foreground="#6C7086" FontSize="11" Margin="0,0,12,0"
+                               Foreground="{DynamicResource Overlay0Brush}" FontSize="11" Margin="0,0,12,0"
                                Visibility="{Binding HasProject, Converter={StaticResource BoolToVis}}"/>
                     <TextBlock Text="{Binding HardwareStatusText}"
-                               Foreground="#6C7086" FontSize="11"/>
+                               Foreground="{DynamicResource Overlay0Brush}" FontSize="11"/>
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>

@@ -6,7 +6,7 @@ namespace Selah.Core.Audio;
 
 /// <summary>
 /// 실시간 재생 엔진.
-/// WASAPI 공유 모드(기본) → 실패 시 WaveOut 폴백.
+/// WaveOut(기본, 커널 믹서 경유) → 실패 시 WASAPI 폴백.
 /// </summary>
 public sealed class AudioEngine : IDisposable
 {
@@ -35,8 +35,11 @@ public sealed class AudioEngine : IDisposable
     /// <summary>재생 중 플레이헤드 위치 변경 이벤트 (프레임 단위)</summary>
     public event EventHandler<long>? PlayheadAdvanced;
 
-    /// <summary>재생 종료 이벤트</summary>
+    /// <summary>재생 종료 이벤트 (WavePlayer 수준)</summary>
     public event EventHandler? PlaybackStopped;
+
+    /// <summary>메트로놈을 제외한 모든 클립 재생이 끝났을 때 발생하는 이벤트</summary>
+    public event EventHandler? ContentEnded;
 
     public void LoadProject(Project project)
     {
@@ -47,6 +50,8 @@ public sealed class AudioEngine : IDisposable
         _masterMixer = new MasterMixerProvider(project);
         _masterMixer.PlayheadAdvanced += (s, frames) =>
             PlayheadAdvanced?.Invoke(this, frames);
+        _masterMixer.PlaybackEnded += (s, e) =>
+            ContentEnded?.Invoke(this, EventArgs.Empty);
     }
 
     public void Play()
@@ -71,21 +76,42 @@ public sealed class AudioEngine : IDisposable
 
         _volumeProvider = new VolumeSampleProvider(_masterMixer) { Volume = 1f };
 
+        // WaveOut을 기본으로 사용합니다.
+        // Windows 커널 믹서가 SR/포맷 변환을 안정적으로 처리하며,
+        // WASAPI Shared는 일부 드라이버에서 Loudness Equalization 등
+        // 오디오 Enhancement와 상호작용하여 잡음을 유발할 수 있습니다.
         try
         {
+            var wo = new WaveOutEvent { DesiredLatency = 150 };
+            wo.Init(new SampleToWaveProvider16(_volumeProvider));
+            wo.PlaybackStopped += OnPlaybackStopped;
+            _waveOut = wo;
+            return;
+        }
+        catch { /* WaveOut 실패 시 WASAPI 시도 */ }
+
+        // WASAPI 폴백: WaveOut을 사용할 수 없는 환경(서버, 가상 머신 등)에서 시도합니다.
+        try
+        {
+            ISampleProvider outputForWasapi = _volumeProvider;
+            try
+            {
+                using var deviceEnum = new NAudio.CoreAudioApi.MMDeviceEnumerator();
+                using var device = deviceEnum.GetDefaultAudioEndpoint(
+                    NAudio.CoreAudioApi.DataFlow.Render,
+                    NAudio.CoreAudioApi.Role.Multimedia);
+                int mixSR = device.AudioClient.MixFormat.SampleRate;
+                if (mixSR != _masterMixer.WaveFormat.SampleRate)
+                    outputForWasapi = new WdlResamplingSampleProvider(_volumeProvider, mixSR);
+            }
+            catch { /* 믹스 포맷 조회 실패 시 리샘플링 없이 시도 */ }
+
             var wasapi = new WasapiOut(NAudio.CoreAudioApi.AudioClientShareMode.Shared, 100);
-            wasapi.Init(_volumeProvider);
+            wasapi.Init(outputForWasapi);
             wasapi.PlaybackStopped += OnPlaybackStopped;
             _waveOut = wasapi;
         }
-        catch
-        {
-            // WASAPI 실패 시 WaveOut 폴백
-            var wo = new WaveOutEvent { DesiredLatency = 150 };
-            wo.Init(_volumeProvider);
-            wo.PlaybackStopped += OnPlaybackStopped;
-            _waveOut = wo;
-        }
+        catch { /* 오디오 디바이스 없음 */ }
     }
 
     private void OnPlaybackStopped(object? s, StoppedEventArgs e)

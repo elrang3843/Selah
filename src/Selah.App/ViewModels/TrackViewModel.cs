@@ -105,7 +105,7 @@ public class TrackViewModel : ViewModelBase
     public bool SplitClipAt(long timelineFrame)
     {
         var target = Clips.FirstOrDefault(c =>
-            timelineFrame > c.TimelineStartSamples && timelineFrame < c.TimelineEndSamples);
+            timelineFrame > c.TimelineStartSamples && timelineFrame < c.TimelineEndProjectFrame);
         if (target == null) return false;
 
         var (left, right) = target.Split(timelineFrame);

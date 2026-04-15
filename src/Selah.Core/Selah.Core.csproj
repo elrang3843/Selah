@@ -6,6 +6,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>Selah.Core</AssemblyName>
     <RootNamespace>Selah.Core</RootNamespace>
+    <!-- 앱이 Windows 전용(net8.0-windows)이므로 플랫폼 호환성 경고를 억제합니다 -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />

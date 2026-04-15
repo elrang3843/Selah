@@ -88,13 +88,14 @@ public sealed class ClipSampleProvider : ISampleProvider, IDisposable
         if (_reader == null) return;
 
         long relFrame = timelineFrames - _clip.TimelineStartSamples;
-        if (relFrame < 0) return; // 클립 시작 전 — 다음 Read에서 무음 반환
-
-        long srcFrame = _clip.SourceInSamples + ToSrcFrames(relFrame);
-
-        if (srcFrame < _clip.SourceInSamples || srcFrame >= _clip.SourceOutSamples)
-            return; // 범위 밖
-
+        // 클립 이전 위치라도 소스 시작점에 미리 위치시킴.
+        // Read() 내에서 SeekReaderToFrame을 호출하지 않으므로, 리샘플러 체인 초기화 후
+        // 여기서 한 번만 위치를 설정해야 합니다.
+        long srcFrame = relFrame <= 0
+            ? _clip.SourceInSamples
+            : _clip.SourceInSamples + ToSrcFrames(relFrame);
+        srcFrame = Math.Clamp(srcFrame, _clip.SourceInSamples,
+            Math.Max(_clip.SourceInSamples, _clip.SourceOutSamples - 1));
         SeekReaderToFrame(srcFrame);
     }
 
@@ -125,11 +126,6 @@ public sealed class ClipSampleProvider : ISampleProvider, IDisposable
         int bufferFrameOffset = (int)(overlapStartFrame - _positionFrames);
         int bufSampleOffset = offset + bufferFrameOffset * channels;
 
-        // 소스 파일 내 위치 설정 (프로젝트 프레임 → 소스 프레임 변환 포함)
-        long overlapRelProjectFrames = overlapStartFrame - clipStartFrame;
-        long srcFrame = _clip.SourceInSamples + ToSrcFrames(overlapRelProjectFrames);
-        SeekReaderToFrame(srcFrame);
-
         if (_sampleProvider != null && overlapFrames > 0)
         {
             int readSamples = overlapFrames * channels;
@@ -159,9 +155,7 @@ public sealed class ClipSampleProvider : ISampleProvider, IDisposable
     private void SeekReaderToFrame(long srcFrame)
     {
         if (_reader == null) return;
-        int srcChannels = _reader.WaveFormat.Channels;
-        int bps = _reader.WaveFormat.BitsPerSample / 8;
-        long bytePos = Math.Clamp(srcFrame * srcChannels * bps, 0, _reader.Length);
+        long bytePos = Math.Clamp(srcFrame * _reader.WaveFormat.BlockAlign, 0, _reader.Length);
         _reader.Position = bytePos;
     }
 

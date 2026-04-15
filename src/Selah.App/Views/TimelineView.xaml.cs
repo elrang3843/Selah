@@ -10,13 +10,14 @@ public partial class TimelineView : UserControl
     public TimelineView()
     {
         InitializeComponent();
+        Canvas.ClipSelected += Canvas_ClipSelected;
+        Canvas.ClipMoved += Canvas_ClipMoved;
     }
 
     private MainViewModel? ViewModel => DataContext as MainViewModel;
 
     private void TimelineScroll_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-        // 스크롤 오프셋을 TimelineViewModel에 동기화
         if (ViewModel?.Timeline is TimelineViewModel tl)
             tl.ScrollOffsetX = e.HorizontalOffset;
     }
@@ -26,9 +27,21 @@ public partial class TimelineView : UserControl
         if (ViewModel == null) return;
         int sr = ViewModel.CurrentProject?.SampleRate ?? 48000;
         ViewModel.Timeline.UpdatePlayhead(frames, sr);
-        // 재생 중이면 엔진 위치도 이동
         if (ViewModel.IsPlaying)
             ViewModel.AudioEngine.Seek(frames);
+    }
+
+    private void Canvas_ClipSelected(object? sender,
+        (Selah.App.ViewModels.TrackViewModel? Track, Selah.App.ViewModels.ClipViewModel? Clip) e)
+    {
+        if (ViewModel == null) return;
+        if (e.Track != null) ViewModel.SelectedTrack = e.Track;
+        ViewModel.SelectedClip = e.Clip;
+    }
+
+    private void Canvas_ClipMoved(object? sender, EventArgs e)
+    {
+        ViewModel?.AudioEngine.RebuildMixers();
     }
 
     private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)

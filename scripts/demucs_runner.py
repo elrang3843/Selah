@@ -43,11 +43,47 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
     """
     os.makedirs(output_dir, exist_ok=True)
 
+    # torchaudio 2.6+ routes torchaudio.save() through save_with_torchcodec().
+    # torchaudio 2.11+ declares torchcodec as a hard dependency and may eagerly
+    # import it at module-load time, so `import torchaudio` itself crashes when
+    # the torchcodec DLL is broken (Python 3.14 / pythoncore incompatibility).
+    #
+    # Fix: run demucs via `python -c <inline_code>` so two patches fire before
+    # anything else is imported:
+    #   1. MetaPathFinder stub — intercepts every `import torchcodec*` and
+    #      returns an empty module, preventing the broken DLL from ever loading.
+    #   2. torchaudio.save monkey-patch — replaces the save function with a
+    #      soundfile-based implementation so the torchcodec code path is skipped
+    #      even for the actual write call.
+    _PATCH = (
+        "import sys, importlib.abc, importlib.machinery\n"
+        "class _TC(importlib.abc.MetaPathFinder, importlib.abc.Loader):\n"
+        "    def find_spec(self, n, p, t=None):\n"
+        "        if n.startswith('torchcodec'):\n"
+        "            return importlib.machinery.ModuleSpec(n, self)\n"
+        "    def create_module(self, s): return None\n"
+        "    def exec_module(self, m): pass\n"
+        "sys.meta_path.insert(0, _TC())\n"
+        "try:\n"
+        "    import torchaudio as _ta, soundfile as _sf\n"
+        "    def _save(uri, src, sr, channels_first=True,\n"
+        "              bits_per_sample=None, encoding=None, **kw):\n"
+        "        w = src.numpy()\n"
+        "        if channels_first and w.ndim == 2: w = w.T\n"
+        "        sub = ('PCM_24' if bits_per_sample == 24\n"
+        "               else 'FLOAT' if bits_per_sample == 32\n"
+        "               else 'PCM_16')\n"
+        "        _sf.write(str(uri), w, sr, subtype=sub)\n"
+        "    _ta.save = _save\n"
+        "except Exception:\n"
+        "    pass\n"
+        "from demucs.__main__ import main; sys.exit(main())\n"
+    )
+
     cmd = [
-        sys.executable, "-m", "demucs",
+        sys.executable, "-c", _PATCH,
         "--name", model,
         "--out", output_dir,
-        "--float32",        # float32 WAV 출력
         input_path,
     ]
 
@@ -55,7 +91,8 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
         cmd += ["--two-stems", "vocals"]
 
     log_progress(5.0)
-    print(f"[Selah] 실행 명령: {' '.join(cmd)}", file=sys.stderr)
+
+    env = os.environ.copy()
 
     try:
         proc = subprocess.Popen(
@@ -64,11 +101,16 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
+            env=env,
         )
+
+        last_lines: list[str] = []   # rolling buffer for error reporting
 
         for line in proc.stdout:  # type: ignore[union-attr]
             line = line.rstrip()
-            print(f"[demucs] {line}", file=sys.stderr, flush=True)
+            last_lines.append(line)
+            if len(last_lines) > 25:
+                last_lines.pop(0)
 
             # Demucs 출력에서 진행률 파싱 (예: "  0%|          |")
             if "%" in line:
@@ -83,12 +125,36 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
         exit_code = proc.returncode
 
     except FileNotFoundError:
-        print("[Selah] 오류: demucs 명령을 찾을 수 없습니다. pip install demucs 를 실행하세요.",
-              file=sys.stderr)
+        print("LOG:demucs 명령을 찾을 수 없습니다. pip install demucs 를 실행하세요.", flush=True)
         return 1
 
     if exit_code != 0:
-        print(f"[Selah] Demucs 오류 (종료 코드 {exit_code})", file=sys.stderr)
+        # Detect torchcodec-not-available in two forms:
+        #   1. "No module named 'torchcodec'"  — package missing
+        #   2. "TorchCodec is required for save_with_torchcodec" — torchaudio 2.6+
+        #      calls torchcodec explicitly for WAV save regardless of TORCHAUDIO_BACKEND
+        torchcodec_missing = any(
+            ("no module named" in line.lower() and "torchcodec" in line.lower()) or
+            "torchcodec is required" in line.lower() or
+            "please install torchcodec" in line.lower()
+            for line in last_lines
+        )
+        # Detect a broken torchcodec install: DLL present but fails to load.
+        torchcodec_broken = not torchcodec_missing and any(
+            "libtorchcodec" in line.lower() or
+            ("could not" in line.lower() and "torchcodec" in line.lower())
+            for line in last_lines
+        )
+        if torchcodec_missing:
+            print("LOG:TORCHCODEC_MISSING", flush=True)
+        elif torchcodec_broken:
+            print("LOG:TORCHCODEC_BROKEN", flush=True)
+        else:
+            # Forward captured output to C# so the user can see the actual error
+            for log_line in last_lines:
+                stripped = log_line.strip()
+                if stripped:
+                    print(f"LOG:{stripped}", flush=True)
         return exit_code
 
     # Demucs는 output_dir/<model>/<track_name>/ 구조로 저장
@@ -125,6 +191,10 @@ def run_demucs(input_path: str, output_dir: str, model: str, stems: int) -> int:
             dst = Path(output_dir) / dst_name
             shutil.move(str(src), str(dst))
             print(f"[Selah] 저장됨: {dst}", file=sys.stderr)
+            # Notify C# that this stem WAV is ready for immediate clip creation.
+            # Format: STEM:<key>=<absolute-path>  (written to stdout)
+            stem_key = src_name.replace(".wav", "")
+            print(f"STEM:{stem_key}={dst}", flush=True)
             moved += 1
 
     if moved == 0:

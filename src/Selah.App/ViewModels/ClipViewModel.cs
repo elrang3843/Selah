@@ -42,7 +42,29 @@ public class ClipViewModel : ViewModelBase
     }
 
     public long LengthSamples => _clip.LengthSamples;
+
+    /// <summary>
+    /// 타임라인 표시/위치 계산에 사용하는 길이 (프로젝트 SR 프레임).
+    /// 소스 SR ≠ 프로젝트 SR이면 자동 변환합니다.
+    /// (ClipSampleProvider는 자체적으로 ToProjectFrames()를 적용하므로 별도 처리 불필요)
+    /// </summary>
+    public long TimelineLengthFrames
+    {
+        get
+        {
+            var src = _project.AudioSources.FirstOrDefault(s => s.Id == _clip.SourceId);
+            if (src == null || src.SampleRate == _project.SampleRate)
+                return _clip.LengthSamples;
+            return (long)(_clip.LengthSamples * (double)_project.SampleRate / src.SampleRate);
+        }
+    }
+
+    /// <summary>타임라인에서의 끝 위치 (프로젝트 SR 프레임).</summary>
+    public long TimelineEndProjectFrame => TimelineStartSamples + TimelineLengthFrames;
+
+    // 소스 SR 기준이 필요한 곳(ClipSampleProvider)에서 사용하는 원래 값
     public long TimelineEndSamples => _clip.TimelineEndSamples;
+
 
     public long FadeInSamples
     {
@@ -69,14 +91,14 @@ public class ClipViewModel : ViewModelBase
     }
 
     public double TimelineStartSeconds => (double)_clip.TimelineStartSamples / _project.SampleRate;
-    public double LengthSeconds => (double)_clip.LengthSamples / _project.SampleRate;
+    public double LengthSeconds => (double)TimelineLengthFrames / _project.SampleRate;
 
     public string DisplayName
     {
         get
         {
             var src = _project.AudioSources.FirstOrDefault(s => s.Id == _clip.SourceId);
-            return src?.Name ?? "알 수 없는 소스";
+            return src?.Name ?? Loc.Get("Clip_UnknownSource");
         }
     }
 

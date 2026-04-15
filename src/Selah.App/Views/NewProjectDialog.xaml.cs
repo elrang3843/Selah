@@ -4,12 +4,13 @@ namespace Selah.App.Views;
 
 public partial class NewProjectDialog : Window
 {
-    public string ProjectName { get; private set; } = "새 프로젝트";
+    public string ProjectName { get; private set; } = string.Empty;
     public int SampleRate { get; private set; } = 48000;
 
     public NewProjectDialog()
     {
         InitializeComponent();
+        TxtName.Text = Loc.Get("NewProject_DefaultName");
         Loaded += (_, _) => TxtName.SelectAll();
         TxtName.Focus();
     }
@@ -19,7 +20,10 @@ public partial class NewProjectDialog : Window
         var name = TxtName.Text.Trim();
         if (string.IsNullOrEmpty(name))
         {
-            MessageBox.Show("프로젝트 이름을 입력하세요.", "셀라", MessageBoxButton.OK,
+            MessageBox.Show(
+                Loc.Get("NewProject_NameRequired"),
+                Loc.Get("NewProject_AppTitle"),
+                MessageBoxButton.OK,
                 MessageBoxImage.Warning);
             return;
         }

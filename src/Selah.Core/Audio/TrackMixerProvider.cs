@@ -11,6 +11,7 @@ public sealed class TrackMixerProvider : ISampleProvider, IDisposable
     private readonly Track _track;
     private readonly Project _project;
     private readonly List<ClipSampleProvider> _clipProviders = new();
+    private float[] _temp = Array.Empty<float>();
 
     public string TrackId => _track.Id;
     public WaveFormat WaveFormat { get; }
@@ -46,14 +47,15 @@ public sealed class TrackMixerProvider : ISampleProvider, IDisposable
     public int Read(float[] buffer, int offset, int count)
     {
         Array.Clear(buffer, offset, count);
-        var temp = new float[count];
+        if (_temp.Length < count)
+            _temp = new float[count];
 
         foreach (var cp in _clipProviders)
         {
-            Array.Clear(temp, 0, count);
-            cp.Read(temp, 0, count);
+            Array.Clear(_temp, 0, count);
+            cp.Read(_temp, 0, count);
             for (int i = 0; i < count; i++)
-                buffer[offset + i] += temp[i];
+                buffer[offset + i] += _temp[i];
         }
 
         // 트랙 게인 + 패닝 적용

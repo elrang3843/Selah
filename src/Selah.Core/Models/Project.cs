@@ -30,13 +30,27 @@ public class Project
     [JsonIgnore]
     public bool IsDirty { get; set; }
 
-    /// <summary>모든 클립의 끝 위치 중 최대값 (샘플 단위)</summary>
+    /// <summary>모든 클립의 끝 위치 중 최대값 (프로젝트 SR 프레임).</summary>
     [JsonIgnore]
-    public long TotalLengthSamples =>
-        Tracks.SelectMany(t => t.Clips)
-              .Select(c => c.TimelineEndSamples)
-              .DefaultIfEmpty(0)
-              .Max();
+    public long TotalLengthSamples
+    {
+        get
+        {
+            long max = 0;
+            foreach (var track in Tracks)
+            foreach (var clip in track.Clips)
+            {
+                // 소스 SR이 다를 경우 프로젝트 SR로 변환
+                var src = AudioSources.FirstOrDefault(s => s.Id == clip.SourceId);
+                long lenFrames = (src == null || src.SampleRate == SampleRate)
+                    ? clip.LengthSamples
+                    : (long)(clip.LengthSamples * (double)SampleRate / src.SampleRate);
+                long end = clip.TimelineStartSamples + lenFrames;
+                if (end > max) max = end;
+            }
+            return max;
+        }
+    }
 
     [JsonIgnore]
     public double TotalLengthSeconds =>

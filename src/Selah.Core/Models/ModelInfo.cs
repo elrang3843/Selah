@@ -30,6 +30,9 @@ public class ModelInfo
     /// <summary>예배 사역자를 위한 저작권 주의 메시지</summary>
     public string WorshipNote { get; set; } = string.Empty;
 
+    /// <summary>모델 파일 다운로드 URL (null이면 수동 설치)</summary>
+    public string? DownloadUrl { get; set; }
+
     public List<string> Tags { get; set; } = new();
 
     public string SizeDisplay =>
@@ -54,6 +57,6 @@ public enum StemType
 
 public enum ModelEngine
 {
-    PythonCLI,      // Demucs CLI (python subprocess)
-    OnnxRuntime     // ONNX Runtime (DirectML/CUDA/CPU)
+    PythonCLI,      // Demucs CLI (python subprocess) — 레거시
+    OnnxRuntime     // ONNX Runtime + FFmpeg (권장)
 }
