@@ -17,7 +17,7 @@ Selah combines three main ideas into one workflow:
 - **AI-assisted stem separation from audio recordings**
 
 The application is currently implemented as a **WPF desktop app** with a shared core library for audio, project, and separation services.
-
+  
 ---
 
 ## Main Goals
