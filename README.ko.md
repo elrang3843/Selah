@@ -74,8 +74,12 @@ Selah.sln
 │  └─ demucs_runner.py  # 외부 Demucs 실행 스크립트
 ├─ docs/
 │  ├─ ETHICS.md
-│  └─ TRADEMARK.md
+│  ├─ TRADEMARK.md
+│  └─ Korean versions:
+│     ├─ docs/ETHICS.ko.md
+│     └─ docs/TRADEMARK.ko.md
 ├─ README.md
 ├─ README.ko.md
 ├─ LICENSE
+├─ THIRD_PARTY_NOTICES.md
 └─ Selah.sln

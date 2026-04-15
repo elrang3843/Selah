@@ -17,7 +17,7 @@ Selah combines three main ideas into one workflow:
 - **AI-assisted stem separation from audio recordings**
 
 The application is currently implemented as a **WPF desktop app** with a shared core library for audio, project, and separation services.
-  
+
 ---
 
 ## Main Goals
@@ -64,7 +64,11 @@ Selah.sln
 │  └─ demucs_runner.py  # external Demucs runner
 ├─ docs/
 │  ├─ ETHICS.md
-│  └─ TRADEMARK.md
+│  ├─ TRADEMARK.md
+│  └─ Korean versions:
+│     ├─ docs/ETHICS.ko.md
+│     └─ docs/TRADEMARK.ko.md
 ├─ README.md
 ├─ LICENSE
+├─ THIRD_PARTY_NOTICES.md
 └─ Selah.sln
