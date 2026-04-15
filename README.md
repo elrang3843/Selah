@@ -1,13 +1,70 @@
 # Selah
-찬양사역용 MR편집기 셀라(Selah)
 
-본 프로그램은 기독교 선교사역을 위해 힘쓰시는 선교사님들과 
-개척교회에서 말씀대로 살기 위해 온 힘을 다하고 계시는 목회자, 
-봉사자들을 위하여 기획/작성된 프로그램입니다. 
-무료로 사용 및 소스를 가져다 쓰실 수 있지만, 
-목적한 용도 외로 사용하시지 말아주시고, 
-굳이 용도 외로 사용하셔야 한다면 
-본 제품의 이름과 프로젝트명을 사용하시지 말아주세요. 
+**Selah** is a Windows desktop application for worship music preparation, project-based audio arrangement, and AI-assisted stem separation.
 
-선교 현장에서 예배와 선교를 위해 힘쓰시는 많은 사역자 분들께 
-이 프로그램이 조금이나마 위로와 평강이 되기를 기도하며, 아멘.
+It is designed to help churches, missionaries, and small worship teams prepare accompaniment-oriented audio materials from recordings or worship media in a practical and accessible way.
+
+> Current status: early-stage prototype / actively evolving architecture
+
+---
+
+## Overview
+
+Selah combines three main ideas into one workflow:
+
+- **project-based worship audio preparation**
+- **timeline-oriented clip and track arrangement**
+- **AI-assisted stem separation from audio recordings**
+
+The application is currently implemented as a **WPF desktop app** with a shared core library for audio, project, and separation services.
+
+---
+
+## Main Goals
+
+Selah aims to support:
+
+- worship preparation for small churches and pioneer churches
+- missionary and ministry-oriented audio workflows
+- accompaniment preparation from worship recordings
+- reusable project-based arrangement of separated stems
+- simple local workflows without requiring cloud services
+
+This project is being built as a **free and open-source tool** for non-commercial ministry-oriented use.
+
+---
+
+## Current Features
+
+The repository currently includes:
+
+- WPF desktop application (`Selah.App`)
+- shared core library (`Selah.Core`)
+- project / track / clip data model
+- timeline-related UI and view models
+- audio engine / mixer-related components
+- waveform cache support
+- FFmpeg / FFprobe wrapper service
+- hardware detection service
+- model management service
+- prototype stem separation service using external Python + Demucs
+- localization resources (Korean / English)
+- theme resources (light / dark)
+
+---
+
+## Repository Structure
+
+```text
+Selah.sln
+├─ src/
+│  ├─ Selah.App/        # WPF application
+│  └─ Selah.Core/       # audio engine, models, services
+├─ scripts/
+│  └─ demucs_runner.py  # external Demucs runner
+├─ docs/
+│  ├─ ETHICS.md
+│  └─ TRADEMARK.md
+├─ README.md
+├─ LICENSE
+└─ Selah.sln
