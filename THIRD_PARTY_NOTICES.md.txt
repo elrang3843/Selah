@@ -1,0 +1,96 @@
+# Third-Party Notices
+
+This project, **Selah**, may use, invoke, or depend on third-party software,
+libraries, runtimes, tools, scripts, or models depending on build configuration,
+runtime environment, and feature usage.
+
+This file is provided as a general notice and starting point for dependency review.
+It does not replace the original licenses or notices of third-party projects.
+
+---
+
+## 1. FFmpeg / FFprobe
+
+Selah may use FFmpeg and FFprobe for media probing, audio decoding, conversion,
+and related processing workflows.
+
+- Project: FFmpeg
+- Website: https://ffmpeg.org/
+
+Users and redistributors are responsible for confirming which FFmpeg build is used,
+including whether it is LGPL-based, GPL-enabled, or otherwise distributed under a
+specific build configuration.
+
+---
+
+## 2. Python Runtime
+
+Selah may invoke a local Python runtime for prototype stem separation workflows.
+
+- Project: Python
+- Website: https://www.python.org/
+
+The Python runtime is governed by its own license and distribution terms.
+Users are responsible for installing and maintaining an appropriate local Python environment where required.
+
+---
+
+## 3. Demucs
+
+Selah may use Demucs through an external Python-based execution workflow for music source separation.
+
+- Project: Demucs
+- Source: https://github.com/facebookresearch/demucs
+
+Demucs code, related models, and associated resources may be governed by their own licenses and usage terms.
+Users must verify the applicable terms of any Demucs package, code, model, or derivative workflow they use.
+
+---
+
+## 4. Python Packages for Audio / ML Workflows
+
+Depending on environment and feature usage, Selah’s prototype separation workflow may rely on Python packages such as:
+
+- torchaudio
+- soundfile
+- PyTorch-related packages
+- other runtime dependencies required by Demucs or local audio processing
+
+Each such package remains subject to its own separate license.
+
+Users and redistributors must review the applicable license terms for every installed dependency.
+
+---
+
+## 5. Local Scripts
+
+This repository includes or may include local scripts used to bridge external processing workflows, including:
+
+- `scripts/demucs_runner.py`
+
+Such scripts are part of the Selah project unless otherwise noted, but they may call or rely on third-party tools and runtimes that are licensed separately.
+
+---
+
+## 6. User Responsibility
+
+Users and redistributors are responsible for reviewing all applicable terms related to:
+
+- third-party software
+- Python packages
+- Demucs and related models
+- FFmpeg builds
+- runtime environments
+- input media files and their legal usage
+
+Technical capability provided by Selah does not imply legal permission to process, redistribute, or commercialize any input or output media.
+
+---
+
+## 7. No Exhaustive Guarantee
+
+This file is not guaranteed to be a complete or exhaustive list of all runtime or transitive dependencies.
+
+Environment-specific dependencies may vary across developer machines, user installations, and future project revisions.
+
+Please consult the relevant package managers, lock files, build configuration, and upstream project pages where applicable.
