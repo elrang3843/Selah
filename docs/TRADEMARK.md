@@ -1,56 +1,112 @@
-# 셀라(Selah) 상표 및 브랜드 정책
+# Trademark and Naming Guidance
 
-## 상표 사용 허가 범위
+## Project Name
 
-**셀라(Selah)** 프로젝트 이름, 로고 및 관련 브랜드 자산은 **기독교 예배 사역 지원**이라는 본래 목적에 한해 사용이 허가됩니다.
+The project name is **Selah**.
 
----
-
-## 허가되는 상표 사용
-
-- **교회 예배 사역자**가 셀라 소프트웨어를 사용 및 공유할 때 프로젝트 이름 언급
-- **오픈소스 기여자**가 프로젝트 공식 저장소에서 기여 활동을 할 때
-- **언론/미디어**가 소프트웨어를 정확하게 소개할 때 (왜곡 없는 인용)
-- **교육 목적**으로 소프트웨어 기능이나 코드를 설명할 때
+This repository may also refer to the project together with its publisher/maintainer information, including **HANDTECH**.
 
 ---
 
-## 금지되는 상표 사용
+## Purpose of This Document
 
-- "셀라(Selah)"라는 이름을 사용하여 **다른 상업적 소프트웨어 또는 서비스를 마케팅**하는 행위
-- 본 프로젝트와 **무관한 조직이나 상품에 셀라 이름/로고 사용**
-- 기독교 예배 사역과 **무관한 목적**으로 브랜드를 차용하는 행위
-- 프로젝트의 **공식 대변자인 것처럼 오해를 유발**하는 행위
-- **음원 저작권 침해를 조장**하는 목적으로 브랜드를 사용하는 행위
+This document explains how the project name, publisher name, and related identity references should be used in connection with:
 
----
+- source distributions
+- forks
+- modified builds
+- public releases
+- unofficial packages
+- screenshots, videos, and documentation
 
-## 포크(Fork) 및 파생 작업
-
-GPLv3에 따라 이 소프트웨어를 자유롭게 포크하고 수정할 수 있습니다. 단, 파생 작품을 배포할 때는 다음을 준수하십시오:
-
-1. 포크된 소프트웨어는 **"셀라(Selah)" 이름을 그대로 사용하지 마세요**. 별도의 이름을 사용하고 원본 프로젝트와 명확하게 구분하십시오.
-2. 단, "셀라(Selah) 기반" 또는 "Selah 포크"처럼 **파생 관계를 명시하는 표현**은 허용합니다.
-3. 원본 저작권 고지와 GPLv3 라이선스 고지를 **반드시 유지**하십시오.
+This document is intended to reduce confusion about what is official, modified, or community-maintained.
 
 ---
 
-## 로고 사용
+## Official Project Identity
 
-공식 로고 파일은 `assets/logo/` 폴더에 있습니다. 로고는 다음 조건 하에 사용 가능합니다:
+At the time of writing, the project is maintained by:
 
-- 비율 유지 (변형 금지)
-- 배경색과 충분한 대비 유지
-- 다른 로고와의 혼합/조합 금지
+- **HANDTECH**
+- Representative / CEO: **Noh JinMoon**
+- Website: https://www.handtech.co.kr
+- Location: Siheung-si, Gyeonggi-do, Republic of Korea
 
----
-
-## 상표 정책 관련 문의
-
-상표 사용 허가 여부가 불분명한 경우:  
-→ GitHub Discussions: https://github.com/elrang3843/Selah/discussions
+Unless clearly stated otherwise, references to the official project should point to the original upstream repository and officially published materials.
 
 ---
 
-*이 정책은 프로젝트 관리자의 재량으로 업데이트될 수 있습니다.*  
-*최종 업데이트: 2026년 4월*
+## Allowed Descriptive Use
+
+In general, you may refer to the project by name for factual and descriptive purposes, for example:
+
+- "This project is based on Selah"
+- "This is a fork of Selah"
+- "Compatible with Selah project files"
+- "Originally derived from the Selah repository"
+
+Such descriptive use should not imply official endorsement, sponsorship, certification, or approval unless that is explicitly true.
+
+---
+
+## Modified Versions and Forks
+
+If you distribute a modified version, fork, patched build, or repackaged version of Selah, you should make that fact clear.
+
+Recommended examples:
+
+- "Unofficial fork of Selah"
+- "Modified build based on Selah"
+- "Community-maintained derivative of Selah"
+
+Please avoid presenting modified or repackaged versions in a way that may cause users to believe they are official HANDTECH releases if they are not.
+
+---
+
+## Restricted or Discouraged Uses
+
+Please do not use the names **Selah** or **HANDTECH** in a way that:
+
+- falsely suggests official partnership, endorsement, or certification
+- causes confusion about the origin of a modified build
+- misrepresents the publisher or maintainer identity
+- implies legal ownership of the original project identity by unrelated parties
+- uses the name in deceptive, fraudulent, or abusive contexts
+
+If you create a significantly modified derivative, it is strongly recommended that you use a distinct project name.
+
+---
+
+## Logos, Brand Assets, and Visual Identity
+
+Unless separately provided with permission, this repository does **not** grant any automatic right to use:
+
+- official logos
+- icons identified as official brand assets
+- publisher trade dress
+- official release presentation materials as if they were your own official assets
+
+If your fork or derivative includes modified branding, it should be clearly distinguished from the official project identity.
+
+---
+
+## Screenshots, Reviews, and Educational Content
+
+Screenshots, commentary, tutorials, issue discussions, review videos, and educational material may refer to Selah descriptively, provided they do not falsely imply official sponsorship or approval.
+
+---
+
+## Relationship to License
+
+The software license for Selah governs copyright permissions for the code and related project materials.
+
+This trademark / naming guidance does **not** replace the software license.
+Likewise, the software license does not automatically grant rights in names, marks, branding, or identity presentation.
+
+---
+
+## Questions
+
+If clarification is needed regarding official identity or naming use in public redistribution, users should prefer clear attribution and clear labeling of unofficial builds or forks.
+
+When in doubt, avoid implying official status.

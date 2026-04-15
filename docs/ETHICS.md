@@ -1,64 +1,138 @@
-# 셀라(Selah) 윤리적 사용 가이드라인
+# Ethics and Intended Use
 
-> "모든 것이 가하나 모든 것이 유익한 것은 아니요" — 고린도전서 10:23
+## Purpose of the Project
 
-## 이 소프트웨어의 목적
+**Selah** is developed as a ministry-oriented audio software project intended to support:
 
-**셀라(Selah)**는 경제적으로 열악한 환경에서 예배를 섬기는 기독교 사역자를 위해 개발된 오픈소스 도구입니다. 소형 교회, 선교지, 개척 교회에서 예배 반주(MR)를 직접 제작할 수 있도록 설계되었습니다.
+- Christian worship preparation
+- small church and pioneer church audio workflows
+- missionary and ministry-related accompaniment preparation
+- practical local audio processing for worship support
 
----
-
-## 허용되는 사용
-
-- **교회 내부 예배용** 반주 음악(MR) 제작
-- **저작권이 만료되었거나 퍼블릭 도메인**인 음원 처리
-- **CCL(Christian Copyright License) 또는 원저작자로부터 명시적 허락을 받은** 찬양곡 처리
-- **직접 창작하거나 소속 교회/단체가 저작권을 보유한** 음원 편집
+The project is being built with a strong preference for **non-commercial**, **service-oriented**, and **locally operated** use cases.
 
 ---
 
-## 금지되는 사용
+## Ethical Position
 
-- **저작권 있는 음원의 무단 분리, 복제, 재배포**
-- **저작권자의 허락 없이 처리된 음원의 공개 배포** (유튜브 예배 영상 포함)
-- **상업적 목적**의 저작권 침해
-- 원저작자의 의도에 반하는 음원의 **변형 또는 왜곡**
+Selah is not being developed as a growth-hacking, exploitative, or mass-content automation tool.
 
----
+The intended direction of the project is:
 
-## 저작권 관련 주요 원칙
-
-### 1. 처리 전 반드시 확인하세요
-
-음원을 분리하기 전에 해당 음원이 다음 중 하나에 해당하는지 확인하십시오:
-- 퍼블릭 도메인 (저작권 만료)
-- 원저작자가 자유 이용을 허락한 경우 (CC 라이선스 포함)
-- 귀하 또는 귀하의 단체가 저작권을 보유한 경우
-- 이용허락(라이선스) 계약을 통해 처리 권한을 취득한 경우
-
-### 2. 교회 예배에서 흔히 사용되는 찬양곡 주의
-
-대부분의 현대 CCM(Contemporary Christian Music)은 **저작권이 살아있습니다**. CCL 가입 여부와 무관하게, 음원 **분리 자체**가 저작권법상 '복제'에 해당할 수 있습니다. 반드시 원저작자 또는 저작권 관리 단체(예: KCCA, KMCA)의 허락을 먼저 구하십시오.
-
-### 3. 국가별 법률이 다릅니다
-
-한국, 미국, 유럽 등 국가별로 음원 처리에 관한 법률이 다릅니다. 법적 판단이 필요한 경우 해당 국가의 법률 전문가에게 문의하십시오.
+- to support worship preparation rather than content extraction abuse
+- to assist ministry work rather than commercial media repackaging
+- to encourage lawful, careful, and responsible handling of recorded materials
+- to reduce technical barriers for small churches and ministry teams
 
 ---
 
-## 개발자의 당부
+## Respect for Rights and Ownership
 
-이 도구를 사용하는 여러분이 하나님의 영광을 위해 예배를 섬기고 있음을 압니다. 그러나 예배 가운데 다른 이의 창작물을 존중하는 것 또한 하나님이 기뻐하시는 일입니다.
+Users must respect the rights of:
 
-> "남에게 대접을 받고자 하는 대로 너희도 남을 대접하라" — 누가복음 6:31
+- composers
+- lyricists
+- performers
+- churches and ministries that produced recordings
+- publishers and copyright holders
+- software and model authors
+- dataset and tool maintainers
+
+The existence of technical functionality does **not** mean a user automatically has legal, ethical, or ministry-appropriate permission to process or redistribute audio materials.
 
 ---
 
-## 보고 및 문의
+## Not a Guarantee of Permitted Use
 
-이 가이드라인의 위반 사례를 발견하거나 문의 사항이 있으신 경우:  
-→ GitHub Issues: https://github.com/elrang3843/Selah/issues
+Selah may make certain processing workflows technically possible, including audio extraction, track arrangement, and stem separation.
+
+However, the project does **not** claim that all such uses are:
+
+- legally permitted
+- ethically appropriate
+- ministry-appropriate
+- licensed by the relevant rights holders
+
+Each user remains responsible for reviewing the legal and ethical appropriateness of their own use.
 
 ---
 
-*이 문서는 법적 조언이 아닙니다. 구체적인 법적 판단은 전문가에게 문의하시기 바랍니다.*
+## Non-Commercial and Ministry-Oriented Direction
+
+Selah is maintained with a ministry-oriented identity and is intended primarily for non-commercial support scenarios.
+
+This project description reflects the values and intended direction of the maintainers.  
+It does **not**, by itself, replace or override:
+
+- the project license
+- third-party licenses
+- copyright law
+- trademark law
+- local regulations
+- separate usage terms of external tools or model files
+
+---
+
+## Responsible Use
+
+Users are encouraged to use Selah in ways that are:
+
+- lawful
+- respectful of copyright and neighboring rights
+- transparent in attribution where needed
+- careful with redistributed outputs
+- considerate toward churches, ministries, and original creators
+
+Examples of responsible use may include:
+
+- preparing accompaniment for a small worship team where lawful access exists
+- organizing ministry recordings for internal rehearsal or worship support
+- testing source separation on audio materials one is permitted to process
+
+Examples of questionable or irresponsible use may include:
+
+- redistributing copyrighted worship recordings without permission
+- commercial repackaging of separated stems
+- removing vocals or extracting tracks from materials without lawful rights
+- using the project in ways that misrepresent official church or ministry approval
+
+---
+
+## AI / Model-Related Caution
+
+Where Selah uses AI-related tooling, model runners, or separation backends, users should understand that:
+
+- model outputs may be imperfect
+- outputs may contain artifacts or partial reconstruction errors
+- model availability and licensing may vary
+- third-party model terms may impose additional restrictions
+
+Maintainers do not guarantee suitability for production, release, commercial distribution, or theological/media approval workflows.
+
+---
+
+## Community Direction
+
+The maintainers welcome constructive contributions that align with the project’s intended direction, especially work that improves:
+
+- accessibility
+- stability
+- lawful local workflows
+- transparency of dependencies
+- maintainability of the codebase
+- practical usability for ministry settings
+
+Contributions that conflict with the core spirit of the project may be declined.
+
+---
+
+## Final Note
+
+This document explains the ethical direction and intended use of the project.
+
+It is provided as guidance and project position, not as a replacement for legal advice.
+For legal terms, see:
+
+- `LICENSE`
+- `TRADEMARK.md`
+- repository notices regarding third-party software and models
