@@ -154,8 +154,12 @@ public class ModelManagerService
 
     /// <summary>
     /// 시스템 PATH 및 Windows py.exe 런처에서 Python 실행 파일을 찾습니다.
-    /// Windows Store App Execution Alias(%LOCALAPPDATA%\Microsoft\WindowsApps\)는
-    /// CreateNoWindow=true 환경에서 9009로 종료되므로 건너뜁니다.
+    /// 검색 순서:
+    ///   1. PATH 직접 스캔 — Windows Store App Execution Alias 제외
+    ///      (%LOCALAPPDATA%\Microsoft\WindowsApps\ 는 CreateNoWindow=true 환경에서
+    ///       9009를 반환하는 스텁이므로 건너뜁니다)
+    ///   2. Windows py.exe 런처 (C:\Windows\py.exe)
+    ///   3. cmd.exe 셸 폴백 — Windows Store Python 포함, 실제 .exe 경로 반환
     /// </summary>
     internal static string? FindPython()
     {
@@ -164,10 +168,10 @@ public class ModelManagerService
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Microsoft", "WindowsApps");
 
+        // ── 1. PATH 직접 스캔 ────────────────────────────────────
         var pathVar = Environment.GetEnvironmentVariable("PATH") ?? "";
         foreach (var dir in pathVar.Split(Path.PathSeparator))
         {
-            // Windows Store App Execution Alias 건너뛰기
             if (dir.StartsWith(windowsAppsDir, StringComparison.OrdinalIgnoreCase))
                 continue;
 
@@ -177,10 +181,41 @@ public class ModelManagerService
                 if (File.Exists(full)) return full;
             }
         }
-        // Windows py.exe 런처 (python.org 설치 시 C:\Windows\py.exe)
+
+        // ── 2. Windows py.exe 런처 ───────────────────────────────
         var py = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Windows), "py.exe");
-        return File.Exists(py) ? py : null;
+        if (File.Exists(py)) return py;
+
+        // ── 3. cmd.exe 셸 폴백 (Windows Store Python 포함) ──────
+        //    cmd.exe는 App Execution Alias를 올바르게 처리하며,
+        //    sys.executable은 스텁이 아닌 실제 .exe 절대 경로를 반환합니다.
+        if (OperatingSystem.IsWindows())
+        {
+            try
+            {
+                var psi = new ProcessStartInfo(
+                    "cmd.exe",
+                    "/c python -c \"import sys; print(sys.executable)\"")
+                {
+                    RedirectStandardOutput = true,
+                    RedirectStandardError  = true,
+                    UseShellExecute        = false,
+                    CreateNoWindow         = true
+                };
+                using var p = Process.Start(psi);
+                if (p != null)
+                {
+                    var exePath = p.StandardOutput.ReadLine()?.Trim();
+                    p.WaitForExit(5_000);
+                    if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
+                        return exePath;
+                }
+            }
+            catch { /* Python 없음 */ }
+        }
+
+        return null;
     }
 
     // ── pip 런타임 설치 ───────────────────────────────────────────
