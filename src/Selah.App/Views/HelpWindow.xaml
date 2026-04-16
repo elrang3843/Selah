@@ -57,6 +57,14 @@
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="LineHeight"   Value="22"/>
         </Style>
+        <!-- 도구 설치 소목차 헤더 -->
+        <Style x:Key="SubSecHead" TargetType="TextBlock">
+            <Setter Property="FontSize"     Value="13"/>
+            <Setter Property="FontWeight"   Value="SemiBold"/>
+            <Setter Property="Foreground"   Value="{DynamicResource PeachBrush}"/>
+            <Setter Property="Margin"       Value="0,18,0,6"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -281,6 +289,10 @@
                                Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,4"/>
                     <Border Style="{StaticResource Divider}" Margin="0,12,0,0"/>
 
+                    <!-- 셀라란? -->
+                    <TextBlock Text="{DynamicResource Help_UG_About_Head}" Style="{StaticResource SecHead}"/>
+                    <TextBlock Text="{DynamicResource Help_UG_About_Body}" Style="{StaticResource BodyText}"/>
+
                     <!-- 시작하기 -->
                     <TextBlock Text="{DynamicResource Help_UG_Start_Head}" Style="{StaticResource SecHead}"/>
                     <TextBlock Text="{DynamicResource Help_UG_Start_Body}" Style="{StaticResource BodyText}"/>
@@ -304,6 +316,108 @@
                     <!-- 내보내기 -->
                     <TextBlock Text="{DynamicResource Help_UG_Export_Head}" Style="{StaticResource SecHead}"/>
                     <TextBlock Text="{DynamicResource Help_UG_Export_Body}" Style="{StaticResource BodyText}"/>
+
+                    <!-- ══ 필수 도구 설치 구분선 ══ -->
+                    <Border BorderBrush="{DynamicResource AccentBrush}" BorderThickness="0,1,0,0"
+                            Margin="0,32,0,0" Padding="0,18,0,0">
+                        <TextBlock Text="{DynamicResource Help_UG_Setup_Head}"
+                                   FontSize="18" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentBrush}"/>
+                    </Border>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_Intro}"
+                               Style="{StaticResource BodyText}" Margin="0,8,0,0"/>
+
+                    <!-- ① Python -->
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_Python_Head}" Style="{StaticResource SubSecHead}"/>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_Python_Body}" Style="{StaticResource BodyText}"/>
+                    <Border Background="{DynamicResource WarningSurfaceBrush}"
+                            BorderBrush="{DynamicResource YellowBrush}" BorderThickness="1"
+                            CornerRadius="4" Padding="12,8" Margin="0,8,0,0">
+                        <TextBlock Text="{DynamicResource Help_UG_Setup_Python_Warn}"
+                                   Foreground="{DynamicResource YellowBrush}" FontSize="12"
+                                   TextWrapping="Wrap" LineHeight="19"/>
+                    </Border>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_Check}"
+                               FontSize="12" Foreground="{DynamicResource Overlay0Brush}" Margin="0,10,0,2"/>
+                    <Border Background="{DynamicResource DeepBgBrush}" CornerRadius="4" Padding="14,9" Margin="0,0,0,0">
+                        <TextBlock Text="python --version"
+                                   FontFamily="Consolas, Courier New" FontSize="12"
+                                   Foreground="{DynamicResource GreenBrush}"/>
+                    </Border>
+
+                    <!-- ② ONNX Runtime -->
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_ONNX_Head}" Style="{StaticResource SubSecHead}"/>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_ONNX_Body}" Style="{StaticResource BodyText}"/>
+                    <Border Background="{DynamicResource DeepBgBrush}" CornerRadius="4" Padding="14,9" Margin="0,8,0,0">
+                        <TextBlock Text="pip install onnxruntime numpy scipy"
+                                   FontFamily="Consolas, Courier New" FontSize="12"
+                                   Foreground="{DynamicResource GreenBrush}"/>
+                    </Border>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_AltCmd}"
+                               FontSize="12" Foreground="{DynamicResource Overlay0Brush}" Margin="0,8,0,2"/>
+                    <Border Background="{DynamicResource DeepBgBrush}" CornerRadius="4" Padding="14,9" Margin="0,0,0,0">
+                        <TextBlock Text="python -m pip install onnxruntime numpy scipy"
+                                   FontFamily="Consolas, Courier New" FontSize="12"
+                                   Foreground="{DynamicResource GreenBrush}"/>
+                    </Border>
+                    <Border Background="{DynamicResource WarningSurfaceBrush}"
+                            BorderBrush="{DynamicResource YellowBrush}" BorderThickness="1"
+                            CornerRadius="4" Padding="12,8" Margin="0,8,0,0">
+                        <TextBlock Text="{DynamicResource Help_UG_Setup_Venv_Warn}"
+                                   Foreground="{DynamicResource YellowBrush}" FontSize="12"
+                                   TextWrapping="Wrap" LineHeight="19"/>
+                    </Border>
+
+                    <!-- ③ audio-separator -->
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_AudioSep_Head}" Style="{StaticResource SubSecHead}"/>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_AudioSep_Body}" Style="{StaticResource BodyText}"/>
+                    <Border Background="{DynamicResource DeepBgBrush}" CornerRadius="4" Padding="14,9" Margin="0,8,0,0">
+                        <TextBlock Text="pip install &quot;audio-separator[cpu]&quot;"
+                                   FontFamily="Consolas, Courier New" FontSize="12"
+                                   Foreground="{DynamicResource GreenBrush}"/>
+                    </Border>
+                    <Border Background="{DynamicResource WarningSurfaceBrush}"
+                            BorderBrush="{DynamicResource YellowBrush}" BorderThickness="1"
+                            CornerRadius="4" Padding="12,8" Margin="0,8,0,0">
+                        <TextBlock Text="{DynamicResource Help_UG_Setup_Venv_Warn}"
+                                   Foreground="{DynamicResource YellowBrush}" FontSize="12"
+                                   TextWrapping="Wrap" LineHeight="19"/>
+                    </Border>
+
+                    <!-- ④ noisereduce -->
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_Noise_Head}" Style="{StaticResource SubSecHead}"/>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_Noise_Body}" Style="{StaticResource BodyText}"/>
+                    <Border Background="{DynamicResource DeepBgBrush}" CornerRadius="4" Padding="14,9" Margin="0,8,0,0">
+                        <TextBlock Text="pip install noisereduce"
+                                   FontFamily="Consolas, Courier New" FontSize="12"
+                                   Foreground="{DynamicResource GreenBrush}"/>
+                    </Border>
+                    <Border Background="{DynamicResource WarningSurfaceBrush}"
+                            BorderBrush="{DynamicResource YellowBrush}" BorderThickness="1"
+                            CornerRadius="4" Padding="12,8" Margin="0,8,0,0">
+                        <TextBlock Text="{DynamicResource Help_UG_Setup_Venv_Warn}"
+                                   Foreground="{DynamicResource YellowBrush}" FontSize="12"
+                                   TextWrapping="Wrap" LineHeight="19"/>
+                    </Border>
+
+                    <!-- ⑤ FFmpeg -->
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_FFmpeg_Head}" Style="{StaticResource SubSecHead}"/>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_FFmpeg_Body}" Style="{StaticResource BodyText}"/>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_FFmpeg_WingetNote}"
+                               FontSize="12" Foreground="{DynamicResource Overlay0Brush}" Margin="0,8,0,2"
+                               TextWrapping="Wrap"/>
+                    <Border Background="{DynamicResource DeepBgBrush}" CornerRadius="4" Padding="14,9" Margin="0,0,0,0">
+                        <TextBlock Text="winget install Gyan.FFmpeg"
+                                   FontFamily="Consolas, Courier New" FontSize="12"
+                                   Foreground="{DynamicResource GreenBrush}"/>
+                    </Border>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_FFmpeg_ManualNote}"
+                               FontSize="12" Foreground="{DynamicResource Overlay0Brush}"
+                               TextWrapping="Wrap" LineHeight="19" Margin="0,10,0,0"/>
+
+                    <!-- ⑥ 모델 다운로드 -->
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_Model_Head}" Style="{StaticResource SubSecHead}"/>
+                    <TextBlock Text="{DynamicResource Help_UG_Setup_Model_Body}" Style="{StaticResource BodyText}"/>
 
                 </StackPanel>
             </ScrollViewer>

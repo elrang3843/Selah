@@ -237,6 +237,32 @@
     <sys:String x:Key="Help_UG_Export_Head">Exporting</sys:String>
     <sys:String x:Key="Help_UG_Export_Body">When editing is complete, use File → Export as WAV (Ctrl+E) to render the entire timeline to a 24-bit WAV file.&#x0a;&#x0a;Muted tracks are excluded from the output. To export specific tracks only, mute the others.&#x0a;&#x0a;If the metronome is on, it will be included in the output — turn it off before exporting.</sys:String>
 
+    <!-- User Guide: About Selah intro -->
+    <sys:String x:Key="Help_UG_About_Head">What is Selah?</sys:String>
+    <sys:String x:Key="Help_UG_About_Body">Selah is a Windows desktop application for worship music preparation, project-based audio editing, and AI-assisted stem separation.&#x0a;&#x0a;It is designed for small churches, mission fields, and worship teams to prepare accompaniment-oriented audio from recordings or worship media in a practical, accessible way. Selah is a free and open-source (GPLv3) tool that runs entirely offline.</sys:String>
+
+    <!-- User Guide: Required Tools Setup -->
+    <sys:String x:Key="Help_UG_Setup_Head">Required Tools Setup</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Intro">The following tools are required to use stem separation (MR extraction) and noise reduction. Basic WAV editing and export work without any additional installation.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Check">Verify installation (Command Prompt):</sys:String>
+    <sys:String x:Key="Help_UG_Setup_AltCmd">If pip is not found:</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Venv_Warn">⚠ Virtual environments (venv, conda): Selah does not auto-detect virtual environments. Install packages to global Python, or use py -m pip install.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Python_Head">① Install Python — Required (all MR extraction)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Python_Body">Download Python 3.10 or later from python.org/downloads. During installation, check "Add Python to PATH". Restart Selah after installation.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Python_Warn">⚠ Do not use the Microsoft Store version of Python — it does not work correctly as a background process. Install from python.org only.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_ONNX_Head">② Install ONNX Runtime — Required (Demucs model)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_ONNX_Body">ONNX Runtime and related packages are required for AI model inference.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_AudioSep_Head">③ Install audio-separator — Recommended (vocal separation)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_AudioSep_Body">Recognizes a far wider range of voices than Demucs — all genders, ranges, and vocal styles including non-Western singing. For GPU acceleration, replace [cpu] with [gpu]. (Requires CUDA 12.x)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Noise_Head">④ Install noisereduce — Required (noise reduction)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Noise_Body">Required for the Edit → Reduce Noise feature. No model file needed — just one pip command.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_FFmpeg_Head">⑤ Install FFmpeg — Required (MP3/MP4 import)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_FFmpeg_Body">Required to import non-WAV formats (MP3, MP4, MKV, etc.) and for audio decoding/encoding during MR extraction.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_FFmpeg_WingetNote">Method A — Open Command Prompt as Administrator (recommended):</sys:String>
+    <sys:String x:Key="Help_UG_Setup_FFmpeg_ManualNote">Method B (manual) — Download Windows builds from ffmpeg.org/download.html and add the bin\ folder to your system PATH environment variable.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Model_Head">⑥ Download AI Separation Model</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Model_Body">After installing the tools above, open Tools → Model Manager to download an AI model.&#x0a;&#x0a;• Hybrid Transformer Demucs (htdemucs) — 4-stem separation, 303 MB, requires ONNX Runtime&#x0a;• UVR MDX-NET Vocal FT — vocal/backing 2-stem, 65 MB, requires audio-separator&#x0a;&#x0a;Select a model, click "Install Model / Download", then click Refresh when done.</sys:String>
+
     <!-- Ethics Panel -->
     <sys:String x:Key="Help_Eth_Title">Ethical Use Guidelines</sys:String>
     <sys:String x:Key="Help_Eth_Banner">Selah was created to support worship ministry. Users are responsible for verifying the copyright status of any audio they process.</sys:String>

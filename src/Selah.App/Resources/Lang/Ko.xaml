@@ -237,6 +237,32 @@
     <sys:String x:Key="Help_UG_Export_Head">내보내기</sys:String>
     <sys:String x:Key="Help_UG_Export_Body">편집이 완료되면 파일 → WAV로 내보내기 (Ctrl+E)로 전체 타임라인을 24-bit WAV 파일로 렌더링합니다.&#x0a;&#x0a;뮤트된 트랙은 출력에 포함되지 않습니다. 특정 트랙만 내보내려면 나머지 트랙을 뮤트하세요.&#x0a;&#x0a;메트로놈이 켜져 있으면 출력에 포함되므로, 내보내기 전에 확인하세요.</sys:String>
 
+    <!-- 사용 가이드: 셀라 소개 -->
+    <sys:String x:Key="Help_UG_About_Head">셀라란?</sys:String>
+    <sys:String x:Key="Help_UG_About_Body">Selah는 예배 음악 준비, 프로젝트 기반 오디오 편집, AI 스템 분리를 위한 Windows 데스크탑 애플리케이션입니다.&#x0a;&#x0a;소형 교회, 선교지, 소규모 찬양팀이 녹음이나 예배 영상에서 반주 중심의 오디오 자료를 실용적으로 준비할 수 있도록 설계되었습니다. 인터넷 연결 없이 로컬에서 실행되는 무료·오픈소스(GPLv3) 도구입니다.</sys:String>
+
+    <!-- 사용 가이드: 필수 도구 설치 -->
+    <sys:String x:Key="Help_UG_Setup_Head">필수 도구 설치</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Intro">스템 분리(MR 추출)와 노이즈 감소 기능을 사용하려면 아래 도구를 설치해야 합니다. 기본 WAV 편집과 내보내기는 추가 설치 없이 사용 가능합니다.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Check">설치 확인 (명령 프롬프트):</sys:String>
+    <sys:String x:Key="Help_UG_Setup_AltCmd">pip 명령을 찾지 못하는 경우:</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Venv_Warn">⚠ 가상 환경(venv, conda) 사용 시: 셀라가 가상 환경을 자동 인식하지 않습니다. 전역(global) Python에 설치하거나 py -m pip install 명령을 사용하세요.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Python_Head">① Python 설치 — 필수 (MR 추출 전체)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Python_Body">python.org/downloads 에서 Python 3.10 이상을 다운로드하세요. 설치 시 반드시 "Add Python to PATH" 옵션을 체크해야 합니다. 설치 완료 후 셀라를 재시작하세요.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Python_Warn">⚠ Windows 스토어(Microsoft Store) Python은 사용하지 마세요. 반드시 python.org에서 설치하세요. 스토어 버전은 백그라운드 실행 시 제대로 동작하지 않습니다.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_ONNX_Head">② ONNX Runtime 설치 — 필수 (Demucs 모델)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_ONNX_Body">AI 모델 추론에 ONNX Runtime 및 관련 패키지가 필요합니다.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_AudioSep_Head">③ audio-separator 설치 — 권장 (보컬 분리)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_AudioSep_Body">Demucs보다 훨씬 넓은 범위의 목소리를 인식합니다. 남성·여성·어린이·비서양권 창법 등 모든 음역대를 지원합니다. GPU 가속을 원하면 [cpu] 대신 [gpu]를 사용하세요. (CUDA 12.x 필요)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Noise_Head">④ noisereduce 설치 — 필수 (노이즈 감소)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Noise_Body">편집 → 노이즈 감소 기능에 필요합니다. 모델 파일 없이 pip 한 줄로 설치됩니다.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_FFmpeg_Head">⑤ FFmpeg 설치 — 필수 (MP3·MP4 임포트)</sys:String>
+    <sys:String x:Key="Help_UG_Setup_FFmpeg_Body">MP3, MP4, MKV 등 WAV 이외 형식 임포트와 MR 추출에 FFmpeg가 필요합니다.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_FFmpeg_WingetNote">방법 A — 명령 프롬프트를 관리자 권한으로 열고 (권장):</sys:String>
+    <sys:String x:Key="Help_UG_Setup_FFmpeg_ManualNote">방법 B (수동) — ffmpeg.org/download.html 에서 Windows 빌드를 다운로드하고, bin\ 폴더 경로를 시스템 PATH 환경 변수에 추가합니다.</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Model_Head">⑥ AI 분리 모델 다운로드</sys:String>
+    <sys:String x:Key="Help_UG_Setup_Model_Body">위 도구 설치 후, 도구 → 모델 관리자에서 AI 모델을 다운로드합니다.&#x0a;&#x0a;• Hybrid Transformer Demucs (htdemucs) — 4스템 분리, 303 MB, ONNX Runtime 필요&#x0a;• UVR MDX-NET Vocal FT — 보컬/반주 2스템, 65 MB, audio-separator 필요&#x0a;&#x0a;모델을 선택 후 "모델 설치 / 다운로드"를 클릭하고, 완료 후 "새로고침"을 누르세요.</sys:String>
+
     <!-- 윤리적 사용 패널 -->
     <sys:String x:Key="Help_Eth_Title">윤리적 사용 가이드라인</sys:String>
     <sys:String x:Key="Help_Eth_Banner">Selah는 예배 사역 지원을 위해 제작되었습니다. 처리 대상 음원의 저작권 상태는 사용자가 직접 확인할 책임이 있습니다.</sys:String>
