@@ -191,6 +191,82 @@
 
     <!-- Startup dependency guide removed — tools_setup.html is opened in browser on first run -->
 
+    <!-- ── Help Window ── -->
+    <sys:String x:Key="Help_Window_Title">Help — Selah</sys:String>
+    <sys:String x:Key="Help_Nav_Label">Help Center</sys:String>
+    <sys:String x:Key="Help_Nav_Shortcuts">⌨  Keyboard Shortcuts</sys:String>
+    <sys:String x:Key="Help_Nav_UserGuide">📖  User Guide</sys:String>
+    <sys:String x:Key="Help_Nav_Ethics">⚖  Ethical Use</sys:String>
+    <sys:String x:Key="Help_Nav_About">ℹ  About Selah</sys:String>
+    <sys:String x:Key="Menu_Help_UserGuide">User Guide...</sys:String>
+
+    <!-- Shortcuts Panel -->
+    <sys:String x:Key="Help_Sh_Title">Keyboard Shortcuts</sys:String>
+    <sys:String x:Key="Help_Sh_Cat_File">FILE</sys:String>
+    <sys:String x:Key="Help_Sh_Cat_Playback">PLAYBACK</sys:String>
+    <sys:String x:Key="Help_Sh_Cat_Edit">EDIT</sys:String>
+    <sys:String x:Key="Help_Sh_Cat_Tools">TOOLS</sys:String>
+    <sys:String x:Key="Help_Sh_NewProject">Create new project</sys:String>
+    <sys:String x:Key="Help_Sh_Open">Open project</sys:String>
+    <sys:String x:Key="Help_Sh_Save">Save</sys:String>
+    <sys:String x:Key="Help_Sh_SaveAs">Save As</sys:String>
+    <sys:String x:Key="Help_Sh_Export">Export as WAV</sys:String>
+    <sys:String x:Key="Help_Sh_PlayStop">Play / Stop</sys:String>
+    <sys:String x:Key="Help_Sh_ReturnToStart">Return to start</sys:String>
+    <sys:String x:Key="Help_Sh_Split">Split clip at playhead</sys:String>
+    <sys:String x:Key="Help_Sh_Delete">Delete selected clip</sys:String>
+    <sys:String x:Key="Help_Sh_Undo">Undo (not yet implemented)</sys:String>
+    <sys:String x:Key="Help_Sh_Redo">Redo (not yet implemented)</sys:String>
+    <sys:String x:Key="Help_Sh_Metronome">Toggle metronome</sys:String>
+    <sys:String x:Key="Help_Sh_Snap">Toggle snap</sys:String>
+    <sys:String x:Key="Help_Sh_Zoom">Timeline zoom in / out</sys:String>
+    <sys:String x:Key="Help_Sh_HelpWindow">Open this help window</sys:String>
+
+    <!-- User Guide Panel -->
+    <sys:String x:Key="Help_UG_Title">User Guide</sys:String>
+    <sys:String x:Key="Help_UG_Start_Head">Getting Started</sys:String>
+    <sys:String x:Key="Help_UG_Start_Body">When you first launch Selah, a welcome screen is displayed. Click '＋ New Project' to create a new project, or '📂 Open Project' to load an existing one.&#x0a;&#x0a;When creating a new project, choose a name and sample rate. 48 kHz is recommended for video/streaming work; 44.1 kHz is typical for music files.</sys:String>
+    <sys:String x:Key="Help_UG_Project_Head">Managing Projects</sys:String>
+    <sys:String x:Key="Help_UG_Project_Body">A project saves all tracks, clips, and settings in a single folder.&#x0a;&#x0a;Ctrl+S — Save   /   Ctrl+Shift+S — Save As   /   Ctrl+O — Open&#x0a;&#x0a;When closing, if there are unsaved changes, you will be prompted to save.</sys:String>
+    <sys:String x:Key="Help_UG_Import_Head">Importing Audio</sys:String>
+    <sys:String x:Key="Help_UG_Import_Body">Use File → Import Audio/Video to import WAV, MP3, FLAC, MP4, and other formats.&#x0a;&#x0a;Formats other than WAV require FFmpeg. Without FFmpeg, only WAV files can be imported. See Tools → Essential Tools Setup Guide for installation instructions.&#x0a;&#x0a;Selecting multiple files at once adds each as a separate track.</sys:String>
+    <sys:String x:Key="Help_UG_Timeline_Head">Timeline Editing</sys:String>
+    <sys:String x:Key="Help_UG_Timeline_Body">Edit audio clips visually in the timeline.&#x0a;&#x0a;Move clip — Drag a clip to change its position.&#x0a;Split clip — Position the playhead and press S.&#x0a;Delete clip — Select a clip and press Delete.&#x0a;Zoom — Use Ctrl+Mouse Wheel to zoom in and out.&#x0a;Snap — Press N to toggle snapping.&#x0a;&#x0a;Use the volume slider, M (Mute), and S (Solo) buttons in each track header to control individual tracks.</sys:String>
+    <sys:String x:Key="Help_UG_AI_Head">AI Stem Separation / MR Extraction</sys:String>
+    <sys:String x:Key="Help_UG_AI_Body">Use AI stem separation to remove vocals or isolate drums, bass, and instruments.&#x0a;&#x0a;1. Open Tools → Model Manager and install a separation model. (Requires Python 3.10+ and internet)&#x0a;2. Select a clip in the timeline.&#x0a;3. Run Edit → Separate Stems.&#x0a;4. After completion, each stem is automatically added as a new track.&#x0a;&#x0a;Noise Reduction: Use Edit → Reduce Noise. (Requires: pip install noisereduce)</sys:String>
+    <sys:String x:Key="Help_UG_Export_Head">Exporting</sys:String>
+    <sys:String x:Key="Help_UG_Export_Body">When editing is complete, use File → Export as WAV (Ctrl+E) to render the entire timeline to a 24-bit WAV file.&#x0a;&#x0a;Muted tracks are excluded from the output. To export specific tracks only, mute the others.&#x0a;&#x0a;If the metronome is on, it will be included in the output — turn it off before exporting.</sys:String>
+
+    <!-- Ethics Panel -->
+    <sys:String x:Key="Help_Eth_Title">Ethical Use Guidelines</sys:String>
+    <sys:String x:Key="Help_Eth_Banner">Selah was created to support worship ministry. Users are responsible for verifying the copyright status of any audio they process.</sys:String>
+    <sys:String x:Key="Help_Eth_Purpose_Head">Purpose</sys:String>
+    <sys:String x:Key="Help_Eth_Purpose_Body">Selah is a ministry-oriented audio software project designed to support Christian worship preparation, small church audio workflows, and missionary accompaniment preparation. It prioritizes non-commercial, service-oriented, and local-environment use cases.</sys:String>
+    <sys:String x:Key="Help_Eth_Rights_Head">Respect for Rights and Ownership</sys:String>
+    <sys:String x:Key="Help_Eth_Rights_Body">Users must respect the rights of composers, lyricists, performers, churches and ministries that produced recordings, publishers, and copyright holders. The existence of technical functionality does not automatically mean a use is legally or ethically permitted.</sys:String>
+    <sys:String x:Key="Help_Eth_Good_Head">Examples of Responsible Use</sys:String>
+    <sys:String x:Key="Help_Eth_Good_1">Using accessible worship audio to prepare backing tracks for a small worship team</sys:String>
+    <sys:String x:Key="Help_Eth_Good_2">Organizing ministry recordings for internal church rehearsal</sys:String>
+    <sys:String x:Key="Help_Eth_Good_3">Testing stem separation on audio you have permission to process</sys:String>
+    <sys:String x:Key="Help_Eth_Bad_Head">Examples of Prohibited Use</sys:String>
+    <sys:String x:Key="Help_Eth_Bad_1">Redistributing copyrighted worship recordings without permission</sys:String>
+    <sys:String x:Key="Help_Eth_Bad_2">Commercially repackaging separated stems</sys:String>
+    <sys:String x:Key="Help_Eth_Bad_3">Removing vocals or extracting tracks without lawful rights</sys:String>
+    <sys:String x:Key="Help_Eth_Bad_4">Misrepresenting official church or ministry approval</sys:String>
+    <sys:String x:Key="Help_Eth_AI_Head">AI / Model Caution</sys:String>
+    <sys:String x:Key="Help_Eth_AI_Body">Model outputs may be imperfect and may contain artifacts or reconstruction errors. Third-party model terms may impose additional restrictions. Maintainers do not guarantee suitability for commercial distribution or public release.</sys:String>
+    <sys:String x:Key="Help_Eth_Note">This document does not replace legal advice. For legal terms, see LICENSE and TRADEMARK.md.</sys:String>
+
+    <!-- About Panel -->
+    <sys:String x:Key="Help_Ab_Subtitle">MR Editor for Worship Ministry</sys:String>
+    <sys:String x:Key="Help_Ab_Version">Version: 0.1.0 (Prototype)</sys:String>
+    <sys:String x:Key="Help_Ab_License">License: GPLv3</sys:String>
+    <sys:String x:Key="Help_Ab_SourceLabel">Source:</sys:String>
+    <sys:String x:Key="Help_Ab_SourceUrl">https://github.com/elrang3843/Selah</sys:String>
+    <sys:String x:Key="Help_Ab_Desc">This software is freely distributed as open source (GPLv3) for worship workers in small churches and mission fields.</sys:String>
+    <sys:String x:Key="Help_Ab_Credits_Head">Key Open Source Libraries</sys:String>
+    <sys:String x:Key="Help_Ab_Glory">To God be the glory.</sys:String>
+
     <!-- ── Misc ── -->
     <sys:String x:Key="Clip_UnknownSource">Unknown source</sys:String>
     <sys:String x:Key="Project_SaveFirst">Please save the project first.</sys:String>
