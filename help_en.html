@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta charset="UTF-8">
+<title>Selah Help</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #1e1e2e; color: #cdd6f4;
+  font-family: 'Segoe UI', sans-serif; font-size: 14px;
+  line-height: 1.7; padding: 32px 36px 60px;
+}
+h1 { font-size: 22px; font-weight: 600; color: #89b4fa; margin-bottom: 4px; }
+h2 { font-size: 15px; font-weight: 600; color: #cdd6f4; margin: 22px 0 7px; }
+h3 { font-size: 13px; font-weight: 600; color: #fab387; margin: 18px 0 6px; }
+p  { color: #a6adc8; margin-bottom: 8px; }
+hr { border: none; border-top: 1px solid #313244; margin: 14px 0 14px; }
+section { margin-bottom: 56px; }
+.cat {
+  font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  color: #6c7086; text-transform: uppercase;
+  margin: 22px 0 10px;
+}
+.divider { border-top: 1px solid #313244; margin-bottom: 12px; }
+.key-row {
+  display: table; width: 100%; margin-bottom: 8px;
+}
+.key-cell { display: table-cell; width: 180px; vertical-align: middle; }
+.desc-cell { display: table-cell; vertical-align: middle; color: #cdd6f4; font-size: 13px; }
+.kbd {
+  display: inline-block;
+  background: #313244; color: #a6adc8;
+  font-family: Consolas, 'Courier New', monospace; font-size: 11.5px;
+  padding: 3px 9px; border-radius: 4px;
+}
+.dim { color: #6c7086; }
+.warn {
+  background: #2a2419; border: 1px solid #f9e2af; border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0; color: #f9e2af; font-size: 12.5px;
+}
+.good {
+  background: #1a2820; border: 1px solid #a6e3a1; border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0;
+}
+.good-item { color: #a6e3a1; font-size: 12.5px; margin-bottom: 4px; }
+.bad {
+  background: #2a1a1e; border: 1px solid #f38ba8; border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0;
+}
+.bad-item { color: #f38ba8; font-size: 12.5px; margin-bottom: 4px; }
+.code {
+  background: #11111b; border-radius: 4px;
+  padding: 8px 14px; margin: 6px 0;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 12px; color: #a6e3a1;
+}
+.note { font-size: 12px; color: #6c7086; margin: 8px 0 2px; }
+.card {
+  background: #313244; border-radius: 5px;
+  padding: 14px 16px; margin: 8px 0;
+}
+.credit-name { font-size: 13px; font-weight: 600; color: #cdd6f4; }
+.credit-meta { font-size: 11.5px; color: #6c7086; }
+.glory {
+  text-align: center; font-style: italic;
+  color: #a6adc8; font-size: 15px;
+  border-top: 1px solid #313244; padding-top: 18px; margin-top: 28px;
+}
+</style>
+<script>
+function scrollToSection(id) {
+  var el = document.getElementById(id);
+  if (el) { el.scrollIntoView(true); }
+}
+</script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SHORTCUTS
+     ═══════════════════════════════════════════ -->
+<section id="shortcuts">
+<h1>Keyboard Shortcuts</h1>
+<hr>
+
+<div class="cat">FILE</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + N</span></div><div class="desc-cell">Create new project</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + O</span></div><div class="desc-cell">Open project</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + S</span></div><div class="desc-cell">Save</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Shift + S</span></div><div class="desc-cell">Save As</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + E</span></div><div class="desc-cell">Export as WAV</div></div>
+
+<div class="cat">PLAYBACK</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Space</span></div><div class="desc-cell">Play / Stop</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Home</span></div><div class="desc-cell">Return to start</div></div>
+
+<div class="cat">EDIT</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">S</span></div><div class="desc-cell">Split clip at playhead</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Delete</span></div><div class="desc-cell">Delete selected clip</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Z</span></div><div class="desc-cell dim">Undo (not yet implemented)</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Y</span></div><div class="desc-cell dim">Redo (not yet implemented)</div></div>
+
+<div class="cat">TOOLS</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">M</span></div><div class="desc-cell">Toggle metronome</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">N</span></div><div class="desc-cell">Toggle snap</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Wheel</span></div><div class="desc-cell">Timeline zoom in / out</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">F1</span></div><div class="desc-cell">Open this help window</div></div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     USER GUIDE
+     ═══════════════════════════════════════════ -->
+<section id="userguide">
+<h1>User Guide</h1>
+<hr>
+
+<h2>What is Selah?</h2>
+<p>Selah is a Windows desktop application for worship music preparation, project-based audio editing, and AI-assisted stem separation. It is designed for small churches, mission fields, and worship teams to prepare accompaniment-oriented audio from recordings or worship media. Selah is free and open-source (GPLv3) and runs entirely offline.</p>
+
+<h2>Getting Started</h2>
+<p>When you first launch Selah, the welcome screen is displayed. Click <strong>＋ New Project</strong> to create a new project, or <strong>📂 Open Project</strong> to load an existing one. Choose a name and sample rate — 48 kHz is recommended for video/streaming; 44.1 kHz for music files.</p>
+
+<h2>Managing Projects</h2>
+<p>A project saves all tracks, clips, and settings in a single folder.</p>
+<p><span class="kbd">Ctrl+S</span> Save &nbsp;|&nbsp; <span class="kbd">Ctrl+Shift+S</span> Save As &nbsp;|&nbsp; <span class="kbd">Ctrl+O</span> Open</p>
+<p>When closing with unsaved changes, you will be prompted to save.</p>
+
+<h2>Importing Audio</h2>
+<p>Use <strong>File → Import Audio/Video</strong> to import WAV, MP3, FLAC, MP4, and other formats. Formats other than WAV require FFmpeg. Selecting multiple files at once adds each as a separate track.</p>
+
+<h2>Timeline Editing</h2>
+<p><strong>Move clip</strong> — Drag a clip to change its position.<br>
+<strong>Split clip</strong> — Position the playhead and press <span class="kbd">S</span>.<br>
+<strong>Delete clip</strong> — Select a clip and press <span class="kbd">Delete</span>.<br>
+<strong>Zoom</strong> — Use <span class="kbd">Ctrl+Wheel</span> to zoom in and out.<br>
+<strong>Snap</strong> — Press <span class="kbd">N</span> to toggle snapping.</p>
+<p>Use the volume slider, <strong>M</strong> (Mute), and <strong>S</strong> (Solo) buttons in each track header to control individual tracks.</p>
+
+<h2>AI Stem Separation / MR Extraction</h2>
+<p>Use AI stem separation to remove vocals or isolate drums, bass, and instruments.</p>
+<p>1. Open <strong>Tools → Model Manager</strong> and install a model. (Requires Python 3.10+ and internet)<br>
+2. Select a clip in the timeline.<br>
+3. Run <strong>Edit → Separate Stems</strong>.<br>
+4. Each stem is automatically added as a new track.</p>
+<p><strong>Noise Reduction:</strong> Edit → Reduce Noise. (Requires: <code>pip install noisereduce</code>)</p>
+
+<h2>Exporting</h2>
+<p>Use <strong>File → Export as WAV</strong> (<span class="kbd">Ctrl+E</span>) to render the entire timeline to a 24-bit WAV. Muted tracks are excluded. If the metronome is on, it will be included — turn it off before exporting.</p>
+
+<hr style="margin:32px 0 18px; border-color:#89b4fa;">
+<h1 style="font-size:18px;">Required Tools Setup</h1>
+<p style="margin-top:8px;">The following tools are required for stem separation and noise reduction. Basic WAV editing works without any additional installation.</p>
+
+<h3>① Install Python — Required (all MR extraction)</h3>
+<p>Download Python 3.10+ from <strong>python.org/downloads</strong>. Check <strong>"Add Python to PATH"</strong> during install. Restart Selah after installation.</p>
+<div class="warn">⚠ Do not use the Microsoft Store version of Python — it does not work correctly as a background process.</div>
+<div class="note">Verify (Command Prompt):</div>
+<div class="code">python --version</div>
+
+<h3>② Install ONNX Runtime — Required (Demucs model)</h3>
+<div class="code">pip install onnxruntime numpy scipy</div>
+<div class="note">If pip is not found:</div>
+<div class="code">python -m pip install onnxruntime numpy scipy</div>
+<div class="warn">⚠ Virtual environments (venv, conda): Selah does not auto-detect virtual environments. Install to global Python, or use <code>py -m pip install</code>.</div>
+
+<h3>③ Install audio-separator — Recommended (vocal separation)</h3>
+<p>Recognizes a wider range of voices than Demucs. For GPU acceleration, replace [cpu] with [gpu]. (Requires CUDA 12.x)</p>
+<div class="code">pip install "audio-separator[cpu]"</div>
+
+<h3>④ Install noisereduce — Required (noise reduction)</h3>
+<div class="code">pip install noisereduce</div>
+
+<h3>⑤ Install FFmpeg — Required (MP3/MP4 import)</h3>
+<p>Method A — Open Command Prompt as Administrator (recommended):</p>
+<div class="code">winget install Gyan.FFmpeg</div>
+<p>Method B (manual) — Download from <strong>ffmpeg.org/download.html</strong> and add the bin\ folder to your system PATH.</p>
+
+<h3>⑥ Download AI Separation Model</h3>
+<p>After installing the tools above, open <strong>Tools → Model Manager</strong> to download a model.</p>
+<div class="card">
+  <div class="credit-name">Hybrid Transformer Demucs (htdemucs)</div>
+  <div class="credit-meta">4-stem separation · 303 MB · requires ONNX Runtime</div>
+</div>
+<div class="card">
+  <div class="credit-name">UVR MDX-NET Vocal FT</div>
+  <div class="credit-meta">vocal/backing 2-stem · 65 MB · requires audio-separator</div>
+</div>
+<p>Select a model, click <strong>Install Model / Download</strong>, then click <strong>Refresh</strong> when done.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     ETHICS
+     ═══════════════════════════════════════════ -->
+<section id="ethics">
+<h1>Ethical Use Guidelines</h1>
+<hr>
+<div class="warn">Selah was created to support worship ministry. Users are responsible for verifying the copyright status of any audio they process.</div>
+
+<h2>Purpose</h2>
+<p>Selah is a ministry-oriented audio software project designed to support Christian worship preparation, small church audio workflows, and missionary accompaniment preparation. It prioritizes non-commercial, service-oriented, and local-environment use cases.</p>
+
+<h2>Respect for Rights and Ownership</h2>
+<p>Users must respect the rights of composers, lyricists, performers, churches, ministries, publishers, and copyright holders. The existence of technical functionality does not automatically mean a use is legally or ethically permitted.</p>
+
+<h2>Examples of Responsible Use</h2>
+<div class="good">
+  <div class="good-item">✓ Using accessible worship audio to prepare backing tracks for a small worship team</div>
+  <div class="good-item">✓ Organizing ministry recordings for internal church rehearsal</div>
+  <div class="good-item">✓ Testing stem separation on audio you have permission to process</div>
+</div>
+
+<h2>Examples of Prohibited Use</h2>
+<div class="bad">
+  <div class="bad-item">✗ Redistributing copyrighted worship recordings without permission</div>
+  <div class="bad-item">✗ Commercially repackaging separated stems</div>
+  <div class="bad-item">✗ Removing vocals or extracting tracks without lawful rights</div>
+  <div class="bad-item">✗ Misrepresenting official church or ministry approval</div>
+</div>
+
+<h2>AI / Model Caution</h2>
+<p>Model outputs may be imperfect and may contain artifacts. Third-party model terms may impose additional restrictions. Maintainers do not guarantee suitability for commercial distribution or public release.</p>
+
+<p style="font-size:11.5px; color:#6c7086; font-style:italic; border-top:1px solid #313244; padding-top:14px; margin-top:24px;">
+This document does not replace legal advice. For legal terms, see LICENSE and TRADEMARK.md.
+</p>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     ABOUT
+     ═══════════════════════════════════════════ -->
+<section id="about">
+<h1 style="font-size:32px;">Selah</h1>
+<p style="font-size:15px; color:#a6adc8; margin-top:4px; margin-bottom:20px;">MR Editor for Worship Ministry</p>
+<hr>
+
+<p style="margin-top:16px;">Version: 0.1.0 (Prototype)</p>
+<p>License: GPLv3</p>
+<p>Source: <span style="color:#89b4fa; text-decoration:underline;">https://github.com/elrang3843/Selah</span></p>
+
+<p style="margin-top:16px; color:#a6adc8;">This software is freely distributed as open source (GPLv3) for worship workers in small churches and mission fields.</p>
+
+<h2>Key Open Source Libraries</h2>
+<div class="card" style="margin-bottom:8px;">
+  <div style="display:table; width:100%;">
+    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; padding-left:10px;">
+      <div class="credit-name">NAudio 2.2.1</div>
+      <div class="credit-meta">MIT License — Microsoft</div>
+    </div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:8px;">
+  <div style="display:table; width:100%;">
+    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; padding-left:10px;">
+      <div class="credit-name">Demucs</div>
+      <div class="credit-meta">MIT License — Meta AI</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div style="display:table; width:100%;">
+    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; padding-left:10px;">
+      <div class="credit-name">FFmpeg</div>
+      <div class="credit-meta">LGPL / GPL (optional)</div>
+    </div>
+  </div>
+</div>
+
+<div class="glory">To God be the glory.</div>
+</section>
+
+</body>
+</html>

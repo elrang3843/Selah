@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta charset="UTF-8">
+<title>Selah 도움말</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #1e1e2e; color: #cdd6f4;
+  font-family: 'Malgun Gothic', 'Segoe UI', sans-serif; font-size: 14px;
+  line-height: 1.7; padding: 32px 36px 60px;
+}
+h1 { font-size: 22px; font-weight: 600; color: #89b4fa; margin-bottom: 4px; }
+h2 { font-size: 15px; font-weight: 600; color: #cdd6f4; margin: 22px 0 7px; }
+h3 { font-size: 13px; font-weight: 600; color: #fab387; margin: 18px 0 6px; }
+p  { color: #a6adc8; margin-bottom: 8px; }
+hr { border: none; border-top: 1px solid #313244; margin: 14px 0 14px; }
+section { margin-bottom: 56px; }
+.cat {
+  font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  color: #6c7086; text-transform: uppercase;
+  margin: 22px 0 10px;
+}
+.divider { border-top: 1px solid #313244; margin-bottom: 12px; }
+.key-row { display: table; width: 100%; margin-bottom: 8px; }
+.key-cell { display: table-cell; width: 180px; vertical-align: middle; }
+.desc-cell { display: table-cell; vertical-align: middle; color: #cdd6f4; font-size: 13px; }
+.kbd {
+  display: inline-block;
+  background: #313244; color: #a6adc8;
+  font-family: Consolas, 'Courier New', monospace; font-size: 11.5px;
+  padding: 3px 9px; border-radius: 4px;
+}
+.dim { color: #6c7086; }
+.warn {
+  background: #2a2419; border: 1px solid #f9e2af; border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0; color: #f9e2af; font-size: 12.5px;
+}
+.good {
+  background: #1a2820; border: 1px solid #a6e3a1; border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0;
+}
+.good-item { color: #a6e3a1; font-size: 12.5px; margin-bottom: 4px; }
+.bad {
+  background: #2a1a1e; border: 1px solid #f38ba8; border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0;
+}
+.bad-item { color: #f38ba8; font-size: 12.5px; margin-bottom: 4px; }
+.code {
+  background: #11111b; border-radius: 4px;
+  padding: 8px 14px; margin: 6px 0;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 12px; color: #a6e3a1;
+}
+.note { font-size: 12px; color: #6c7086; margin: 8px 0 2px; }
+.card {
+  background: #313244; border-radius: 5px;
+  padding: 14px 16px; margin: 8px 0;
+}
+.credit-name { font-size: 13px; font-weight: 600; color: #cdd6f4; }
+.credit-meta { font-size: 11.5px; color: #6c7086; }
+.glory {
+  text-align: center; font-style: italic;
+  color: #a6adc8; font-size: 15px;
+  border-top: 1px solid #313244; padding-top: 18px; margin-top: 28px;
+}
+</style>
+<script>
+function scrollToSection(id) {
+  var el = document.getElementById(id);
+  if (el) { el.scrollIntoView(true); }
+}
+</script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     단축키 목록
+     ═══════════════════════════════════════════ -->
+<section id="shortcuts">
+<h1>단축키 목록</h1>
+<hr>
+
+<div class="cat">파일</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + N</span></div><div class="desc-cell">새 프로젝트 만들기</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + O</span></div><div class="desc-cell">프로젝트 열기</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + S</span></div><div class="desc-cell">저장</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Shift + S</span></div><div class="desc-cell">다른 이름으로 저장</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + E</span></div><div class="desc-cell">WAV로 내보내기</div></div>
+
+<div class="cat">재생</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Space</span></div><div class="desc-cell">재생 / 정지</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Home</span></div><div class="desc-cell">처음으로 이동</div></div>
+
+<div class="cat">편집</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">S</span></div><div class="desc-cell">재생 커서 위치에서 클립 분할</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Delete</span></div><div class="desc-cell">선택한 클립 삭제</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Z</span></div><div class="desc-cell dim">실행 취소 (미구현)</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Y</span></div><div class="desc-cell dim">다시 실행 (미구현)</div></div>
+
+<div class="cat">도구</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">M</span></div><div class="desc-cell">메트로놈 켜기 / 끄기</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">N</span></div><div class="desc-cell">스냅 켜기 / 끄기</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Wheel</span></div><div class="desc-cell">타임라인 줌 인 / 아웃</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">F1</span></div><div class="desc-cell">이 도움말 창 열기</div></div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     사용 가이드
+     ═══════════════════════════════════════════ -->
+<section id="userguide">
+<h1>사용 가이드</h1>
+<hr>
+
+<h2>셀라란?</h2>
+<p>Selah는 예배 음악 준비, 프로젝트 기반 오디오 편집, AI 스템 분리를 위한 Windows 데스크탑 애플리케이션입니다. 소형 교회, 선교지, 소규모 찬양팀이 녹음이나 예배 영상에서 반주 중심의 오디오 자료를 실용적으로 준비할 수 있도록 설계되었습니다. 인터넷 연결 없이 로컬에서 실행되는 무료·오픈소스(GPLv3) 도구입니다.</p>
+
+<h2>시작하기</h2>
+<p>Selah를 처음 실행하면 환영 화면이 표시됩니다. <strong>＋ 새 프로젝트</strong> 버튼으로 새 프로젝트를 만들거나, <strong>📂 프로젝트 열기</strong>로 기존 프로젝트를 불러올 수 있습니다. 새 프로젝트 생성 시 이름과 샘플레이트를 선택합니다. 영상·스트리밍 작업에는 48 kHz, 음악 파일 중심이면 44.1 kHz를 권장합니다.</p>
+
+<h2>프로젝트 관리</h2>
+<p>프로젝트는 모든 트랙, 클립, 설정을 한 폴더에 저장합니다.</p>
+<p><span class="kbd">Ctrl+S</span> 저장 &nbsp;|&nbsp; <span class="kbd">Ctrl+Shift+S</span> 다른 이름으로 저장 &nbsp;|&nbsp; <span class="kbd">Ctrl+O</span> 열기</p>
+<p>창을 닫을 때 저장하지 않은 변경사항이 있으면 저장 여부를 확인합니다.</p>
+
+<h2>오디오 가져오기</h2>
+<p><strong>파일 → 오디오/영상 불러오기</strong>로 WAV, MP3, FLAC, MP4 등 다양한 형식을 가져올 수 있습니다. WAV 이외 형식은 FFmpeg가 필요합니다. 여러 파일을 한 번에 선택하면 각각 별도 트랙으로 추가됩니다.</p>
+
+<h2>타임라인 편집</h2>
+<p><strong>클립 이동</strong> — 클립을 드래그해 위치를 변경합니다.<br>
+<strong>클립 분할</strong> — 재생 커서를 원하는 위치에 놓고 <span class="kbd">S</span> 키를 누릅니다.<br>
+<strong>클립 삭제</strong> — 클립 선택 후 <span class="kbd">Delete</span> 키를 누릅니다.<br>
+<strong>줌</strong> — <span class="kbd">Ctrl+Wheel</span>로 확대·축소합니다.<br>
+<strong>스냅</strong> — <span class="kbd">N</span> 키로 켜고 끌 수 있습니다.</p>
+<p>트랙 헤더에서 볼륨 슬라이더, <strong>M</strong>(음소거), <strong>S</strong>(솔로) 버튼으로 각 트랙을 조절합니다.</p>
+
+<h2>AI 스템 분리 / MR 추출</h2>
+<p>AI 스템 분리로 음악에서 보컬을 제거하거나 드럼·베이스·악기를 분리할 수 있습니다.</p>
+<p>1. <strong>도구 → 모델 관리자</strong>를 열고 분리 모델을 설치합니다. (Python 3.10+, 인터넷 연결 필요)<br>
+2. 분리할 클립을 타임라인에서 선택합니다.<br>
+3. <strong>편집 → 스템 분리</strong>를 실행합니다.<br>
+4. 분리 완료 후 각 스템이 새 트랙으로 자동 추가됩니다.</p>
+<p><strong>노이즈 감소:</strong> 편집 → 노이즈 감소. (<code>pip install noisereduce</code> 필요)</p>
+
+<h2>내보내기</h2>
+<p><strong>파일 → WAV로 내보내기</strong> (<span class="kbd">Ctrl+E</span>)로 전체 타임라인을 24-bit WAV로 렌더링합니다. 뮤트된 트랙은 출력에 포함되지 않습니다. 메트로놈이 켜져 있으면 출력에 포함되므로 내보내기 전에 확인하세요.</p>
+
+<hr style="margin:32px 0 18px; border-color:#89b4fa;">
+<h1 style="font-size:18px;">필수 도구 설치</h1>
+<p style="margin-top:8px;">스템 분리(MR 추출)와 노이즈 감소 기능을 사용하려면 아래 도구를 설치해야 합니다. 기본 WAV 편집과 내보내기는 추가 설치 없이 사용 가능합니다.</p>
+
+<h3>① Python 설치 — 필수 (MR 추출 전체)</h3>
+<p><strong>python.org/downloads</strong>에서 Python 3.10 이상을 다운로드하세요. 설치 시 반드시 <strong>"Add Python to PATH"</strong> 옵션을 체크하세요. 설치 완료 후 셀라를 재시작하세요.</p>
+<div class="warn">⚠ Windows 스토어(Microsoft Store) Python은 사용하지 마세요. 백그라운드 실행 시 제대로 동작하지 않습니다.</div>
+<div class="note">설치 확인 (명령 프롬프트):</div>
+<div class="code">python --version</div>
+
+<h3>② ONNX Runtime 설치 — 필수 (Demucs 모델)</h3>
+<div class="code">pip install onnxruntime numpy scipy</div>
+<div class="note">pip 명령을 찾지 못하는 경우:</div>
+<div class="code">python -m pip install onnxruntime numpy scipy</div>
+<div class="warn">⚠ 가상 환경(venv, conda) 사용 시: 셀라가 가상 환경을 자동 인식하지 않습니다. 전역 Python에 설치하거나 <code>py -m pip install</code>을 사용하세요.</div>
+
+<h3>③ audio-separator 설치 — 권장 (보컬 분리)</h3>
+<p>Demucs보다 훨씬 넓은 범위의 목소리를 인식합니다. GPU 가속을 원하면 [cpu] 대신 [gpu]를 사용하세요. (CUDA 12.x 필요)</p>
+<div class="code">pip install "audio-separator[cpu]"</div>
+
+<h3>④ noisereduce 설치 — 필수 (노이즈 감소)</h3>
+<div class="code">pip install noisereduce</div>
+
+<h3>⑤ FFmpeg 설치 — 필수 (MP3·MP4 임포트)</h3>
+<p>방법 A — 명령 프롬프트를 관리자 권한으로 열고 (권장):</p>
+<div class="code">winget install Gyan.FFmpeg</div>
+<p>방법 B (수동) — <strong>ffmpeg.org/download.html</strong>에서 Windows 빌드를 다운로드하고, bin\ 폴더 경로를 시스템 PATH 환경 변수에 추가합니다.</p>
+
+<h3>⑥ AI 분리 모델 다운로드</h3>
+<p>위 도구 설치 후, <strong>도구 → 모델 관리자</strong>에서 AI 모델을 다운로드합니다.</p>
+<div class="card">
+  <div class="credit-name">Hybrid Transformer Demucs (htdemucs)</div>
+  <div class="credit-meta">4스템 분리 · 303 MB · ONNX Runtime 필요</div>
+</div>
+<div class="card">
+  <div class="credit-name">UVR MDX-NET Vocal FT</div>
+  <div class="credit-meta">보컬/반주 2스템 · 65 MB · audio-separator 필요</div>
+</div>
+<p>모델 선택 후 <strong>모델 설치 / 다운로드</strong>를 클릭하고, 완료 후 <strong>새로고침</strong>을 누르세요.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     윤리적 사용
+     ═══════════════════════════════════════════ -->
+<section id="ethics">
+<h1>윤리적 사용 가이드라인</h1>
+<hr>
+<div class="warn">Selah는 예배 사역 지원을 위해 제작되었습니다. 처리 대상 음원의 저작권 상태는 사용자가 직접 확인할 책임이 있습니다.</div>
+
+<h2>프로젝트 목적</h2>
+<p>Selah는 기독교 예배 준비, 소형 교회 및 개척교회 오디오 작업, 선교 및 사역 관련 반주 준비를 지원하기 위해 개발된 사역 지향 오디오 소프트웨어입니다. 비상업적·섬김 중심·로컬 환경 중심의 활용을 우선합니다.</p>
+
+<h2>권리와 소유에 대한 존중</h2>
+<p>작곡자, 작사가, 연주자, 녹음물을 제작한 교회와 사역 단체, 출판사 및 저작권자의 권리를 존중해야 합니다. 기술적으로 가능하다고 해서 법적·윤리적으로 허용되는 것은 아닙니다.</p>
+
+<h2>책임 있는 사용 예시</h2>
+<div class="good">
+  <div class="good-item">✓ 적법하게 접근 가능한 예배 음원을 소규모 찬양팀 반주 준비에 활용</div>
+  <div class="good-item">✓ 교회 내부 리허설을 위해 사역 녹음물을 정리</div>
+  <div class="good-item">✓ 자신이 처리 권한을 가진 오디오 자료에 대해 스템 분리 시험</div>
+</div>
+
+<h2>문제가 될 수 있는 사용 예시</h2>
+<div class="bad">
+  <div class="bad-item">✗ 허락 없이 저작권 있는 예배 녹음물을 재배포</div>
+  <div class="bad-item">✗ 분리된 스템을 상업적으로 재포장</div>
+  <div class="bad-item">✗ 적법한 권리 없이 보컬 제거·트랙 추출</div>
+  <div class="bad-item">✗ 특정 교회·사역 단체의 승인 없이 승인된 것처럼 오인시키는 사용</div>
+</div>
+
+<h2>AI / 모델 관련 주의</h2>
+<p>모델 출력은 완벽하지 않을 수 있으며 아티팩트·재구성 오류가 포함될 수 있습니다. 제3자 모델 약관이 추가 제한을 둘 수 있습니다. 유지관리자는 상업 배포·공개 릴리스에 대한 적합성을 보장하지 않습니다.</p>
+
+<p style="font-size:11.5px; color:#6c7086; font-style:italic; border-top:1px solid #313244; padding-top:14px; margin-top:24px;">
+이 문서는 법률 자문을 대체하지 않습니다. 법적 조건은 LICENSE, TRADEMARK.md를 참고하세요.
+</p>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     셀라 정보
+     ═══════════════════════════════════════════ -->
+<section id="about">
+<h1 style="font-size:32px;">Selah</h1>
+<p style="font-size:15px; color:#a6adc8; margin-top:4px; margin-bottom:20px;">찬양사역용 MR편집기</p>
+<hr>
+
+<p style="margin-top:16px;">버전: 0.1.0 (1차 프로토타입)</p>
+<p>라이선스: GPLv3</p>
+<p>소스코드: <span style="color:#89b4fa; text-decoration:underline;">https://github.com/elrang3843/Selah</span></p>
+
+<p style="margin-top:16px; color:#a6adc8;">이 소프트웨어는 소형 교회와 선교 현장의 예배 사역자를 위해 오픈소스(GPLv3)로 자유롭게 배포됩니다.</p>
+
+<h2>사용된 핵심 오픈소스 라이브러리</h2>
+<div class="card" style="margin-bottom:8px;">
+  <div style="display:table; width:100%;">
+    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; padding-left:10px;">
+      <div class="credit-name">NAudio 2.2.1</div>
+      <div class="credit-meta">MIT License — Microsoft</div>
+    </div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:8px;">
+  <div style="display:table; width:100%;">
+    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; padding-left:10px;">
+      <div class="credit-name">Demucs</div>
+      <div class="credit-meta">MIT License — Meta AI</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div style="display:table; width:100%;">
+    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; padding-left:10px;">
+      <div class="credit-name">FFmpeg</div>
+      <div class="credit-meta">LGPL / GPL (선택 설치 / optional)</div>
+    </div>
+  </div>
+</div>
+
+<div class="glory">모든 영광을 하나님께.</div>
+</section>
+
+</body>
+</html>

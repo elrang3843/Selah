@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta charset="UTF-8">
+<title>Selah 帮助</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #1e1e2e; color: #cdd6f4;
+  font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif; font-size: 14px;
+  line-height: 1.7; padding: 32px 36px 60px;
+}
+h1 { font-size: 22px; font-weight: 600; color: #89b4fa; margin-bottom: 4px; }
+h2 { font-size: 15px; font-weight: 600; color: #cdd6f4; margin: 22px 0 7px; }
+h3 { font-size: 13px; font-weight: 600; color: #fab387; margin: 18px 0 6px; }
+p  { color: #a6adc8; margin-bottom: 8px; }
+hr { border: none; border-top: 1px solid #313244; margin: 14px 0 14px; }
+section { margin-bottom: 56px; }
+.cat {
+  font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  color: #6c7086; text-transform: uppercase;
+  margin: 22px 0 10px;
+}
+.divider { border-top: 1px solid #313244; margin-bottom: 12px; }
+.key-row { display: table; width: 100%; margin-bottom: 8px; }
+.key-cell { display: table-cell; width: 180px; vertical-align: middle; }
+.desc-cell { display: table-cell; vertical-align: middle; color: #cdd6f4; font-size: 13px; }
+.kbd {
+  display: inline-block;
+  background: #313244; color: #a6adc8;
+  font-family: Consolas, 'Courier New', monospace; font-size: 11.5px;
+  padding: 3px 9px; border-radius: 4px;
+}
+.dim { color: #6c7086; }
+.warn {
+  background: #2a2419; border: 1px solid #f9e2af; border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0; color: #f9e2af; font-size: 12.5px;
+}
+.good {
+  background: #1a2820; border: 1px solid #a6e3a1; border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0;
+}
+.good-item { color: #a6e3a1; font-size: 12.5px; margin-bottom: 4px; }
+.bad {
+  background: #2a1a1e; border: 1px solid #f38ba8; border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0;
+}
+.bad-item { color: #f38ba8; font-size: 12.5px; margin-bottom: 4px; }
+.code {
+  background: #11111b; border-radius: 4px;
+  padding: 8px 14px; margin: 6px 0;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 12px; color: #a6e3a1;
+}
+.note { font-size: 12px; color: #6c7086; margin: 8px 0 2px; }
+.card { background: #313244; border-radius: 5px; padding: 14px 16px; margin: 8px 0; }
+.credit-name { font-size: 13px; font-weight: 600; color: #cdd6f4; }
+.credit-meta { font-size: 11.5px; color: #6c7086; }
+.glory {
+  text-align: center; font-style: italic;
+  color: #a6adc8; font-size: 15px;
+  border-top: 1px solid #313244; padding-top: 18px; margin-top: 28px;
+}
+</style>
+<script>
+function scrollToSection(id) {
+  var el = document.getElementById(id);
+  if (el) { el.scrollIntoView(true); }
+}
+</script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     键盘快捷键
+     ═══════════════════════════════════════════ -->
+<section id="shortcuts">
+<h1>键盘快捷键</h1>
+<hr>
+
+<div class="cat">文件</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + N</span></div><div class="desc-cell">新建项目</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + O</span></div><div class="desc-cell">打开项目</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + S</span></div><div class="desc-cell">保存</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Shift + S</span></div><div class="desc-cell">另存为</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + E</span></div><div class="desc-cell">导出为 WAV</div></div>
+
+<div class="cat">播放</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Space</span></div><div class="desc-cell">播放 / 停止</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Home</span></div><div class="desc-cell">返回开头</div></div>
+
+<div class="cat">编辑</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">S</span></div><div class="desc-cell">在播放头处分割片段</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Delete</span></div><div class="desc-cell">删除所选片段</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Z</span></div><div class="desc-cell dim">撤销（暂未实现）</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Y</span></div><div class="desc-cell dim">重做（暂未实现）</div></div>
+
+<div class="cat">工具</div>
+<div class="divider"></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">M</span></div><div class="desc-cell">切换节拍器</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">N</span></div><div class="desc-cell">切换吸附</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">Ctrl + Wheel</span></div><div class="desc-cell">时间轴缩放</div></div>
+<div class="key-row"><div class="key-cell"><span class="kbd">F1</span></div><div class="desc-cell">打开帮助窗口</div></div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     使用指南
+     ═══════════════════════════════════════════ -->
+<section id="userguide">
+<h1>使用指南</h1>
+<hr>
+
+<h2>什么是 Selah？</h2>
+<p>Selah 是一款用于敬拜音乐准备、项目式音频编辑和 AI 辅助音轨分离的 Windows 桌面应用程序。专为小型教会、宣教工场和敬拜团队设计，帮助他们从录音或敬拜媒体中实用地制作以伴奏为主的音频资料。Selah 是完全离线运行的免费开源软件（GPLv3）。</p>
+
+<h2>开始使用</h2>
+<p>首次启动 Selah 时，会显示欢迎界面。点击 <strong>＋ 新建项目</strong> 创建新项目，或点击 <strong>📂 打开项目</strong> 加载已有项目。创建新项目时，选择名称和采样率——视频/流媒体工作推荐 48 kHz，音乐文件推荐 44.1 kHz。</p>
+
+<h2>项目管理</h2>
+<p>项目将所有轨道、片段和设置保存在同一个文件夹中。</p>
+<p><span class="kbd">Ctrl+S</span> 保存 &nbsp;|&nbsp; <span class="kbd">Ctrl+Shift+S</span> 另存为 &nbsp;|&nbsp; <span class="kbd">Ctrl+O</span> 打开</p>
+<p>关闭时若有未保存的更改，系统会提示是否保存。</p>
+
+<h2>导入音频</h2>
+<p>使用 <strong>文件 → 导入音频/视频</strong> 可导入 WAV、MP3、FLAC、MP4 等多种格式。WAV 以外的格式需要安装 FFmpeg。同时选择多个文件时，每个文件会分别添加为独立轨道。</p>
+
+<h2>时间轴编辑</h2>
+<p><strong>移动片段</strong> — 拖动片段更改其位置。<br>
+<strong>分割片段</strong> — 将播放头定位到目标位置，按 <span class="kbd">S</span> 键。<br>
+<strong>删除片段</strong> — 选中片段后按 <span class="kbd">Delete</span> 键。<br>
+<strong>缩放</strong> — 使用 <span class="kbd">Ctrl+滚轮</span> 放大/缩小。<br>
+<strong>吸附</strong> — 按 <span class="kbd">N</span> 键切换吸附。</p>
+<p>在轨道标题栏中使用音量滑块、<strong>M</strong>（静音）和 <strong>S</strong>（独奏）按钮控制各轨道。</p>
+
+<h2>AI 音轨分离 / MR 提取</h2>
+<p>使用 AI 音轨分离可以从音乐中去除人声，或分离鼓、贝斯和乐器。</p>
+<p>1. 打开 <strong>工具 → 模型管理器</strong> 并安装分离模型。（需要 Python 3.10+ 和网络连接）<br>
+2. 在时间轴中选择要处理的片段。<br>
+3. 执行 <strong>编辑 → 分离音轨</strong>。<br>
+4. 分离完成后，每个音轨将自动添加为新轨道。</p>
+<p><strong>降噪：</strong> 编辑 → 降噪。（需要：<code>pip install noisereduce</code>）</p>
+
+<h2>导出</h2>
+<p>编辑完成后，使用 <strong>文件 → 导出为 WAV</strong>（<span class="kbd">Ctrl+E</span>）将整个时间轴渲染为 24-bit WAV 文件。静音轨道不会包含在输出中。如果节拍器处于开启状态，它将被包含在输出中——导出前请确认。</p>
+
+<hr style="margin:32px 0 18px; border-color:#89b4fa;">
+<h1 style="font-size:18px;">必要工具安装</h1>
+<p style="margin-top:8px;">音轨分离（MR 提取）和降噪功能需要安装以下工具。基本 WAV 编辑和导出无需额外安装。</p>
+
+<h3>① 安装 Python — 必须（所有 MR 提取功能）</h3>
+<p>从 <strong>python.org/downloads</strong> 下载 Python 3.10 或更高版本。安装时必须勾选 <strong>"Add Python to PATH"</strong>。安装完成后重启 Selah。</p>
+<div class="warn">⚠ 请勿使用 Microsoft Store 版本的 Python——它无法正常作为后台进程运行。请务必从 python.org 安装。</div>
+<div class="note">验证安装（命令提示符）：</div>
+<div class="code">python --version</div>
+
+<h3>② 安装 ONNX Runtime — 必须（Demucs 模型）</h3>
+<div class="code">pip install onnxruntime numpy scipy</div>
+<div class="note">如果找不到 pip 命令：</div>
+<div class="code">python -m pip install onnxruntime numpy scipy</div>
+<div class="warn">⚠ 使用虚拟环境（venv、conda）时：Selah 不会自动检测虚拟环境。请安装到全局 Python，或使用 <code>py -m pip install</code>。</div>
+
+<h3>③ 安装 audio-separator — 推荐（人声分离）</h3>
+<p>能识别比 Demucs 更广泛的人声范围，支持各种音域和演唱风格。如需 GPU 加速，将 [cpu] 替换为 [gpu]。（需要 CUDA 12.x）</p>
+<div class="code">pip install "audio-separator[cpu]"</div>
+
+<h3>④ 安装 noisereduce — 必须（降噪）</h3>
+<div class="code">pip install noisereduce</div>
+
+<h3>⑤ 安装 FFmpeg — 必须（MP3/MP4 导入）</h3>
+<p>方法 A — 以管理员身份打开命令提示符（推荐）：</p>
+<div class="code">winget install Gyan.FFmpeg</div>
+<p>方法 B（手动）— 从 <strong>ffmpeg.org/download.html</strong> 下载 Windows 版本，将 bin\ 文件夹路径添加到系统 PATH 环境变量。</p>
+
+<h3>⑥ 下载 AI 分离模型</h3>
+<p>安装上述工具后，打开 <strong>工具 → 模型管理器</strong> 下载 AI 模型。</p>
+<div class="card">
+  <div class="credit-name">Hybrid Transformer Demucs (htdemucs)</div>
+  <div class="credit-meta">4音轨分离 · 303 MB · 需要 ONNX Runtime</div>
+</div>
+<div class="card">
+  <div class="credit-name">UVR MDX-NET Vocal FT</div>
+  <div class="credit-meta">人声/伴奏 2音轨 · 65 MB · 需要 audio-separator</div>
+</div>
+<p>选择模型后点击 <strong>安装模型 / 下载</strong>，完成后点击 <strong>刷新</strong>。</p>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     伦理使用
+     ═══════════════════════════════════════════ -->
+<section id="ethics">
+<h1>伦理使用准则</h1>
+<hr>
+<div class="warn">Selah 是为支持敬拜事工而创建的。用户有责任自行确认所处理音频的版权状态。</div>
+
+<h2>项目目的</h2>
+<p>Selah 是一款以事工为导向的音频软件，旨在支持基督教敬拜准备、小型教会音频工作流程以及宣教伴奏制作。优先考虑非商业、以服侍为中心、本地化的使用场景。</p>
+
+<h2>尊重权利与所有权</h2>
+<p>用户必须尊重作曲家、作词家、演奏者、制作录音的教会和事工机构、出版商及版权持有者的权利。技术上可行并不代表在法律或道德上是被允许的。</p>
+
+<h2>负责任使用示例</h2>
+<div class="good">
+  <div class="good-item">✓ 使用合法获取的敬拜音频为小型敬拜团队制作伴奏</div>
+  <div class="good-item">✓ 整理事工录音用于教会内部排练</div>
+  <div class="good-item">✓ 对您有权处理的音频进行音轨分离测试</div>
+</div>
+
+<h2>禁止使用示例</h2>
+<div class="bad">
+  <div class="bad-item">✗ 未经许可重新分发受版权保护的敬拜录音</div>
+  <div class="bad-item">✗ 将分离的音轨进行商业包装再销售</div>
+  <div class="bad-item">✗ 在没有合法权利的情况下去除人声或提取音轨</div>
+  <div class="bad-item">✗ 在没有授权的情况下误导他人认为已获得某教会或事工机构的认可</div>
+</div>
+
+<h2>AI / 模型注意事项</h2>
+<p>模型输出可能不完美，可能包含伪影或重建错误。第三方模型条款可能有额外限制。维护者不保证其适用于商业发行或公开发布。</p>
+
+<p style="font-size:11.5px; color:#6c7086; font-style:italic; border-top:1px solid #313244; padding-top:14px; margin-top:24px;">
+本文件不代替法律建议。如需了解法律条款，请参阅 LICENSE 和 TRADEMARK.md。
+</p>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     关于 Selah
+     ═══════════════════════════════════════════ -->
+<section id="about">
+<h1 style="font-size:32px;">Selah</h1>
+<p style="font-size:15px; color:#a6adc8; margin-top:4px; margin-bottom:20px;">敬拜事工 MR 编辑器</p>
+<hr>
+
+<p style="margin-top:16px;">版本：0.1.0（原型）</p>
+<p>许可证：GPLv3</p>
+<p>源代码：<span style="color:#89b4fa; text-decoration:underline;">https://github.com/elrang3843/Selah</span></p>
+
+<p style="margin-top:16px; color:#a6adc8;">本软件以开源（GPLv3）形式自由发行，专为小型教会和宣教工场的敬拜工作者设计。</p>
+
+<h2>使用的核心开源库</h2>
+<div class="card" style="margin-bottom:8px;">
+  <div style="display:table; width:100%;">
+    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; padding-left:10px;">
+      <div class="credit-name">NAudio 2.2.1</div>
+      <div class="credit-meta">MIT License — Microsoft</div>
+    </div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:8px;">
+  <div style="display:table; width:100%;">
+    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; padding-left:10px;">
+      <div class="credit-name">Demucs</div>
+      <div class="credit-meta">MIT License — Meta AI</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div style="display:table; width:100%;">
+    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; padding-left:10px;">
+      <div class="credit-name">FFmpeg</div>
+      <div class="credit-meta">LGPL / GPL（可选安装）</div>
+    </div>
+  </div>
+</div>
+
+<div class="glory">一切荣耀归于神。</div>
+</section>
+
+</body>
+</html>
