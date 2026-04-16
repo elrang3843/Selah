@@ -1,11 +1,12 @@
 namespace Selah.Core.Services;
 
 /// <summary>
-/// FluidSynth 실행 파일 및 SoundFont(.sf2) 탐지 서비스.
+/// FluidSynth 탐지 서비스.
 /// FFmpegService와 동일한 패턴으로 PATH 및 번들·표준 경로를 검색합니다.
 ///
-/// 사용자가 FluidSynth를 별도로 설치해야 합니다:
-///   https://www.fluidsynth.org/
+/// 합성 경로 (우선순위 순):
+///   1. Python fluidsynth 패키지 (pip install fluidsynth) — libfluidsynth DLL 필요
+///   2. fluidsynth.exe 실행 파일 (fluidsynth.org 또는 PATH에 설치)
 ///
 /// SoundFont(.sf2) 배치 위치 (우선순위 순):
 ///   %AppData%\Selah\soundfonts\*.sf2
@@ -17,18 +18,23 @@ public class FluidSynthService
 {
     private string? _fluidsynthPath;
     private string? _soundFontPath;
+    private bool    _pythonPkgAvailable;
 
-    public bool IsAvailable      => _fluidsynthPath != null && _soundFontPath != null;
-    public bool IsFluidSynthFound => _fluidsynthPath != null;
-    public bool IsSoundFontFound  => _soundFontPath  != null;
+    /// <summary>FluidSynth(Python 패키지 또는 exe)와 SoundFont 모두 탐지된 경우 true.</summary>
+    public bool IsAvailable      => IsFluidSynthFound && _soundFontPath != null;
+    /// <summary>Python fluidsynth 패키지 또는 fluidsynth.exe 중 하나라도 사용 가능한 경우 true.</summary>
+    public bool IsFluidSynthFound => _pythonPkgAvailable || _fluidsynthPath != null;
+    public bool IsSoundFontFound  => _soundFontPath != null;
 
+    /// <summary>fluidsynth.exe 경로 (없으면 null — Python 패키지로 대체 가능).</summary>
     public string? FluidSynthPath => _fluidsynthPath;
     public string? SoundFontPath  => _soundFontPath;
 
     public void Detect()
     {
-        _fluidsynthPath = FindFluidSynth();
-        _soundFontPath  = FindSoundFont();
+        _fluidsynthPath     = FindFluidSynth();
+        _soundFontPath      = FindSoundFont();
+        _pythonPkgAvailable = ModelManagerService.IsFluidSynthPkgInstalled();
     }
 
     // ── 실행 파일 탐지 ────────────────────────────────────────────────────────

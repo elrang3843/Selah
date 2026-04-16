@@ -110,11 +110,16 @@ public class SheetMusicService
         if (_pythonPath == null)
             throw new InvalidOperationException("Python이 없습니다.");
 
-        if (!_fluidSynth.IsAvailable)
+        if (!_fluidSynth.IsFluidSynthFound)
             throw new InvalidOperationException(
-                "FluidSynth 또는 SoundFont(.sf2)를 찾을 수 없습니다.\n" +
-                "FluidSynth를 설치하고 .sf2 파일을 " +
-                $"{FluidSynthService.GetSoundFontsDir()} 에 넣어 주세요.");
+                "FluidSynth를 찾을 수 없습니다.\n" +
+                "pip install fluidsynth 으로 Python 패키지를 설치하거나,\n" +
+                "fluidsynth.org에서 실행 파일을 설치하고 PATH에 추가해 주세요.");
+
+        if (!_fluidSynth.IsSoundFontFound)
+            throw new InvalidOperationException(
+                "SoundFont(.sf2) 파일을 찾을 수 없습니다.\n" +
+                $".sf2 파일을 {FluidSynthService.GetSoundFontsDir()} 에 넣어 주세요.");
 
         if (!GmPatchMap.TryGetValue(instrument, out int patch))
             patch = 0;
@@ -125,10 +130,11 @@ public class SheetMusicService
         if (!File.Exists(scriptPath))
             throw new FileNotFoundException("midi_synthesizer.py를 찾을 수 없습니다.", scriptPath);
 
+        // --fluidsynth은 선택적 — exe가 없을 때 빈 문자열로 전달하면 Python API 경로만 사용됩니다
         var args = $"\"{scriptPath}\" " +
                    $"--midi \"{midiPath}\" " +
                    $"--soundfont \"{_fluidSynth.SoundFontPath}\" " +
-                   $"--fluidsynth \"{_fluidSynth.FluidSynthPath}\" " +
+                   $"--fluidsynth \"{_fluidSynth.FluidSynthPath ?? string.Empty}\" " +
                    $"--instrument \"{instrument}\" " +
                    $"--patch {patch} " +
                    $"--output \"{outputWavPath}\" " +
