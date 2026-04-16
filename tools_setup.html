@@ -194,8 +194,13 @@
 <pre><code>python -c "import noisereduce; print('noisereduce OK')"</code></pre>
 
 <div class="warn">
-  ⚠ 가상 환경(venv, conda 등) 사용 시 셀라가 해당 환경을 자동으로 인식하지 못할 수 있습니다.
-  <strong>전역(global) 환경에 설치</strong>하거나 셀라 실행 전에 가상 환경을 활성화하세요.
+  ⚠ <strong>가상 환경(venv) 사용 시 주의</strong><br>
+  pip 출력에 <code>.\\.venv\\</code> 또는 <code>site-packages</code> 경로가 보인다면
+  가상 환경에 설치된 것입니다. 셀라는 가상 환경을 자동 감지하지 않으므로
+  <strong>전역(global) Python에 재설치</strong>해야 합니다.<br><br>
+  전역 Python에 설치하는 방법:
+  <pre style="margin:8px 0 0"><code>py -m pip install noisereduce</code></pre>
+  <span style="font-size:0.85em">(<code>py</code> 명령은 Windows Python Launcher로 전역 Python을 직접 호출합니다.)</span>
 </div>
 
 <!-- ════════════════════════════════════════════════════════
