@@ -74,52 +74,74 @@
                                          FontWeight="SemiBold" FontSize="12"
                                          VerticalAlignment="Center"/>
 
-                                <!-- M 버튼: 기본 Peach 글자, 뮤트 시 Peach 배경 -->
+                                <!-- M 버튼: 항상 Peach 테두리, 뮤트 시 Peach 배경 -->
                                 <ToggleButton Grid.Column="3"
-                                              Content="M"
                                               ToolTip="{DynamicResource Track_Tooltip_Mute}"
                                               IsChecked="{Binding Muted}"
                                               Command="{Binding MuteCommand}"
-                                              Width="22" Height="18" FontSize="9" FontWeight="Bold"
+                                              Width="24" Height="18" Padding="0"
                                               Margin="3,0,0,0">
                                     <ToggleButton.Style>
                                         <Style TargetType="ToggleButton"
                                                BasedOn="{StaticResource {x:Type ToggleButton}}">
-                                            <Setter Property="Foreground" Value="{DynamicResource PeachBrush}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource PeachBrush}"/>
                                             <Style.Triggers>
                                                 <Trigger Property="IsChecked" Value="True">
                                                     <Setter Property="Background"
                                                             Value="{DynamicResource PeachBrush}"/>
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource SurfaceBrush}"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
                                     </ToggleButton.Style>
+                                    <TextBlock FontSize="10" FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="M"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource PeachBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Muted}" Value="True">
+                                                        <Setter Property="Foreground"
+                                                                Value="{DynamicResource SurfaceBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </ToggleButton>
 
-                                <!-- S 버튼: 기본 Yellow 글자, 솔로 시 Yellow 배경 -->
+                                <!-- S 버튼: 항상 Yellow 테두리, 솔로 시 Yellow 배경 -->
                                 <ToggleButton Grid.Column="4"
-                                              Content="S"
                                               ToolTip="{DynamicResource Track_Tooltip_Solo}"
                                               IsChecked="{Binding Solo}"
                                               Command="{Binding SoloCommand}"
-                                              Width="22" Height="18" FontSize="9" FontWeight="Bold"
+                                              Width="24" Height="18" Padding="0"
                                               Margin="2,0,0,0">
                                     <ToggleButton.Style>
                                         <Style TargetType="ToggleButton"
                                                BasedOn="{StaticResource {x:Type ToggleButton}}">
-                                            <Setter Property="Foreground" Value="{DynamicResource YellowBrush}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}"/>
                                             <Style.Triggers>
                                                 <Trigger Property="IsChecked" Value="True">
                                                     <Setter Property="Background"
                                                             Value="{DynamicResource YellowBrush}"/>
-                                                    <Setter Property="Foreground"
-                                                            Value="{DynamicResource SurfaceBrush}"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
                                     </ToggleButton.Style>
+                                    <TextBlock FontSize="10" FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="S"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource YellowBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Solo}" Value="True">
+                                                        <Setter Property="Foreground"
+                                                                Value="{DynamicResource SurfaceBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </ToggleButton>
                             </Grid>
 
