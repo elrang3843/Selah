@@ -268,9 +268,15 @@ public class SheetMusicService
         string error;
         lock (lockObj)
         {
-            error = logLines.Count > 0
-                ? string.Join("\n", logLines.TakeLast(15))
-                : string.Join("\n", stderrLines.TakeLast(15));
+            // 오류 메시지: 가장 최근 LOG 줄 1개만 사용.
+            // LOG 줄은 진행 상태("이미지 전처리 중...", "OMR 실행 중...") + 최종 오류를 포함하므로
+            // 모두 합치면 "오류: 이미지 전처리 중...\nOMR 실행 중..." 같은 오해를 낳음.
+            // MISSING 플래그(OEMER_MISSING 등)는 항상 마지막 LOG 줄이라 Contains 검사에 안전.
+            var lastLog    = logLines.Count > 0 ? logLines[^1] : null;
+            var stderrText = stderrLines.Count > 0
+                ? string.Join("\n", stderrLines.TakeLast(5))
+                : null;
+            error = lastLog ?? stderrText ?? string.Empty;
         }
         return (proc.ExitCode, profile, error);
     }

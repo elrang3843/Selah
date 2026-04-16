@@ -131,7 +131,12 @@ def run_omr(image_path: str, output_dir: str) -> str:
     """
     oemer를 서브프로세스로 실행하여 MusicXML 파일을 생성합니다.
     oemer는 입력 이미지 이름과 동일한 .musicxml을 output_dir에 저장합니다.
+    Popen + communicate()를 사용하여 stdout/stderr 파이프 버퍼 교착(deadlock)을 방지하고,
+    15초마다 진행 상태 메시지를 출력하여 사용자에게 oemer가 실행 중임을 알립니다.
     """
+    import threading
+    import time
+
     print("LOG:OMR 실행 중 (oemer)...", flush=True)
 
     oemer_cmd = _find_oemer()
@@ -139,15 +144,30 @@ def run_omr(image_path: str, output_dir: str) -> str:
         print("LOG:OEMER_MISSING — oemer 실행 파일을 찾을 수 없습니다. pip install oemer", flush=True)
         sys.exit(1)
 
-    result = subprocess.run(
+    proc_oemer = subprocess.Popen(
         oemer_cmd + [image_path, "-o", output_dir, "--without-deskew"],
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
     )
 
-    if result.returncode != 0:
-        # stderr의 마지막 몇 줄만 로그 출력 (파이프 버퍼 초과 방지)
-        err_tail = "\n".join(result.stderr.strip().splitlines()[-10:])
+    # 15초마다 경과 시간을 출력 — C#이 수신하여 UI 상태 메시지를 갱신함
+    def _heartbeat() -> None:
+        elapsed = 0
+        while proc_oemer.poll() is None:
+            time.sleep(15)
+            elapsed += 15
+            if proc_oemer.poll() is None:
+                print(f"LOG:OMR 실행 중 (oemer)... ({elapsed}초 경과)", flush=True)
+
+    hb = threading.Thread(target=_heartbeat, daemon=True)
+    hb.start()
+
+    stdout_data, stderr_data = proc_oemer.communicate()
+
+    if proc_oemer.returncode != 0:
+        # stderr의 마지막 몇 줄만 로그 출력
+        err_tail = "\n".join(stderr_data.strip().splitlines()[-10:])
         print(f"LOG:OMR 실패: {err_tail}", flush=True)
         sys.exit(1)
 
