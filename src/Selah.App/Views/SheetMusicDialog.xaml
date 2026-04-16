@@ -141,7 +141,7 @@
                     IsDefault="True"
                     IsEnabled="{Binding CanInsert}"
                     Click="InsertButton_Click"
-                    MinWidth="88" Padding="10,6"
+                    MinWidth="110" Padding="12,6"
                     Margin="0,0,8,0"/>
 
             <Button Grid.Column="2"
