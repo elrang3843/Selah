@@ -94,6 +94,30 @@ def preprocess_image(input_path: str, output_path: str) -> None:
 
 # ── OMR 실행 ─────────────────────────────────────────────────────────────────
 
+def _find_oemer() -> list[str]:
+    """
+    oemer 실행 커맨드를 반환합니다.
+    oemer는 __main__.py가 없으므로 `python -m oemer`가 동작하지 않습니다.
+    우선순위:
+      1. sys.executable과 같은 Scripts 폴더의 oemer(.exe) 실행 파일
+      2. PATH에서 shutil.which("oemer")로 탐색
+      3. 폴백: oemer.main() 직접 호출을 위해 빈 리스트 반환
+    """
+    import shutil
+
+    scripts_dir = os.path.dirname(sys.executable)
+    for name in ("oemer.exe", "oemer"):
+        candidate = os.path.join(scripts_dir, name)
+        if os.path.isfile(candidate):
+            return [candidate]
+
+    found = shutil.which("oemer")
+    if found:
+        return [found]
+
+    return []   # 폴백: 직접 import로 실행
+
+
 def run_omr(image_path: str, output_dir: str) -> str:
     """
     oemer를 서브프로세스로 실행하여 MusicXML 파일을 생성합니다.
@@ -101,9 +125,13 @@ def run_omr(image_path: str, output_dir: str) -> str:
     """
     print("LOG:OMR 실행 중 (oemer)...", flush=True)
 
+    oemer_cmd = _find_oemer()
+    if not oemer_cmd:
+        print("LOG:OEMER_MISSING — oemer 실행 파일을 찾을 수 없습니다. pip install oemer", flush=True)
+        sys.exit(1)
+
     result = subprocess.run(
-        [sys.executable, "-m", "oemer", image_path, "-o", output_dir,
-         "--without-deskew"],   # 이미 전처리에서 처리됨
+        oemer_cmd + [image_path, "-o", output_dir, "--without-deskew"],
         capture_output=True,
         text=True,
     )
