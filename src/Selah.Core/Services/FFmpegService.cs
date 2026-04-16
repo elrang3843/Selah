@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Selah.Core.Services;
@@ -44,6 +45,94 @@ public partial class FFmpegService
                          "ffmpeg", "bin", name + ".exe"),
         };
         return candidates.FirstOrDefault(File.Exists);
+    }
+
+    /// <summary>입력 파일의 모든 오디오 스트림 정보를 조회합니다.</summary>
+    public async Task<IReadOnlyList<AudioStreamInfo>> ProbeAudioStreamsAsync(
+        string inputPath, CancellationToken ct = default)
+    {
+        if (_ffprobePath == null) return [];
+        var args = $"-v quiet -print_format json -show_streams \"{inputPath}\"";
+        var json = await RunProcessAsync(_ffprobePath, args, ct);
+        return ParseAudioStreams(json);
+    }
+
+    private static IReadOnlyList<AudioStreamInfo> ParseAudioStreams(string json)
+    {
+        var result = new List<AudioStreamInfo>();
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("streams", out var streams)) return result;
+            int audioIndex = 0;
+            foreach (var stream in streams.EnumerateArray())
+            {
+                if (!stream.TryGetProperty("codec_type", out var ct2) ||
+                    ct2.GetString() != "audio") continue;
+                int absIndex = stream.TryGetProperty("index", out var idx) ? idx.GetInt32() : 0;
+                int channels = stream.TryGetProperty("channels", out var ch) ? ch.GetInt32() : 2;
+                int sr = 48000;
+                if (stream.TryGetProperty("sample_rate", out var srProp) &&
+                    int.TryParse(srProp.GetString(), out var srVal))
+                    sr = srVal;
+                double dur = 0;
+                if (stream.TryGetProperty("duration", out var durProp) &&
+                    double.TryParse(durProp.GetString(),
+                        System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out var durVal))
+                    dur = durVal;
+                string title = "";
+                if (stream.TryGetProperty("tags", out var tags) &&
+                    tags.TryGetProperty("title", out var titleProp))
+                    title = titleProp.GetString() ?? "";
+                result.Add(new AudioStreamInfo
+                {
+                    AudioStreamIndex = audioIndex++,
+                    AbsoluteIndex    = absIndex,
+                    Channels         = channels,
+                    SampleRate       = sr,
+                    DurationSeconds  = dur,
+                    Title            = title
+                });
+            }
+        }
+        catch { /* 파싱 실패 시 빈 목록 반환 */ }
+        return result;
+    }
+
+    /// <summary>지정 오디오 스트림을 WAV로 추출합니다.</summary>
+    public async Task ExtractStreamAsync(
+        string inputPath,
+        string outputWavPath,
+        int audioStreamIndex,
+        int sampleRate,
+        int channels = 2,
+        CancellationToken ct = default)
+    {
+        if (_ffmpegPath == null)
+            throw new InvalidOperationException("FFmpeg가 없습니다.");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputWavPath)!);
+        var args = $"-y -i \"{inputPath}\" -map 0:a:{audioStreamIndex} -vn " +
+                   $"-ar {sampleRate} -ac {channels} -sample_fmt s16 \"{outputWavPath}\"";
+        await RunProcessAsync(_ffmpegPath, args, ct);
+    }
+
+    /// <summary>멀티채널 스트림에서 단일 채널을 모노 WAV로 추출합니다.</summary>
+    public async Task ExtractChannelAsync(
+        string inputPath,
+        string outputWavPath,
+        int audioStreamIndex,
+        int channelIndex,
+        int sampleRate,
+        CancellationToken ct = default)
+    {
+        if (_ffmpegPath == null)
+            throw new InvalidOperationException("FFmpeg가 없습니다.");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputWavPath)!);
+        var args = $"-y -i \"{inputPath}\" -map 0:a:{audioStreamIndex} " +
+                   $"-af \"pan=mono|c0=c{channelIndex}\" " +
+                   $"-ar {sampleRate} -sample_fmt s16 \"{outputWavPath}\"";
+        await RunProcessAsync(_ffmpegPath, args, ct);
     }
 
     /// <summary>입력 파일의 오디오 정보를 조회합니다.</summary>
@@ -201,4 +290,14 @@ public record AudioFileInfo
     public int Channels { get; set; } = 2;
     public double DurationSeconds { get; set; }
     public long LengthSamples { get; set; }
+}
+
+public record AudioStreamInfo
+{
+    public int AudioStreamIndex { get; init; }  // 오디오 스트림 중 0-based 인덱스
+    public int AbsoluteIndex    { get; init; }  // 컨테이너 내 절대 스트림 인덱스
+    public int Channels         { get; init; }
+    public int SampleRate       { get; init; }
+    public double DurationSeconds { get; init; }
+    public string Title         { get; init; } = string.Empty;
 }

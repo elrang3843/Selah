@@ -21,13 +21,14 @@
     <sys:String x:Key="Menu_Edit_Split">Split Clip</sys:String>
     <sys:String x:Key="Menu_Edit_Delete">Delete Selection</sys:String>
     <sys:String x:Key="Menu_Edit_Separate">Separate Stems (Selected Clip)...</sys:String>
+    <sys:String x:Key="Menu_Edit_ReduceNoise">Reduce Noise (Selected Clip)...</sys:String>
     <sys:String x:Key="Menu_Track">Track(_T)</sys:String>
     <sys:String x:Key="Menu_Track_Add">Add Track</sys:String>
     <sys:String x:Key="Menu_Track_Delete">Delete Selected Track</sys:String>
     <sys:String x:Key="Menu_Tools">Tools(_O)</sys:String>
     <sys:String x:Key="Menu_Tools_ModelManager">Model Manager...</sys:String>
     <sys:String x:Key="Menu_Tools_HardwareDiag">Hardware Diagnostics...</sys:String>
-    <sys:String x:Key="Menu_Tools_FFmpegGuide">FFmpeg Install Guide...</sys:String>
+    <sys:String x:Key="Menu_Tools_FFmpegGuide">Essential Tools Setup Guide...</sys:String>
     <sys:String x:Key="Menu_Help">Help(_H)</sys:String>
     <sys:String x:Key="Menu_Help_Shortcuts">Keyboard Shortcuts</sys:String>
     <sys:String x:Key="Menu_Help_Ethics">Ethical Use Guidelines...</sys:String>
@@ -57,6 +58,7 @@
     <sys:String x:Key="Transport_Tooltip_Stop">Stop + Return to Start (Shift+Space)</sys:String>
     <sys:String x:Key="Transport_Tooltip_Metronome">Toggle Metronome (M)</sys:String>
     <sys:String x:Key="Transport_Tooltip_Snap">Toggle Snap (N)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_SnapMode">Snap unit</sys:String>
     <sys:String x:Key="Transport_Tooltip_ZoomOut">Zoom Out (Ctrl+-)</sys:String>
     <sys:String x:Key="Transport_Tooltip_ZoomIn">Zoom In (Ctrl++)</sys:String>
 
@@ -66,7 +68,7 @@
     <sys:String x:Key="Track_Vol">Vol</sys:String>
     <sys:String x:Key="Track_Tooltip_Mute">Mute</sys:String>
     <sys:String x:Key="Track_Tooltip_Solo">Solo</sys:String>
-    <sys:String x:Key="Track_Tooltip_Select">Select / deselect track</sys:String>
+    <sys:String x:Key="Track_Tooltip_Enable">Enable / disable track playback</sys:String>
 
     <!-- ── Model Manager ── -->
     <sys:String x:Key="ModelManager_Title">Model Manager</sys:String>
@@ -125,7 +127,14 @@
     <sys:String x:Key="Status_MetronomeOn">Metronome on</sys:String>
     <sys:String x:Key="Status_MetronomeOff">Metronome off</sys:String>
     <sys:String x:Key="Status_PlaybackEnded">Playback complete</sys:String>
+    <sys:String x:Key="Progress_Title_Import">Importing Audio</sys:String>
+    <sys:String x:Key="Progress_Title_Export">Exporting WAV</sys:String>
     <sys:String x:Key="Status_Separating">Separating stems...</sys:String>
+    <sys:String x:Key="Status_ReducingNoise">Reducing noise...</sys:String>
+    <sys:String x:Key="Status_NoiseReduceComplete">'{0}' noise reduction complete</sys:String>
+    <sys:String x:Key="Status_NoiseReduceFailed">Noise reduction failed: {0}</sys:String>
+    <sys:String x:Key="Status_NoiseReduce_Missing">noisereduce library is not installed.&#x0a;Install it with: pip install noisereduce</sys:String>
+    <sys:String x:Key="Status_NoiseReduce_Missing_Short">noisereduce not installed — opening setup guide...</sys:String>
     <sys:String x:Key="Status_SeparateComplete">'{0}' separation complete ({1} stems)</sys:String>
     <sys:String x:Key="Status_SeparateFailed">Separation failed: {0}</sys:String>
     <sys:String x:Key="Status_Separate_NoSource">Source file not found.</sys:String>
@@ -135,6 +144,7 @@
     <sys:String x:Key="Status_Separate_TorchCodecBroken">TorchCodec DLL error — opening setup guide...</sys:String>
     <sys:String x:Key="Status_Separate_OnnxRuntimeMissing">ONNX Runtime not installed — opening setup guide...</sys:String>
     <sys:String x:Key="Status_Separate_OnnxModelMissing">ONNX model file missing — opening setup guide...</sys:String>
+    <sys:String x:Key="Status_Separate_AudioSeparatorMissing">audio-separator not installed — opening setup guide...</sys:String>
     <sys:String x:Key="Status_SetupRequired">Tool setup required. Opening setup guide...</sys:String>
     <sys:String x:Key="Stem_Vocals">Vocals</sys:String>
     <sys:String x:Key="Stem_NoVocals">Backing</sys:String>

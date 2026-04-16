@@ -92,7 +92,20 @@
                           ToolTip="{DynamicResource Transport_Tooltip_Snap}"
                           IsChecked="{Binding Timeline.SnapEnabled, Mode=OneWay}"
                           Command="{Binding ToggleSnapCommand}"
-                          Height="28"/>
+                          Height="28" Margin="0,0,4,0"/>
+            <ComboBox ItemsSource="{Binding Timeline.SnapModeItems}"
+                      SelectedValuePath="Mode"
+                      SelectedValue="{Binding Timeline.SnapMode}"
+                      IsEnabled="{Binding Timeline.SnapEnabled}"
+                      Height="28" MinWidth="64"
+                      VerticalContentAlignment="Center"
+                      ToolTip="{DynamicResource Transport_Tooltip_SnapMode}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Label}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
         </StackPanel>
 
         <!-- ⑦ 줌 -->

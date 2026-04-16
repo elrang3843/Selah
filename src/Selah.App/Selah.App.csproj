@@ -27,6 +27,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>scripts\onnx_runner.py</TargetPath>
     </Content>
+    <Content Include="..\..\scripts\audio_separator_runner.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>scripts\audio_separator_runner.py</TargetPath>
+    </Content>
+    <Content Include="..\..\scripts\noise_reducer.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>scripts\noise_reducer.py</TargetPath>
+    </Content>
     <!-- 도구 설치 안내 HTML을 실행 파일과 같은 폴더에 복사 -->
     <Content Include="..\..\tools_setup.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

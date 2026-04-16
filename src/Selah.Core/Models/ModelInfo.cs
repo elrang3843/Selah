@@ -33,6 +33,13 @@ public class ModelInfo
     /// <summary>모델 파일 다운로드 URL (null이면 수동 설치)</summary>
     public string? DownloadUrl { get; set; }
 
+    /// <summary>
+    /// audio-separator 엔진에서 사용하는 모델 파일명.
+    /// (예: "UVR-MDX-NET-Voc_FT.onnx")
+    /// OnnxRuntime 엔진에서는 사용하지 않습니다.
+    /// </summary>
+    public string? ModelFilename { get; set; }
+
     public List<string> Tags { get; set; } = new();
 
     public string SizeDisplay =>
@@ -57,6 +64,7 @@ public enum StemType
 
 public enum ModelEngine
 {
-    PythonCLI,      // Demucs CLI (python subprocess) — 레거시
-    OnnxRuntime     // ONNX Runtime + FFmpeg (권장)
+    PythonCLI,        // Demucs CLI (python subprocess) — 레거시
+    OnnxRuntime,      // ONNX Runtime + FFmpeg (권장)
+    AudioSeparator    // audio-separator 패키지 (MDX-Net 보컬 특화, 모든 음역대 지원)
 }

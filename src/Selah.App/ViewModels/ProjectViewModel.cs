@@ -166,6 +166,102 @@ public class ProjectViewModel : ViewModelBase
         return source;
     }
 
+    /// <summary>
+    /// 파일을 프로브하여 단일 스테레오이면 <see cref="ImportAudioAsync"/>와 동일하게 처리하고,
+    /// 멀티채널(>2ch) 또는 멀티스트림이면 채널/스트림별로 분리된 AudioSource 목록을 반환합니다.
+    /// </summary>
+    public async Task<IReadOnlyList<AudioSource>> ImportAudioAutoAsync(
+        string filePath,
+        IProgress<double>? progress = null,
+        CancellationToken ct = default)
+    {
+        if (_project.FilePath == null)
+            throw new InvalidOperationException(Loc.Get("Project_SaveFirst"));
+
+        // FFmpeg가 없으면 단일 임포트로 폴백
+        IReadOnlyList<AudioStreamInfo> streams = [];
+        if (_ffmpegService.IsAvailable)
+        {
+            try { streams = await _ffmpegService.ProbeAudioStreamsAsync(filePath, ct); }
+            catch { /* 프로브 실패 → 단일 임포트 */ }
+        }
+
+        bool needsSplit = streams.Count > 1 || (streams.Count == 1 && streams[0].Channels > 2);
+        if (!needsSplit)
+            return [await ImportAudioAsync(filePath, progress, ct)];
+
+        var audioDir = Path.Combine(_project.FilePath, "audio");
+        Directory.CreateDirectory(audioDir);
+        var baseName = Path.GetFileNameWithoutExtension(filePath);
+        var results  = new List<AudioSource>();
+
+        int totalOps  = streams.Sum(s => s.Channels > 2 ? s.Channels : 1);
+        int completed = 0;
+
+        foreach (var stream in streams)
+        {
+            if (stream.Channels <= 2)
+            {
+                // 개별 스트림 → 스테레오(또는 모노) WAV 추출
+                string label = !string.IsNullOrEmpty(stream.Title)
+                    ? stream.Title
+                    : $"Stream {stream.AudioStreamIndex + 1}";
+                var destName = MakeUniqueFileName(audioDir,
+                    $"{baseName}_{label.Replace(' ', '_')}.wav");
+                var destWav = Path.Combine(audioDir, destName);
+
+                await _ffmpegService.ExtractStreamAsync(
+                    filePath, destWav, stream.AudioStreamIndex,
+                    _project.SampleRate, stream.Channels, ct);
+
+                results.Add(CreateAudioSourceFromWav(destWav,
+                    streams.Count > 1 ? $"{baseName} — {label}" : baseName));
+                progress?.Report((double)++completed / totalOps);
+            }
+            else
+            {
+                // 멀티채널 스트림 → 채널별 모노 WAV 추출
+                for (int ch = 0; ch < stream.Channels; ch++)
+                {
+                    string chLabel = streams.Count > 1
+                        ? $"Stream {stream.AudioStreamIndex + 1} Ch {ch + 1}"
+                        : $"Ch {ch + 1}";
+                    var destName = MakeUniqueFileName(audioDir,
+                        $"{baseName}_{chLabel.Replace(' ', '_')}.wav");
+                    var destWav = Path.Combine(audioDir, destName);
+
+                    await _ffmpegService.ExtractChannelAsync(
+                        filePath, destWav, stream.AudioStreamIndex,
+                        ch, _project.SampleRate, ct);
+
+                    results.Add(CreateAudioSourceFromWav(destWav, $"{baseName} — {chLabel}"));
+                    progress?.Report((double)++completed / totalOps);
+                }
+            }
+        }
+
+        _project.IsDirty = true;
+        OnPropertyChanged(nameof(IsDirty));
+        return results;
+    }
+
+    private AudioSource CreateAudioSourceFromWav(string wavPath, string name)
+    {
+        using var r = new WaveFileReader(wavPath);
+        var src = new AudioSource
+        {
+            Name          = name,
+            RelPath       = Path.GetRelativePath(_project.FilePath!, wavPath),
+            AbsolutePath  = wavPath,
+            SampleRate    = r.WaveFormat.SampleRate,
+            Channels      = r.WaveFormat.Channels,
+            LengthSamples = r.SampleCount,
+            SourceType    = SourceType.Import
+        };
+        _project.AudioSources.Add(src);
+        return src;
+    }
+
     // ── 저장 ──
 
     public async Task SaveAsync()

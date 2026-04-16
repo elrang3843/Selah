@@ -8,8 +8,6 @@ public class TrackViewModel : ViewModelBase
 {
     private readonly Track _track;
     private readonly Project _project;
-    private bool _isSelected;
-
     public TrackViewModel(Track track, Project project)
     {
         _track = track;
@@ -76,10 +74,10 @@ public class TrackViewModel : ViewModelBase
         set { _track.HeightPixels = Math.Clamp(value, 40f, 300f); OnPropertyChanged(); }
     }
 
-    public bool IsSelected
+    public bool IsEnabled
     {
-        get => _isSelected;
-        set => SetField(ref _isSelected, value);
+        get => _track.IsEnabled;
+        set { _track.IsEnabled = value; OnPropertyChanged(); _project.IsDirty = true; }
     }
 
     public ObservableCollection<ClipViewModel> Clips { get; }
