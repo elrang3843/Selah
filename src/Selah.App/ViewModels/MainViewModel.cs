@@ -64,7 +64,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         ToggleSnapCommand = new RelayCommand(() => Timeline.SnapEnabled = !Timeline.SnapEnabled);
         DeleteCommand = new RelayCommand(OnDelete, () => CurrentProject != null);
         SeparateClipCommand = new AsyncRelayCommand(SeparateClipAsync,
-            () => CurrentProject != null && SelectedClip != null && StemSeparator.IsPythonAvailable);
+            () => CurrentProject != null && SelectedClip != null);
 
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
         AudioEngine.PlaybackStopped += OnPlaybackStopped;
