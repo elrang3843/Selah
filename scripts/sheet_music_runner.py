@@ -150,9 +150,12 @@ def run_omr(image_path: str, output_dir: str) -> str:
     stdout_data, stderr_data = proc_oemer.communicate()
 
     if proc_oemer.returncode != 0:
-        # Windows에서 비정상 종료 시 stderr_data가 None일 수 있음 — 안전하게 처리
+        # oemer는 오류를 stderr 대신 stdout에 출력하는 경우가 있음
         stderr_text = (stderr_data or "").strip()
-        err_tail = "\n".join(stderr_text.splitlines()[-10:]) if stderr_text else "(stderr 없음)"
+        stdout_text = (stdout_data or "").strip()
+        # stderr 우선, 없으면 stdout 마지막 10줄 사용
+        output_for_error = stderr_text or stdout_text
+        err_tail = "\n".join(output_for_error.splitlines()[-10:]) if output_for_error else "(출력 없음)"
         print(f"LOG:OMR 실패: {err_tail}", flush=True)
         sys.exit(1)
 
