@@ -63,6 +63,7 @@ public class FluidSynthService
             Path.Combine(appBase,      "fluidsynth", "fluidsynth.exe"),
             Path.Combine(progFiles,    "FluidSynth",  "bin", "fluidsynth.exe"),
             Path.Combine(progFilesX86, "FluidSynth",  "bin", "fluidsynth.exe"),
+            @"C:\tools\fluidsynth\bin\fluidsynth.exe",   // Chocolatey C:\tools\ 레이아웃
             @"C:\FluidSynth\bin\fluidsynth.exe",
         };
         return candidates.FirstOrDefault(File.Exists);

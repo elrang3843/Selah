@@ -66,6 +66,8 @@ def _register_dll_paths() -> None:
                      "FluidSynth", "bin"),
         os.path.join(choco_lib, "bin"),
         choco_lib,
+        r"C:\tools\fluidsynth\bin",   # Chocolatey C:\tools\ 레이아웃
+        r"C:\tools\fluidsynth\lib",
         r"C:\FluidSynth\bin",
         r"C:\FluidSynth\lib",
     ]
