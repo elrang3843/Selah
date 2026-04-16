@@ -40,5 +40,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>tools_setup.html</TargetPath>
     </Content>
+    <!-- 언어별 도움말 HTML -->
+    <Content Include="..\..\help_ko.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>help_ko.html</TargetPath>
+    </Content>
+    <Content Include="..\..\help_en.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>help_en.html</TargetPath>
+    </Content>
+    <Content Include="..\..\help_zh.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>help_zh.html</TargetPath>
+    </Content>
   </ItemGroup>
 </Project>

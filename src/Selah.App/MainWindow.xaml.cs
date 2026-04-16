@@ -216,8 +216,11 @@ public partial class MainWindow : Window
 
     // ── 언어 전환 ──
 
-    private void MenuLang_Ko_Click(object s, RoutedEventArgs e) => Loc.SetLanguage("ko");
-    private void MenuLang_En_Click(object s, RoutedEventArgs e) => Loc.SetLanguage("en");
+    private void MenuLang_Click(object s, RoutedEventArgs e)
+    {
+        if (s is System.Windows.Controls.MenuItem item && item.Tag is string code)
+            Loc.SetLanguage(code);
+    }
 
     private void MenuTheme_Click(object s, RoutedEventArgs e)
     {
