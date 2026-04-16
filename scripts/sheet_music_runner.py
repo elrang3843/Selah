@@ -282,8 +282,9 @@ def main() -> None:
     try:
         from music21.midi import translate as _midi_translate  # type: ignore
         midi_file = _midi_translate.streamToMidiFile(score)
-        with open(midi_path, "wb") as _fh:
-            midi_file.writeFile(_fh)
+        midi_file.open(midi_path, "wb")
+        midi_file.write()
+        midi_file.close()
     except Exception as exc:
         print(f"LOG:MIDI 변환 실패: {exc}", flush=True)
         sys.exit(1)
