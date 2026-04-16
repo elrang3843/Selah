@@ -744,9 +744,14 @@ public class MainViewModel : ViewModelBase, IDisposable
             if (!result.Success)
             {
                 if (result.IsNoiseReduceMissing)
-                    ErrorOccurred?.Invoke(Loc.Get("Status_NoiseReduce_Missing"));
+                {
+                    StatusMessage = Loc.Get("Status_NoiseReduce_Missing_Short");
+                    SetupGuideRequested?.Invoke();
+                }
                 else
+                {
                     ErrorOccurred?.Invoke(Loc.Format("Status_NoiseReduceFailed", result.Error ?? ""));
+                }
                 return;
             }
 

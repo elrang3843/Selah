@@ -105,6 +105,7 @@
   <ol>
     <li><a href="#python">Python 설치</a> — MR 추출(스템 분리)에 필요</li>
     <li><a href="#onnx">ONNX Runtime 설치</a> — AI 추론 엔진</li>
+    <li><a href="#noisereduce">noisereduce 설치</a> — 노이즈 감소 기능</li>
     <li><a href="#ffmpeg">FFmpeg 설치</a> — MP3·MP4 임포트 및 오디오 처리</li>
     <li><a href="#model">분리 모델 다운로드</a> — 셀라 내 모델 관리자에서 진행</li>
   </ol>
@@ -171,9 +172,36 @@
 <pre><code>python -c "import onnxruntime; print(onnxruntime.__version__)"</code></pre>
 
 <!-- ════════════════════════════════════════════════════════
-     3. FFmpeg
+     3. noisereduce
      ════════════════════════════════════════════════════════ -->
-<h2 id="ffmpeg">3. FFmpeg 설치 <span class="badge">필수 — MP3·MP4 임포트 &amp; MR 추출</span></h2>
+<h2 id="noisereduce">3. noisereduce 설치 <span class="badge">필수 — 노이즈 감소</span></h2>
+
+<p>
+  <strong>편집 &gt; 노이즈 감소</strong> 기능에 <code>noisereduce</code> 라이브러리가 필요합니다.
+  모델 파일 없이 <strong>pip 한 줄</strong>로 설치됩니다.<br>
+  <span class="note">The "Reduce Noise" feature requires the <code>noisereduce</code> library. No model file — install with one pip command.</span>
+</p>
+
+<div class="step">
+  <h3>설치 방법</h3>
+  <p>명령 프롬프트(CMD) 또는 PowerShell을 열고 실행합니다:</p>
+  <pre><code>pip install noisereduce</code></pre>
+  <p>pip을 찾지 못하면:</p>
+  <pre><code>python -m pip install noisereduce</code></pre>
+</div>
+
+<p>설치 확인:</p>
+<pre><code>python -c "import noisereduce; print('noisereduce OK')"</code></pre>
+
+<div class="warn">
+  ⚠ 가상 환경(venv, conda 등) 사용 시 셀라가 해당 환경을 자동으로 인식하지 못할 수 있습니다.
+  <strong>전역(global) 환경에 설치</strong>하거나 셀라 실행 전에 가상 환경을 활성화하세요.
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     4. FFmpeg
+     ════════════════════════════════════════════════════════ -->
+<h2 id="ffmpeg">4. FFmpeg 설치 <span class="badge">필수 — MP3·MP4 임포트 &amp; MR 추출</span></h2>
 
 <p>
   MP3, MP4, MKV 등 비(非)WAV 파일 임포트와 MR 추출(오디오 디코딩/인코딩)에
@@ -211,7 +239,7 @@
 <!-- ════════════════════════════════════════════════════════
      4. Model Download
      ════════════════════════════════════════════════════════ -->
-<h2 id="model">4. 분리 모델 다운로드 <span class="badge">필수 — MR 추출</span></h2>
+<h2 id="model">5. 분리 모델 다운로드 <span class="badge">필수 — MR 추출</span></h2>
 
 <p>
   위의 1~3 단계 완료 후, 셀라 내 <strong>모델 관리자</strong>에서 AI 모델 파일을

@@ -132,6 +132,7 @@
     <sys:String x:Key="Status_NoiseReduceComplete">'{0}' noise reduction complete</sys:String>
     <sys:String x:Key="Status_NoiseReduceFailed">Noise reduction failed: {0}</sys:String>
     <sys:String x:Key="Status_NoiseReduce_Missing">noisereduce library is not installed.&#x0a;Install it with: pip install noisereduce</sys:String>
+    <sys:String x:Key="Status_NoiseReduce_Missing_Short">noisereduce not installed — opening setup guide...</sys:String>
     <sys:String x:Key="Status_SeparateComplete">'{0}' separation complete ({1} stems)</sys:String>
     <sys:String x:Key="Status_SeparateFailed">Separation failed: {0}</sys:String>
     <sys:String x:Key="Status_Separate_NoSource">Source file not found.</sys:String>
