@@ -52,6 +52,9 @@ def _register_dll_paths() -> None:
     if sys.platform != "win32":
         return
     import shutil as _shutil
+    choco_lib = os.path.join(
+        os.environ.get("PROGRAMDATA", r"C:\ProgramData"),
+        "chocolatey", "lib", "fluidsynth", "tools")
     candidates = [
         os.path.join(os.environ.get("PROGRAMFILES",      r"C:\Program Files"),
                      "FluidSynth", "bin"),
@@ -59,6 +62,8 @@ def _register_dll_paths() -> None:
                      "FluidSynth", "lib"),
         os.path.join(os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"),
                      "FluidSynth", "bin"),
+        os.path.join(choco_lib, "bin"),
+        choco_lib,
         r"C:\FluidSynth\bin",
         r"C:\FluidSynth\lib",
     ]
