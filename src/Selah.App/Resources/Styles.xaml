@@ -372,13 +372,145 @@
         <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}"/>
     </Style>
 
+    <!-- ComboBoxItem -->
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="Background"  Value="Transparent"/>
+        <Setter Property="Foreground"  Value="{DynamicResource TextBrush}"/>
+        <Setter Property="Padding"     Value="8,5"/>
+        <Setter Property="FontFamily"  Value="Segoe UI, Malgun Gothic"/>
+        <Setter Property="FontSize"    Value="13"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="Transparent"
+                            BorderThickness="2,0,0,0"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{DynamicResource Surface2Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{DynamicResource Surface2Brush}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{DynamicResource AccentBrush}"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected"     Value="True"/>
+                                <Condition Property="IsHighlighted"  Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Bd" Property="Background"
+                                    Value="{DynamicResource Surface2Brush}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{DynamicResource AccentBrush}"/>
+                        </MultiTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ComboBox -->
     <Style TargetType="ComboBox">
-        <Setter Property="Background" Value="{DynamicResource Surface1Brush}"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource Surface2Brush}"/>
-        <Setter Property="FontFamily" Value="Segoe UI, Malgun Gothic"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Background"        Value="{DynamicResource Surface1Brush}"/>
+        <Setter Property="Foreground"        Value="{DynamicResource TextBrush}"/>
+        <Setter Property="BorderBrush"       Value="{DynamicResource Surface2Brush}"/>
+        <Setter Property="BorderThickness"   Value="1"/>
+        <Setter Property="Padding"           Value="8,0"/>
+        <Setter Property="FontFamily"        Value="Segoe UI, Malgun Gothic"/>
+        <Setter Property="FontSize"          Value="13"/>
+        <Setter Property="MaxDropDownHeight" Value="200"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid x:Name="Root">
+                        <!-- 선택 항목 표시 영역 -->
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Column="0"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  VerticalAlignment="Center"
+                                                  IsHitTestVisible="False"/>
+                                <!-- 드롭다운 화살표 -->
+                                <Path Grid.Column="1"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Fill="{DynamicResource SubtextBrush}"
+                                      Data="M0,0 L4,4 L8,0 z"
+                                      IsHitTestVisible="False"/>
+                            </Grid>
+                        </Border>
+                        <!-- 클릭 영역 (투명 ToggleButton 오버레이) -->
+                        <ToggleButton Focusable="False"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
+                                          RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent"/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ToggleButton.Style>
+                        </ToggleButton>
+                        <!-- 드롭다운 팝업 -->
+                        <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               Placement="Bottom"
+                               PopupAnimation="Slide">
+                            <Border Background="{DynamicResource Surface1Brush}"
+                                    BorderBrush="{DynamicResource Surface2Brush}"
+                                    BorderThickness="1"
+                                    MinWidth="{Binding ActualWidth, ElementName=Root}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                <ScrollViewer>
+                                    <ItemsPresenter
+                                        KeyboardNavigation.DirectionalNavigation="Contained"
+                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{DynamicResource AccentBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush"
+                                    Value="{DynamicResource AccentBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- ListBox -->
