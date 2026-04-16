@@ -5,65 +5,116 @@
 <meta charset="UTF-8">
 <title>Selah 도움말</title>
 <style>
+:root {
+  color-scheme: dark light;
+  --bg:       #1e1e2e;
+  --surface:  #313244;
+  --text:     #cdd6f4;
+  --subtext:  #a6adc8;
+  --muted:    #9199b2;
+  --accent:   #89b4fa;
+  --h3:       #fab387;
+  --warn-bg:  #2a2419;
+  --warn-br:  #f9e2af;
+  --warn-tx:  #f9e2af;
+  --good-bg:  #1a2820;
+  --good-br:  #a6e3a1;
+  --good-tx:  #a6e3a1;
+  --bad-bg:   #2a1a1e;
+  --bad-br:   #f38ba8;
+  --bad-tx:   #f38ba8;
+  --code-bg:  #11111b;
+  --code-tx:  #a6e3a1;
+  --divider:  #313244;
+  --kbd-bg:   #313244;
+  --kbd-tx:   #a6adc8;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:       #eff1f5;
+    --surface:  #e6e9ef;
+    --text:     #4c4f69;
+    --subtext:  #5c5f77;
+    --muted:    #5c5f77;
+    --accent:   #1751c8;
+    --h3:       #7c4e00;
+    --warn-bg:  #fef3d8;
+    --warn-br:  #df8e1d;
+    --warn-tx:  #7c5200;
+    --good-bg:  #e8f5e4;
+    --good-br:  #40a02b;
+    --good-tx:  #1f6b1a;
+    --bad-bg:   #fce8ed;
+    --bad-br:   #d20f39;
+    --bad-tx:   #8e0025;
+    --code-bg:  #dce0e8;
+    --code-tx:  #1f6b1a;
+    --divider:  #bcc0cc;
+    --kbd-bg:   #ccd0da;
+    --kbd-tx:   #4c4f69;
+  }
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: #1e1e2e; color: #cdd6f4;
+  background: var(--bg); color: var(--text);
   font-family: 'Malgun Gothic', 'Segoe UI', sans-serif; font-size: 14px;
   line-height: 1.7; padding: 32px 36px 60px;
 }
-h1 { font-size: 22px; font-weight: 600; color: #89b4fa; margin-bottom: 4px; }
-h2 { font-size: 15px; font-weight: 600; color: #cdd6f4; margin: 22px 0 7px; }
-h3 { font-size: 13px; font-weight: 600; color: #fab387; margin: 18px 0 6px; }
-p  { color: #a6adc8; margin-bottom: 8px; }
-hr { border: none; border-top: 1px solid #313244; margin: 14px 0 14px; }
+h1 { font-size: 22px; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+h2 { font-size: 15px; font-weight: 600; color: var(--text); margin: 22px 0 7px; }
+h3 { font-size: 13px; font-weight: 600; color: var(--h3); margin: 18px 0 6px; }
+p  { color: var(--subtext); margin-bottom: 8px; }
+hr { border: none; border-top: 1px solid var(--divider); margin: 14px 0 14px; }
 section { margin-bottom: 56px; }
 .cat {
   font-size: 10px; font-weight: 600; letter-spacing: 1px;
-  color: #6c7086; text-transform: uppercase;
+  color: var(--muted); text-transform: uppercase;
   margin: 22px 0 10px;
 }
-.divider { border-top: 1px solid #313244; margin-bottom: 12px; }
+.divider { border-top: 1px solid var(--divider); margin-bottom: 12px; }
 .key-row { display: table; width: 100%; margin-bottom: 8px; }
 .key-cell { display: table-cell; width: 180px; vertical-align: middle; }
-.desc-cell { display: table-cell; vertical-align: middle; color: #cdd6f4; font-size: 13px; }
+.desc-cell { display: table-cell; vertical-align: middle; color: var(--text); font-size: 13px; }
 .kbd {
   display: inline-block;
-  background: #313244; color: #a6adc8;
+  background: var(--kbd-bg); color: var(--kbd-tx);
   font-family: Consolas, 'Courier New', monospace; font-size: 11.5px;
   padding: 3px 9px; border-radius: 4px;
 }
-.dim { color: #6c7086; }
+.dim { color: var(--muted); }
 .warn {
-  background: #2a2419; border: 1px solid #f9e2af; border-radius: 5px;
-  padding: 10px 14px; margin: 8px 0; color: #f9e2af; font-size: 12.5px;
+  background: var(--warn-bg); border: 1px solid var(--warn-br); border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0; color: var(--warn-tx); font-size: 12.5px;
 }
 .good {
-  background: #1a2820; border: 1px solid #a6e3a1; border-radius: 5px;
+  background: var(--good-bg); border: 1px solid var(--good-br); border-radius: 5px;
   padding: 10px 14px; margin: 8px 0;
 }
-.good-item { color: #a6e3a1; font-size: 12.5px; margin-bottom: 4px; }
+.good-item { color: var(--good-tx); font-size: 12.5px; margin-bottom: 4px; }
 .bad {
-  background: #2a1a1e; border: 1px solid #f38ba8; border-radius: 5px;
+  background: var(--bad-bg); border: 1px solid var(--bad-br); border-radius: 5px;
   padding: 10px 14px; margin: 8px 0;
 }
-.bad-item { color: #f38ba8; font-size: 12.5px; margin-bottom: 4px; }
+.bad-item { color: var(--bad-tx); font-size: 12.5px; margin-bottom: 4px; }
 .code {
-  background: #11111b; border-radius: 4px;
+  background: var(--code-bg); border-radius: 4px;
   padding: 8px 14px; margin: 6px 0;
   font-family: Consolas, 'Courier New', monospace;
-  font-size: 12px; color: #a6e3a1;
+  font-size: 12px; color: var(--code-tx);
 }
-.note { font-size: 12px; color: #6c7086; margin: 8px 0 2px; }
-.card {
-  background: #313244; border-radius: 5px;
-  padding: 14px 16px; margin: 8px 0;
+code {
+  font-family: Consolas, 'Courier New', monospace;
+  background: var(--code-bg); color: var(--code-tx);
+  padding: 1px 5px; border-radius: 3px; font-size: 0.9em;
 }
-.credit-name { font-size: 13px; font-weight: 600; color: #cdd6f4; }
-.credit-meta { font-size: 11.5px; color: #6c7086; }
+.note { font-size: 12px; color: var(--muted); margin: 8px 0 2px; }
+.card { background: var(--surface); border-radius: 5px; padding: 14px 16px; margin: 8px 0; }
+.credit-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.credit-meta { font-size: 11.5px; color: var(--muted); }
 .glory {
   text-align: center; font-style: italic;
-  color: #a6adc8; font-size: 15px;
-  border-top: 1px solid #313244; padding-top: 18px; margin-top: 28px;
+  color: var(--subtext); font-size: 15px;
+  border-top: 1px solid var(--divider); padding-top: 18px; margin-top: 28px;
 }
 </style>
 <script>
@@ -158,7 +209,7 @@ function scrollToSection(id) {
 <h2>내보내기</h2>
 <p><strong>파일 → WAV로 내보내기</strong> (<span class="kbd">Ctrl+E</span>)로 전체 타임라인을 24-bit WAV로 렌더링합니다. 뮤트된 트랙은 출력에 포함되지 않습니다. 메트로놈이 켜져 있으면 출력에 포함되므로 내보내기 전에 확인하세요.</p>
 
-<hr style="margin:32px 0 18px; border-color:#89b4fa;">
+<hr style="margin:32px 0 18px; border-color:var(--accent);">
 <h1 style="font-size:18px;">필수 도구 설치</h1>
 <p style="margin-top:8px;">스템 분리(MR 추출)와 노이즈 감소 기능을 사용하려면 아래 도구를 설치해야 합니다. 기본 WAV 편집과 내보내기는 추가 설치 없이 사용 가능합니다.</p>
 
@@ -256,7 +307,7 @@ function scrollToSection(id) {
 <h2>AI / 모델 관련 주의</h2>
 <p>모델 출력은 완벽하지 않을 수 있으며 아티팩트·재구성 오류가 포함될 수 있습니다. 제3자 모델 약관이 추가 제한을 둘 수 있습니다. 유지관리자는 상업 배포·공개 릴리스에 대한 적합성을 보장하지 않습니다.</p>
 
-<p style="font-size:11.5px; color:#6c7086; font-style:italic; border-top:1px solid #313244; padding-top:14px; margin-top:24px;">
+<p style="font-size:11.5px; color:var(--muted); font-style:italic; border-top:1px solid var(--divider); padding-top:14px; margin-top:24px;">
 이 문서는 법률 자문을 대체하지 않습니다. 법적 조건은 LICENSE, TRADEMARK.md를 참고하세요.
 </p>
 </section>
@@ -266,19 +317,19 @@ function scrollToSection(id) {
      ═══════════════════════════════════════════ -->
 <section id="about">
 <h1 style="font-size:32px;">Selah</h1>
-<p style="font-size:15px; color:#a6adc8; margin-top:4px; margin-bottom:20px;">찬양사역용 MR편집기</p>
+<p style="font-size:15px; color:var(--subtext); margin-top:4px; margin-bottom:20px;">찬양사역용 MR편집기</p>
 <hr>
 
 <p style="margin-top:16px;">버전: 0.1.0 (1차 프로토타입)</p>
 <p>라이선스: GPLv3</p>
-<p>소스코드: <span style="color:#89b4fa; text-decoration:underline;">https://github.com/elrang3843/Selah</span></p>
+<p>소스코드: <span style="color:var(--accent); text-decoration:underline;">https://github.com/elrang3843/Selah</span></p>
 
-<p style="margin-top:16px; color:#a6adc8;">이 소프트웨어는 소형 교회와 선교 현장의 예배 사역자를 위해 오픈소스(GPLv3)로 자유롭게 배포됩니다.</p>
+<p style="margin-top:16px; color:var(--subtext);">이 소프트웨어는 소형 교회와 선교 현장의 예배 사역자를 위해 오픈소스(GPLv3)로 자유롭게 배포됩니다.</p>
 
 <h2>사용된 핵심 오픈소스 라이브러리</h2>
 <div class="card" style="margin-bottom:8px;">
   <div style="display:table; width:100%;">
-    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; width:14px; color:var(--accent); font-size:14px;">•</div>
     <div style="display:table-cell; padding-left:10px;">
       <div class="credit-name">NAudio 2.2.1</div>
       <div class="credit-meta">MIT License — Microsoft</div>
@@ -287,7 +338,7 @@ function scrollToSection(id) {
 </div>
 <div class="card" style="margin-bottom:8px;">
   <div style="display:table; width:100%;">
-    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; width:14px; color:var(--accent); font-size:14px;">•</div>
     <div style="display:table-cell; padding-left:10px;">
       <div class="credit-name">Demucs</div>
       <div class="credit-meta">MIT License — Meta AI</div>
@@ -296,7 +347,7 @@ function scrollToSection(id) {
 </div>
 <div class="card">
   <div style="display:table; width:100%;">
-    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; width:14px; color:var(--accent); font-size:14px;">•</div>
     <div style="display:table-cell; padding-left:10px;">
       <div class="credit-name">FFmpeg</div>
       <div class="credit-meta">LGPL / GPL (선택 설치 / optional)</div>

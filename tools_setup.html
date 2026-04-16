@@ -6,6 +6,7 @@
   <title>셀라 — 도구 설치 안내 / Tools Setup Guide</title>
   <style>
     :root {
+      color-scheme: dark light;
       --bg:       #1e1e2e;
       --surface:  #313244;
       --surface1: #45475a;
@@ -16,6 +17,22 @@
       --yellow:   #f9e2af;
       --red:      #f38ba8;
       --code-bg:  #181825;
+      --warn-bg:  rgba(249,226,175,0.10);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:       #eff1f5;
+        --surface:  #e6e9ef;
+        --surface1: #ccd0da;
+        --text:     #4c4f69;
+        --subtext:  #5c5f77;
+        --accent:   #1751c8;
+        --green:    #1f6b1a;
+        --yellow:   #7c5200;
+        --red:      #8e0025;
+        --code-bg:  #dce0e8;
+        --warn-bg:  #fef3d8;
+      }
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -60,7 +77,7 @@
       border-left: 3px solid var(--accent);
     }
     .warn {
-      background: rgba(249,226,175,0.08);
+      background: var(--warn-bg);
       border: 1px solid var(--yellow);
       border-radius: 6px;
       padding: 10px 16px;
@@ -78,7 +95,7 @@
       border-radius: 12px;
       padding: 2px 10px;
       font-size: 0.78em;
-      color: var(--subtext);
+      color: var(--text);
       margin-left: 8px;
       vertical-align: middle;
     }
