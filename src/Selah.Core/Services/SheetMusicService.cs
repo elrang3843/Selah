@@ -210,11 +210,15 @@ public class SheetMusicService
     {
         var psi = new ProcessStartInfo(python, args)
         {
-            RedirectStandardOutput = true,
-            RedirectStandardError  = true,
-            UseShellExecute        = false,
-            CreateNoWindow         = true
+            RedirectStandardOutput  = true,
+            RedirectStandardError   = true,
+            UseShellExecute         = false,
+            CreateNoWindow          = true,
+            StandardOutputEncoding  = System.Text.Encoding.UTF8,
+            StandardErrorEncoding   = System.Text.Encoding.UTF8,
         };
+        // PYTHONIOENCODING=utf-8 — Korean Windows(CP949) 환경에서 Python stdout을 UTF-8로 강제
+        psi.Environment["PYTHONIOENCODING"] = "utf-8:replace";
 
         using var proc = new Process { StartInfo = psi };
         double lastPct = 0;
@@ -300,11 +304,14 @@ public class SheetMusicService
     {
         var psi = new ProcessStartInfo(python, args)
         {
-            RedirectStandardOutput = true,
-            RedirectStandardError  = true,
-            UseShellExecute        = false,
-            CreateNoWindow         = true
+            RedirectStandardOutput  = true,
+            RedirectStandardError   = true,
+            UseShellExecute         = false,
+            CreateNoWindow          = true,
+            StandardOutputEncoding  = System.Text.Encoding.UTF8,
+            StandardErrorEncoding   = System.Text.Encoding.UTF8,
         };
+        psi.Environment["PYTHONIOENCODING"] = "utf-8:replace";
 
         using var proc = new Process { StartInfo = psi };
         double lastPct = 0;

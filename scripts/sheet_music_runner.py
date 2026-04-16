@@ -33,7 +33,7 @@ try:
     from PIL import Image
     import numpy as np
 except ImportError:
-    print("LOG:PILLOW_MISSING — pip install Pillow", flush=True)
+    print("LOG:PILLOW_MISSING: pip install Pillow", flush=True)
     sys.exit(1)
 
 try:
@@ -45,7 +45,7 @@ except ImportError:
 try:
     import oemer  # noqa: F401 — 존재 여부만 확인
 except ImportError:
-    print("LOG:OEMER_MISSING — pip install oemer", flush=True)
+    print("LOG:OEMER_MISSING: pip install oemer", flush=True)
     sys.exit(1)
 
 
@@ -125,7 +125,7 @@ def run_omr(image_path: str, output_dir: str) -> str:
 
     oemer_cmd = _find_oemer()
     if not oemer_cmd:
-        print("LOG:OEMER_MISSING — oemer 실행 파일을 찾을 수 없습니다. pip install oemer", flush=True)
+        print("LOG:OEMER_MISSING: oemer 실행 파일을 찾을 수 없습니다. pip install oemer", flush=True)
         sys.exit(1)
 
     proc_oemer = subprocess.Popen(
@@ -446,7 +446,7 @@ def main() -> None:
             img.save(normalized_input, format="PNG")
         oemer_input = normalized_input
     except Exception as exc:
-        print(f"LOG:이미지 변환 실패 — 원본 사용: {exc}", flush=True)
+        print(f"LOG:이미지 변환 실패 (원본 사용): {exc}", flush=True)
         oemer_input = args.input
 
     # Step 2: OMR
@@ -474,7 +474,7 @@ def main() -> None:
         sys.exit(1)
 
     print("PROGRESS:100", flush=True)
-    print(f"LOG:인식 완료 — {profile['NoteCount']}개 음표, {profile['DurationSeconds']}초", flush=True)
+    print(f"LOG:인식 완료: {profile['NoteCount']}개 음표, {profile['DurationSeconds']}초", flush=True)
     print(f"PROFILE:{json.dumps(profile, ensure_ascii=False)}", flush=True)
 
 
