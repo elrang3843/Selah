@@ -28,7 +28,7 @@
     <sys:String x:Key="Menu_Tools">도구(_O)</sys:String>
     <sys:String x:Key="Menu_Tools_ModelManager">모델 관리자...</sys:String>
     <sys:String x:Key="Menu_Tools_HardwareDiag">하드웨어 진단...</sys:String>
-    <sys:String x:Key="Menu_Tools_FFmpegGuide">FFmpeg 설치 안내...</sys:String>
+    <sys:String x:Key="Menu_Tools_FFmpegGuide">필수 도구 설치 안내...</sys:String>
     <sys:String x:Key="Menu_Help">도움말(_H)</sys:String>
     <sys:String x:Key="Menu_Help_Shortcuts">단축키 목록</sys:String>
     <sys:String x:Key="Menu_Help_Ethics">윤리적 사용 가이드라인...</sys:String>

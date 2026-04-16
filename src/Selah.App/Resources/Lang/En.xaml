@@ -28,7 +28,7 @@
     <sys:String x:Key="Menu_Tools">Tools(_O)</sys:String>
     <sys:String x:Key="Menu_Tools_ModelManager">Model Manager...</sys:String>
     <sys:String x:Key="Menu_Tools_HardwareDiag">Hardware Diagnostics...</sys:String>
-    <sys:String x:Key="Menu_Tools_FFmpegGuide">FFmpeg Install Guide...</sys:String>
+    <sys:String x:Key="Menu_Tools_FFmpegGuide">Essential Tools Setup Guide...</sys:String>
     <sys:String x:Key="Menu_Help">Help(_H)</sys:String>
     <sys:String x:Key="Menu_Help_Shortcuts">Keyboard Shortcuts</sys:String>
     <sys:String x:Key="Menu_Help_Ethics">Ethical Use Guidelines...</sys:String>
