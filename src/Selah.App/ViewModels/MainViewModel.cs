@@ -285,10 +285,8 @@ public class MainViewModel : ViewModelBase, IDisposable
         IsBusy = true;
         int imported = 0;
 
-        // 삽입 대상 트랙: 선택된 트랙이 활성화된 경우 사용, 없거나 비활성화된 경우 새 트랙 생성
+        // 삽입 대상 트랙 (단일 소스 임포트 시만 사용)
         var targetTrack = (SelectedTrack?.IsEnabled == true) ? SelectedTrack : CurrentProject.AddTrack();
-
-        // 플레이헤드가 기존 클립 위에 있으면 그 클립의 끝에서부터 삽입
         long insertPosition = ResolveInsertPosition(targetTrack, Timeline.PlayheadFrames);
 
         foreach (var file in files)
@@ -296,19 +294,42 @@ public class MainViewModel : ViewModelBase, IDisposable
             StatusMessage = Loc.Format("Status_Importing", Path.GetFileName(file));
             try
             {
-                var source = await CurrentProject.ImportAudioAsync(file,
-                    new Progress<double>(p => StatusMessage = Loc.Format("Status_Converting", p.ToString("P0"))));
+                var progress = new Progress<double>(p =>
+                    StatusMessage = Loc.Format("Status_Converting", p.ToString("P0")));
 
-                var clip = new Clip
+                var sources = await CurrentProject.ImportAudioAutoAsync(file, progress);
+
+                if (sources.Count == 1)
                 {
-                    SourceId = source.Id,
-                    TimelineStartSamples = insertPosition,
-                    SourceInSamples = 0,
-                    SourceOutSamples = source.LengthSamples
-                };
-                source.AbsolutePath ??= Path.Combine(CurrentProject.Model.FilePath!, source.RelPath);
-                targetTrack.AddClip(new ClipViewModel(clip, CurrentProject.Model));
-                insertPosition += source.LengthSamples;
+                    // 단일 소스 — 기존 동작: 대상 트랙에 순차 삽입
+                    var source = sources[0];
+                    source.AbsolutePath ??= Path.Combine(CurrentProject.Model.FilePath!, source.RelPath);
+                    targetTrack.AddClip(new ClipViewModel(new Clip
+                    {
+                        SourceId             = source.Id,
+                        TimelineStartSamples = insertPosition,
+                        SourceInSamples      = 0,
+                        SourceOutSamples     = source.LengthSamples
+                    }, CurrentProject.Model));
+                    insertPosition += source.LengthSamples;
+                }
+                else
+                {
+                    // 멀티채널/멀티스트림 — 소스마다 새 트랙에 삽입
+                    long startPos = Timeline.PlayheadFrames;
+                    foreach (var source in sources)
+                    {
+                        source.AbsolutePath ??= Path.Combine(CurrentProject.Model.FilePath!, source.RelPath);
+                        var track = CurrentProject.AddTrack(source.Name);
+                        track.AddClip(new ClipViewModel(new Clip
+                        {
+                            SourceId             = source.Id,
+                            TimelineStartSamples = startPos,
+                            SourceInSamples      = 0,
+                            SourceOutSamples     = source.LengthSamples
+                        }, CurrentProject.Model));
+                    }
+                }
                 imported++;
             }
             catch (Exception ex)
