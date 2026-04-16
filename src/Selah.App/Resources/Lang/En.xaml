@@ -208,7 +208,7 @@
     <sys:String x:Key="Status_SheetMusicComplete">{0} sheet music track(s) inserted</sys:String>
     <sys:String x:Key="Status_SheetMusicFailed">Sheet music track insertion failed: {0}</sys:String>
     <sys:String x:Key="Status_SheetMusic_NoPython">Python is not installed. Install from python.org.</sys:String>
-    <sys:String x:Key="Status_SheetMusic_NoFluidSynth">FluidSynth not found. Install from fluidsynth.org and add to PATH.</sys:String>
+    <sys:String x:Key="Status_SheetMusic_NoFluidSynth">FluidSynth not found.&#x0a;Install Python package: pip install fluidsynth&#x0a;Or install the executable from fluidsynth.org and add to PATH.</sys:String>
     <sys:String x:Key="Status_SheetMusic_NoSoundFont">SoundFont (.sf2) not found.&#x0a;Place a .sf2 file in %AppData%\Selah\soundfonts\</sys:String>
 
     <!-- ── Instrument track names ── -->

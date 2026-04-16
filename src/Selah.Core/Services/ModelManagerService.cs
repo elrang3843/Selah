@@ -180,6 +180,8 @@ public class ModelManagerService
     public bool IsMusic21Installed() => CheckPythonPackage("music21");
     /// <summary>mido MIDI 조작 패키지 설치 여부를 확인합니다.</summary>
     public bool IsMidoInstalled()   => CheckPythonPackage("mido");
+    /// <summary>fluidsynth Python 패키지 설치 여부를 확인합니다 (pip install fluidsynth).</summary>
+    public static bool IsFluidSynthPkgInstalled() => CheckPythonPackage("fluidsynth");
 
     /// <summary>audio-separator 모델 캐시 폴더 경로 (플랫폼 무관).</summary>
     public static string GetAudioSeparatorCacheDir() =>

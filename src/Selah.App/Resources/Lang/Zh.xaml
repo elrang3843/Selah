@@ -208,7 +208,7 @@
     <sys:String x:Key="Status_SheetMusicComplete">已插入 {0} 条乐谱轨道</sys:String>
     <sys:String x:Key="Status_SheetMusicFailed">乐谱轨道插入失败：{0}</sys:String>
     <sys:String x:Key="Status_SheetMusic_NoPython">未安装 Python。请从 python.org 安装。</sys:String>
-    <sys:String x:Key="Status_SheetMusic_NoFluidSynth">未找到 FluidSynth。请从 fluidsynth.org 安装并添加到 PATH。</sys:String>
+    <sys:String x:Key="Status_SheetMusic_NoFluidSynth">未找到 FluidSynth。&#x0a;安装 Python 包：pip install fluidsynth&#x0a;或从 fluidsynth.org 安装可执行文件并添加到 PATH。</sys:String>
     <sys:String x:Key="Status_SheetMusic_NoSoundFont">未找到 SoundFont (.sf2)。&#x0a;请将 .sf2 文件放入 %AppData%\Selah\soundfonts\</sys:String>
 
     <!-- ── 乐器轨道名称 ── -->
