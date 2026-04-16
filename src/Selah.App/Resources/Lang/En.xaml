@@ -57,6 +57,7 @@
     <sys:String x:Key="Transport_Tooltip_Stop">Stop + Return to Start (Shift+Space)</sys:String>
     <sys:String x:Key="Transport_Tooltip_Metronome">Toggle Metronome (M)</sys:String>
     <sys:String x:Key="Transport_Tooltip_Snap">Toggle Snap (N)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_SnapMode">Snap unit</sys:String>
     <sys:String x:Key="Transport_Tooltip_ZoomOut">Zoom Out (Ctrl+-)</sys:String>
     <sys:String x:Key="Transport_Tooltip_ZoomIn">Zoom In (Ctrl++)</sys:String>
 

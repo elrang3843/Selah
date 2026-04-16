@@ -57,6 +57,7 @@
     <sys:String x:Key="Transport_Tooltip_Stop">정지 + 처음으로 (Shift+Space)</sys:String>
     <sys:String x:Key="Transport_Tooltip_Metronome">메트로놈 켜기/끄기 (M)</sys:String>
     <sys:String x:Key="Transport_Tooltip_Snap">스냅 켜기/끄기 (N)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_SnapMode">스냅 단위 선택</sys:String>
     <sys:String x:Key="Transport_Tooltip_ZoomOut">줌 아웃 (Ctrl+-)</sys:String>
     <sys:String x:Key="Transport_Tooltip_ZoomIn">줌 인 (Ctrl++)</sys:String>
 
