@@ -152,18 +152,20 @@ def run_omr(image_path: str, output_dir: str) -> str:
 
     if proc_oemer.returncode != 0:
         # oemer는 오류를 stderr 대신 stdout에 출력하는 경우가 있음.
-        # 오류 키워드를 포함한 줄 우선 노출, 없으면 마지막 10줄을 표시.
         stderr_text = (stderr_data or "").strip()
         stdout_text = (stdout_data or "").strip()
-        combined = (stderr_text + "\n" + stdout_text).strip()
-        if combined:
-            lines = combined.splitlines()
-            error_lines = [l for l in lines if any(
-                kw in l.lower() for kw in ("error", "exception", "traceback", "failed", "오류"))]
-            err_tail = "\n".join(error_lines[-5:]) if error_lines else "\n".join(lines[-10:])
+        combined_lines = [l for l in (stderr_text + "\n" + stdout_text).splitlines() if l.strip()]
+
+        if combined_lines:
+            # 각 줄을 별도 LOG: 메시지로 출력.
+            # C#의 BeginOutputReadLine은 줄 단위로 이벤트를 발생시키므로
+            # 멀티라인 err_tail을 한 번에 print하면 첫 줄만 LOG: 프리픽스가 붙고
+            # 나머지 줄은 버려집니다. 줄마다 LOG: 를 붙여 모두 전달합니다.
+            # logLines[^1] 이 가장 구체적인 예외 메시지(마지막 줄)가 됩니다.
+            for line in combined_lines[-15:]:
+                print(f"LOG:{line}", flush=True)
         else:
-            err_tail = f"(출력 없음, 종료코드 {proc_oemer.returncode})"
-        print(f"LOG:OMR 실패: {err_tail}", flush=True)
+            print(f"LOG:OMR 실패 (종료코드 {proc_oemer.returncode}, 출력 없음)", flush=True)
         sys.exit(1)
 
     # oemer 출력 파일 탐색 (.musicxml 또는 .xml)
