@@ -19,7 +19,7 @@
 
         <!-- 진행 바 -->
         <ProgressBar Height="8" Minimum="0" Maximum="100"
-                     Value="{Binding ProgressPercent}"
+                     Value="{Binding ProgressPercent, Mode=OneWay}"
                      IsIndeterminate="{Binding IsProgressIndeterminate}"
                      Foreground="{DynamicResource AccentBrush}"
                      Background="{DynamicResource Surface1Brush}"
