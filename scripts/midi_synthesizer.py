@@ -92,14 +92,19 @@ def _register_dll_paths() -> None:
     if exe:
         candidates.append(os.path.dirname(exe))
 
-    # Chocolatey lib 하위 재귀 탐색: 버전별 하위폴더(예: tools\fluidsynth-2.4.7-win10-x64\bin)에 대응
-    choco_lib_root = os.path.join(choco_root, "lib", "fluidsynth")
-    if os.path.isdir(choco_lib_root):
+    # 재귀 탐색: 버전별 하위폴더 및 비표준 설치 경로(C:\tools\ 등)에 대응
+    _dll_names = {"libfluidsynth-3.dll", "libfluidsynth.dll", "libfluidsynth-2.dll"}
+    _walk_roots = [
+        os.path.join(choco_root, "lib", "fluidsynth"),  # C:\ProgramData\chocolatey\lib\fluidsynth
+        r"C:\tools\fluidsynth",                          # Chocolatey C:\tools\ 레이아웃
+    ]
+    for _walk_root in _walk_roots:
+        if not os.path.isdir(_walk_root):
+            continue
         try:
-            _dll_names = {"libfluidsynth-3.dll", "libfluidsynth.dll", "libfluidsynth-2.dll"}
-            for _root, _dirs, _files in os.walk(choco_lib_root):
+            for _root, _dirs, _files in os.walk(_walk_root):
                 if _dll_names.intersection(_files):
-                    candidates.insert(0, _root)   # 찾은 경로를 최우선 후보로 삽입
+                    candidates.insert(0, _root)
                     break
         except Exception:
             pass
