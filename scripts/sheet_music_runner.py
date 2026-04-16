@@ -4,13 +4,13 @@ Selah sheet_music_runner.py — 악보 이미지 OMR + ScoreProfile 추출
 
 파이프라인:
   1. 이미지 전처리  — PIL/scipy: 그레이스케일, 노이즈 감소, 적응형 이진화
-  2. OMR 실행       — oemer 서브모듈로 MusicXML 생성
-  3. 악보 분석      — music21: 보표·음자리표·음표 구조 분석
-  4. MIDI 내보내기  — music21: score.mid 생성
+  2. OMR 실행       — oemer 서브프로세스로 MusicXML 생성
+  3. MIDI 내보내기  — xml.etree.ElementTree + mido: score.mid 생성 (blocking 없음)
+  4. ScoreProfile   — xml.etree.ElementTree: 보표·음자리표·음표 구조 분석
   5. 프로파일 출력  — ScoreProfile JSON을 stdout에 기록
 
 의존 패키지:
-  pip install oemer music21 Pillow scipy
+  pip install oemer mido Pillow scipy
 
 사용법:
   python sheet_music_runner.py --input <image> --output-dir <dir>
@@ -46,22 +46,6 @@ try:
     import oemer  # noqa: F401 — 존재 여부만 확인
 except ImportError:
     print("LOG:OEMER_MISSING — pip install oemer", flush=True)
-    sys.exit(1)
-
-try:
-    from music21 import converter, stream, note, chord, environment  # type: ignore
-    import music21  # type: ignore
-    # 외부 프로그램(MuseScore, LilyPond 등) 자동 실행 완전 차단
-    _env = environment.Environment()
-    for _key in ("musescorePath", "musicxmlPath", "lilypondPath",
-                 "midiPath", "graphicsPath"):
-        try:
-            _env[_key] = ""
-        except Exception:
-            pass
-    _env["autoDownload"] = "deny"
-except ImportError:
-    print("LOG:MUSIC21_MISSING — pip install music21", flush=True)
     sys.exit(1)
 
 
@@ -320,73 +304,106 @@ def _musicxml_to_midi(xml_path: str, midi_path: str) -> None:
     print(f"LOG:MIDI 저장 완료 ({len(mid.tracks) - 1}개 트랙)", flush=True)
 
 
-def build_score_profile(score: "music21.stream.Score", midi_path: str) -> dict:
+def _build_profile_from_xml(xml_path: str, midi_path: str) -> dict:
     """
-    music21 Score 객체에서 ScoreProfile 딕셔너리를 추출합니다.
-    C# ScoreProfile 모델과 필드 이름을 일치시킵니다.
+    MusicXML 파일에서 ScoreProfile을 추출합니다.
+    music21을 전혀 사용하지 않습니다.
+    stdlib xml.etree.ElementTree로 XML을 직접 파싱하고,
+    이미 생성된 MIDI 파일에서 재생 길이를 읽습니다.
     """
+    import xml.etree.ElementTree as ET
+    import mido  # type: ignore
+
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+
+    ns = ""
+    if root.tag.startswith("{"):
+        ns = root.tag.split("}")[0] + "}"
+
+    def t(name: str) -> str:
+        return f"{ns}{name}"
+
+    _STEP = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+
+    def pitch_to_midi(pitch_el) -> int | None:
+        step  = pitch_el.find(t("step"))
+        oct_  = pitch_el.find(t("octave"))
+        alter = pitch_el.find(t("alter"))
+        if step is None or oct_ is None:
+            return None
+        num = (int(oct_.text) + 1) * 12 + _STEP.get(step.text, 0)
+        if alter is not None:
+            num += round(float(alter.text))
+        return max(0, min(127, num))
+
+    parts          = root.findall(t("part"))
+    staff_count    = max(len(parts), 1)
     clef_types: list[str] = []
-    staff_count    = max(len(score.parts), 1)
-    is_polyphonic  = False
     has_perc_clef  = False
-    chord_beats    = 0
-    total_beats    = 0
+    is_polyphonic  = False
+    chord_count    = 0
+    total_notes    = 0
     pitch_min      = 127
     pitch_max      = 0
     note_count     = 0
 
-    for part in score.parts:
-        # 음자리표 수집
-        for clef_obj in part.flat.getElementsByClass("Clef"):
-            clef_name = type(clef_obj).__name__.replace("Clef", "").lower()
-            if not clef_name:
-                clef_name = "treble"
-            if clef_name not in clef_types:
-                clef_types.append(clef_name)
-            if "percussion" in clef_name:
-                has_perc_clef = True
+    for part in parts:
+        for measure in part.findall(t("measure")):
+            attrs = measure.find(t("attributes"))
+            if attrs is not None:
+                for clef_el in attrs.findall(t("clef")):
+                    sign_el = clef_el.find(t("sign"))
+                    if sign_el is not None and sign_el.text:
+                        sign = sign_el.text.strip().lower()
+                        clef_map = {"g": "treble", "f": "bass", "c": "alto",
+                                    "percussion": "percussion"}
+                        clef_name = clef_map.get(sign, sign)
+                        if clef_name not in clef_types:
+                            clef_types.append(clef_name)
+                        if sign == "percussion":
+                            has_perc_clef = True
 
-        # 음표/화음 순회
-        for el in part.flat.notesAndRests:
-            total_beats += 1
-            if isinstance(el, chord.Chord):
-                is_polyphonic = True
-                chord_beats  += 1
-                note_count   += len(el.pitches)
-                for p in el.pitches:
-                    pitch_min = min(pitch_min, p.midi)
-                    pitch_max = max(pitch_max, p.midi)
-            elif isinstance(el, note.Note):
-                note_count += 1
-                pitch_min   = min(pitch_min, el.pitch.midi)
-                pitch_max   = max(pitch_max, el.pitch.midi)
+            for child in measure:
+                if child.tag.replace(ns, "") != "note":
+                    continue
+                is_chord = child.find(t("chord")) is not None
+                is_rest  = child.find(t("rest"))  is not None
+                total_notes += 1
+                if is_chord:
+                    is_polyphonic = True
+                    chord_count  += 1
+                if not is_rest:
+                    pitch_el = child.find(t("pitch"))
+                    if pitch_el is not None:
+                        midi_num = pitch_to_midi(pitch_el)
+                        if midi_num is not None:
+                            note_count += 1
+                            pitch_min   = min(pitch_min, midi_num)
+                            pitch_max   = max(pitch_max, midi_num)
 
-    chord_density = round(chord_beats / total_beats, 3) if total_beats > 0 else 0.0
-
-    # 음표가 없으면 MIDI 범위 초기화
+    chord_density = round(chord_count / total_notes, 3) if total_notes > 0 else 0.0
     if pitch_min > pitch_max:
         pitch_min, pitch_max = 0, 0
 
-    # 재생 길이: score.seconds 실패 시 quarterLength × 0.5s (120 BPM 추정)
+    # 재생 길이: 이미 생성된 MIDI 파일에서 읽음 (mido.MidiFile.length → 초)
     try:
-        duration_sec = round(float(score.seconds), 2)
+        mid = mido.MidiFile(midi_path)
+        duration_sec = round(mid.length, 2)
     except Exception:
-        try:
-            duration_sec = round(score.duration.quarterLength * 0.5, 2)
-        except Exception:
-            duration_sec = 0.0
+        duration_sec = 0.0
 
     return {
-        "StaffCount":        staff_count,
-        "ClefTypes":         clef_types if clef_types else ["treble"],
-        "IsPolyphonic":      is_polyphonic,
-        "HasPercussionClef": has_perc_clef,
-        "ChordDensity":      chord_density,
-        "PitchRangeMin":     pitch_min,
-        "PitchRangeMax":     pitch_max,
-        "NoteCount":         note_count,
-        "DurationSeconds":   duration_sec,
-        "MidiPath":          midi_path,
+        "StaffCount":           staff_count,
+        "ClefTypes":            clef_types if clef_types else ["treble"],
+        "IsPolyphonic":         is_polyphonic,
+        "HasPercussionClef":    has_perc_clef,
+        "ChordDensity":         chord_density,
+        "PitchRangeMin":        pitch_min,
+        "PitchRangeMax":        pitch_max,
+        "NoteCount":            note_count,
+        "DurationSeconds":      duration_sec,
+        "MidiPath":             midi_path,
         "SuggestedInstruments": [],   # C# SheetMusicService.SuggestInstruments()가 채웁니다
     }
 
@@ -410,23 +427,12 @@ def main() -> None:
         print(f"LOG:전처리 실패 — 원본 이미지 사용: {exc}", flush=True)
         preprocessed = args.input
 
-    # Step 2: OMR
+    # Step 2: OMR (오래 걸림 — 15초마다 진행 상태 출력)
     print("PROGRESS:15", flush=True)
     xml_path = run_omr(preprocessed, args.output_dir)
     print(f"LOG:MusicXML 생성: {os.path.basename(xml_path)}", flush=True)
 
-    # Step 3: music21로 분석
-    print("PROGRESS:60", flush=True)
-    print("LOG:악보 분석 중...", flush=True)
-    try:
-        score = converter.parse(xml_path)
-    except Exception as exc:
-        print(f"LOG:MusicXML 파싱 실패: {exc}", flush=True)
-        sys.exit(1)
-
-    # Step 4: MIDI 내보내기
-    # music21의 streamToMidiFile()은 CPU 0% 상태로 무한 대기하는 경우가 있어
-    # (외부 프로그램 호출 또는 I/O 블로킹) mido로 직접 변환합니다.
+    # Step 3: MIDI 내보내기 (직접 XML 파싱 — music21 불필요, blocking 없음)
     print("PROGRESS:75", flush=True)
     print("LOG:MIDI 생성 중...", flush=True)
     midi_path = os.path.join(args.output_dir, "score.mid")
@@ -436,9 +442,14 @@ def main() -> None:
         print(f"LOG:MIDI 변환 실패: {exc}", flush=True)
         sys.exit(1)
 
-    # Step 5: ScoreProfile 빌드 및 출력
+    # Step 4: ScoreProfile 추출 (직접 XML 파싱 — music21 불필요, blocking 없음)
     print("PROGRESS:90", flush=True)
-    profile = build_score_profile(score, midi_path)
+    print("LOG:악보 분석 중...", flush=True)
+    try:
+        profile = _build_profile_from_xml(xml_path, midi_path)
+    except Exception as exc:
+        print(f"LOG:악보 분석 실패: {exc}", flush=True)
+        sys.exit(1)
 
     print("PROGRESS:100", flush=True)
     print(f"LOG:인식 완료 — {profile['NoteCount']}개 음표, {profile['DurationSeconds']}초", flush=True)

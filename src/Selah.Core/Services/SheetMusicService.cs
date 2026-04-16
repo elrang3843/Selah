@@ -8,7 +8,8 @@ namespace Selah.Core.Services;
 /// 악보 이미지 인식(OMR) 및 MIDI 합성 서비스.
 ///
 /// 파이프라인:
-///   1. RecognizeAsync  — sheet_music_runner.py → 이미지 전처리 + oemer OMR + music21 분석
+///   1. RecognizeAsync  — sheet_music_runner.py → 이미지 전처리 + oemer OMR
+///                        MIDI/ScoreProfile은 xml.etree + mido로 직접 추출 (music21 불필요)
 ///                        출력: ScoreProfile JSON + score.mid
 ///   2. SynthesizeAsync — midi_synthesizer.py   → MIDI 패치 교체 + FluidSynth 합성
 ///                        출력: 악기별 WAV
@@ -264,19 +265,30 @@ public class SheetMusicService
         proc.BeginOutputReadLine();
         proc.BeginErrorReadLine();
         await proc.WaitForExitAsync(ct);
+        // WaitForExitAsync 만으로는 BeginOutputReadLine 콜백이 완료됨을 보장하지 않음.
+        // 동기 WaitForExit()를 추가로 호출하여 모든 stdout/stderr 데이터가 처리된 뒤 읽음.
+        proc.WaitForExit();
 
         string error;
         lock (lockObj)
         {
-            // 오류 메시지: 가장 최근 LOG 줄 1개만 사용.
-            // LOG 줄은 진행 상태("이미지 전처리 중...", "OMR 실행 중...") + 최종 오류를 포함하므로
-            // 모두 합치면 "오류: 이미지 전처리 중...\nOMR 실행 중..." 같은 오해를 낳음.
-            // MISSING 플래그(OEMER_MISSING 등)는 항상 마지막 LOG 줄이라 Contains 검사에 안전.
             var lastLog    = logLines.Count > 0 ? logLines[^1] : null;
             var stderrText = stderrLines.Count > 0
                 ? string.Join("\n", stderrLines.TakeLast(5))
                 : null;
-            error = lastLog ?? stderrText ?? string.Empty;
+
+            // 마지막 LOG 줄이 오류/실패를 나타내면 우선 사용.
+            // 진행 메시지("실행 중...", "경과" 등)이면 stderr(Python traceback 등) 우선 사용.
+            bool lastLogIsError = lastLog is not null &&
+                (lastLog.Contains("실패",    StringComparison.Ordinal)  ||
+                 lastLog.Contains("MISSING", StringComparison.Ordinal)  ||
+                 lastLog.Contains("오류",    StringComparison.Ordinal)  ||
+                 lastLog.Contains("Error",   StringComparison.OrdinalIgnoreCase));
+
+            error = (lastLogIsError ? lastLog : null)
+                 ?? stderrText
+                 ?? lastLog
+                 ?? string.Empty;
         }
         return (proc.ExitCode, profile, error);
     }
@@ -332,13 +344,23 @@ public class SheetMusicService
         proc.BeginOutputReadLine();
         proc.BeginErrorReadLine();
         await proc.WaitForExitAsync(ct);
+        proc.WaitForExit(); // 비동기 stdout/stderr 읽기 완료 보장
 
         string error;
         lock (lockObj)
         {
-            error = logLines.Count > 0
-                ? string.Join("\n", logLines.TakeLast(15))
-                : string.Join("\n", stderrLines.TakeLast(15));
+            var lastLog    = logLines.Count > 0 ? logLines[^1] : null;
+            var stderrText = stderrLines.Count > 0
+                ? string.Join("\n", stderrLines.TakeLast(5))
+                : null;
+            bool lastLogIsError = lastLog is not null &&
+                (lastLog.Contains("실패",    StringComparison.Ordinal)  ||
+                 lastLog.Contains("오류",    StringComparison.Ordinal)  ||
+                 lastLog.Contains("Error",   StringComparison.OrdinalIgnoreCase));
+            error = (lastLogIsError ? lastLog : null)
+                 ?? stderrText
+                 ?? lastLog
+                 ?? string.Empty;
         }
         return (proc.ExitCode, error);
     }
