@@ -81,6 +81,7 @@
 
             <MenuItem Header="{DynamicResource Menu_Help}">
                 <MenuItem Header="{DynamicResource Menu_Help_Shortcuts}" Click="MenuShortcuts_Click" InputGestureText="F1"/>
+                <MenuItem Header="{DynamicResource Menu_Help_UserGuide}" Click="MenuUserGuide_Click"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource Menu_Help_Ethics}" Click="MenuEthics_Click"/>
                 <MenuItem Header="{DynamicResource Menu_Help_About}" Click="MenuAbout_Click"/>

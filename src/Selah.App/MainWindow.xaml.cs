@@ -196,37 +196,22 @@ public partial class MainWindow : Window
 
     private void MenuFFmpegGuide_Click(object s, RoutedEventArgs e) => OpenSetupGuide();
 
-    private void MenuShortcuts_Click(object s, RoutedEventArgs e)
-    {
-        MessageBox.Show(
-            Loc.Get("Dialog_Shortcuts_Message"),
-            Loc.Get("Dialog_Shortcuts_Title"),
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
-    }
+    private void MenuShortcuts_Click(object s, RoutedEventArgs e) =>
+        OpenHelp(0);
 
-    private void MenuEthics_Click(object s, RoutedEventArgs e)
-    {
-        var path = System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..",
-            "docs", "ETHICS.md");
-        if (System.IO.File.Exists(path))
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path)
-                { UseShellExecute = true });
-        else
-            MessageBox.Show(
-                Loc.Get("Dialog_Ethics_Message"),
-                Loc.Get("Dialog_Ethics_Title"),
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-    }
+    private void MenuUserGuide_Click(object s, RoutedEventArgs e) =>
+        OpenHelp(1);
 
-    private void MenuAbout_Click(object s, RoutedEventArgs e)
+    private void MenuEthics_Click(object s, RoutedEventArgs e) =>
+        OpenHelp(2);
+
+    private void MenuAbout_Click(object s, RoutedEventArgs e) =>
+        OpenHelp(3);
+
+    private void OpenHelp(int tab)
     {
-        MessageBox.Show(
-            Loc.Get("Dialog_About_Message"),
-            Loc.Get("Dialog_About_Title"),
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
+        var w = new Views.HelpWindow(tab) { Owner = this };
+        w.ShowDialog();
     }
 
     // ── 언어 전환 ──
@@ -246,7 +231,7 @@ public partial class MainWindow : Window
     {
         if (e.Key == System.Windows.Input.Key.F1)
         {
-            MenuShortcuts_Click(s, new RoutedEventArgs());
+            OpenHelp(0);
             e.Handled = true;
         }
     }
