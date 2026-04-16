@@ -431,11 +431,27 @@ def main() -> None:
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # Step 1: oemer에는 원본 이미지를 직접 전달합니다.
-    # oemer는 자체 전처리 파이프라인(그레이스케일·이진화·deskew)을 내장하고 있으며
-    # 외부에서 이미 이진화된 이미지를 받으면 오히려 staff 검출 정확도가 떨어집니다.
+    # Step 1: 이미지 포맷 정규화
+    # oemer는 RGB PNG를 기대합니다.
+    # RGBA(투명도 채널 포함)·팔레트·그레이스케일 이미지는
+    # oemer 내부에서 np.array() 변환 시 NoneType 오류를 유발합니다.
+    # 이진화는 하지 않고, 순수 RGB 변환 + PNG 저장만 수행합니다.
+    print("PROGRESS:10", flush=True)
+    print("LOG:이미지 포맷 확인 중...", flush=True)
+    normalized_input = os.path.join(args.output_dir, "input_rgb.png")
+    try:
+        with Image.open(args.input) as img:
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            img.save(normalized_input, format="PNG")
+        oemer_input = normalized_input
+    except Exception as exc:
+        print(f"LOG:이미지 변환 실패 — 원본 사용: {exc}", flush=True)
+        oemer_input = args.input
+
+    # Step 2: OMR
     print("PROGRESS:15", flush=True)
-    xml_path = run_omr(args.input, args.output_dir)
+    xml_path = run_omr(oemer_input, args.output_dir)
     print(f"LOG:MusicXML 생성: {os.path.basename(xml_path)}", flush=True)
 
     # Step 3: MIDI 내보내기 (직접 XML 파싱 — music21 불필요, blocking 없음)
