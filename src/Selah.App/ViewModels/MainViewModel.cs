@@ -523,8 +523,10 @@ public class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        // 설치된 모델 탐색 (첫 번째 설치된 모델 사용)
-        var model = ModelManagerService.GetCatalog().FirstOrDefault(m => m.IsInstalled);
+        // 설치된 모델 탐색 — htdemucs_ft(파인튜닝 버전) 우선, 없으면 htdemucs
+        var installed = ModelManagerService.GetCatalog().Where(m => m.IsInstalled).ToList();
+        var model = installed.FirstOrDefault(m => m.Id == "htdemucs_ft")
+                 ?? installed.FirstOrDefault();
         if (model == null)
         {
             StatusMessage = Loc.Get("Status_Separate_NoModel");
