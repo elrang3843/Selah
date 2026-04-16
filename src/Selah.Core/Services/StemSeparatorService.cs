@@ -45,20 +45,36 @@ public class StemSeparatorService
         Directory.CreateDirectory(outputDir);
 
         // ── 스크립트 선택 ───────────────────────────────────────
-        var scriptName = model.Engine == ModelEngine.OnnxRuntime
-            ? "onnx_runner.py"
-            : "demucs_runner.py";
+        var scriptName = model.Engine switch
+        {
+            ModelEngine.OnnxRuntime    => "onnx_runner.py",
+            ModelEngine.AudioSeparator => "audio_separator_runner.py",
+            _                          => "demucs_runner.py"   // PythonCLI 레거시
+        };
 
         var scriptPath = Path.Combine(AppContext.BaseDirectory, "scripts", scriptName);
         if (!File.Exists(scriptPath))
             throw new FileNotFoundException($"{scriptName}를 찾을 수 없습니다.", scriptPath);
 
-        var stems = stemType == StemType.TwoStem ? "2" : "4";
-        var args  = $"\"{scriptPath}\" " +
-                    $"--input \"{inputWavPath}\" " +
-                    $"--output \"{outputDir}\" " +
-                    $"--model {model.Id} " +
-                    $"--stems {stems}";
+        string args;
+        if (model.Engine == ModelEngine.AudioSeparator)
+        {
+            // audio_separator_runner.py: --model <파일명> (stems 파라미터 없음)
+            var modelFilename = model.ModelFilename ?? "UVR-MDX-NET-Voc_FT.onnx";
+            args = $"\"{scriptPath}\" " +
+                   $"--input \"{inputWavPath}\" " +
+                   $"--output \"{outputDir}\" " +
+                   $"--model \"{modelFilename}\"";
+        }
+        else
+        {
+            var stems = stemType == StemType.TwoStem ? "2" : "4";
+            args = $"\"{scriptPath}\" " +
+                   $"--input \"{inputWavPath}\" " +
+                   $"--output \"{outputDir}\" " +
+                   $"--model {model.Id} " +
+                   $"--stems {stems}";
+        }
 
         progress?.Report(new SeparationProgress { Phase = "분리 시작 중...", Percent = 0 });
 
@@ -79,13 +95,18 @@ public class StemSeparatorService
             bool torchcodecBroken =
                 errorDetail.Contains("TORCHCODEC_BROKEN", StringComparison.Ordinal);
 
+            // AudioSeparator 오류
+            bool audioSeparatorMissing =
+                errorDetail.Contains("AUDIO_SEPARATOR_MISSING", StringComparison.Ordinal);
+
             return new SeparationResult
             {
-                Success              = false,
-                IsOnnxRuntimeMissing = onnxRuntimeMissing,
-                IsOnnxModelMissing   = onnxModelMissing,
-                IsTorchCodecMissing  = torchcodecMissing,
-                IsTorchCodecBroken   = torchcodecBroken,
+                Success                  = false,
+                IsOnnxRuntimeMissing     = onnxRuntimeMissing,
+                IsOnnxModelMissing       = onnxModelMissing,
+                IsTorchCodecMissing      = torchcodecMissing,
+                IsTorchCodecBroken       = torchcodecBroken,
+                IsAudioSeparatorMissing  = audioSeparatorMissing,
                 Error = string.IsNullOrWhiteSpace(errorDetail)
                     ? $"분리 엔진 종료 코드: {exitCode}"
                     : $"분리 엔진 오류 (코드 {exitCode}):\n\n{errorDetail}"
@@ -230,4 +251,8 @@ public class SeparationResult
     public bool IsTorchCodecMissing { get; set; }
     /// <summary>TorchCodec DLL 로드 실패 (demucs_runner.py 경로).</summary>
     public bool IsTorchCodecBroken  { get; set; }
+
+    // ── AudioSeparator 오류 ──
+    /// <summary>audio-separator 패키지가 설치되지 않은 경우.</summary>
+    public bool IsAudioSeparatorMissing { get; set; }
 }

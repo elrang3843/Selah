@@ -573,9 +573,13 @@ public class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        // 설치된 모델 탐색 — htdemucs_ft(파인튜닝 버전) 우선, 없으면 htdemucs
+        // 설치된 모델 탐색 — 우선순위:
+        //   1. AudioSeparator (MDX-Net): 모든 음역대 보컬 인식
+        //   2. OnnxRuntime 파인튜닝 (htdemucs_ft)
+        //   3. 설치된 모델 중 첫 번째
         var installed = ModelManagerService.GetCatalog().Where(m => m.IsInstalled).ToList();
-        var model = installed.FirstOrDefault(m => m.Id == "htdemucs_ft")
+        var model = installed.FirstOrDefault(m => m.Engine == ModelEngine.AudioSeparator)
+                 ?? installed.FirstOrDefault(m => m.Id == "htdemucs_ft")
                  ?? installed.FirstOrDefault();
         if (model == null)
         {
@@ -669,10 +673,14 @@ public class MainViewModel : ViewModelBase, IDisposable
             if (!result.Success && addedStems.Count == 0)
             {
                 if (result.IsOnnxRuntimeMissing || result.IsOnnxModelMissing ||
-                    result.IsTorchCodecMissing  || result.IsTorchCodecBroken)
+                    result.IsTorchCodecMissing  || result.IsTorchCodecBroken ||
+                    result.IsAudioSeparatorMissing)
                 {
                     // 도구/패키지 미설치 → 설치 안내 페이지 열기
-                    StatusMessage = Loc.Get("Status_SetupRequired");
+                    if (result.IsAudioSeparatorMissing)
+                        StatusMessage = Loc.Get("Status_Separate_AudioSeparatorMissing");
+                    else
+                        StatusMessage = Loc.Get("Status_SetupRequired");
                     SetupGuideRequested?.Invoke();
                 }
                 else

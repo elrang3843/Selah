@@ -144,6 +144,7 @@
     <sys:String x:Key="Status_Separate_TorchCodecBroken">TorchCodec DLL error — opening setup guide...</sys:String>
     <sys:String x:Key="Status_Separate_OnnxRuntimeMissing">ONNX Runtime not installed — opening setup guide...</sys:String>
     <sys:String x:Key="Status_Separate_OnnxModelMissing">ONNX model file missing — opening setup guide...</sys:String>
+    <sys:String x:Key="Status_Separate_AudioSeparatorMissing">audio-separator not installed — opening setup guide...</sys:String>
     <sys:String x:Key="Status_SetupRequired">Tool setup required. Opening setup guide...</sys:String>
     <sys:String x:Key="Stem_Vocals">Vocals</sys:String>
     <sys:String x:Key="Stem_NoVocals">Backing</sys:String>

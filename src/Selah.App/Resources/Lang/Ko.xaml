@@ -144,6 +144,7 @@
     <sys:String x:Key="Status_Separate_TorchCodecBroken">TorchCodec DLL 오류 — 설치 안내 페이지를 여는 중...</sys:String>
     <sys:String x:Key="Status_Separate_OnnxRuntimeMissing">ONNX Runtime 미설치 — 설치 안내 페이지를 여는 중...</sys:String>
     <sys:String x:Key="Status_Separate_OnnxModelMissing">ONNX 모델 파일 없음 — 설치 안내 페이지를 여는 중...</sys:String>
+    <sys:String x:Key="Status_Separate_AudioSeparatorMissing">audio-separator 미설치 — 설치 안내 페이지를 여는 중...</sys:String>
     <sys:String x:Key="Status_SetupRequired">도구 설치가 필요합니다. 설치 안내 페이지를 엽니다...</sys:String>
     <sys:String x:Key="Stem_Vocals">보컬</sys:String>
     <sys:String x:Key="Stem_NoVocals">반주</sys:String>
