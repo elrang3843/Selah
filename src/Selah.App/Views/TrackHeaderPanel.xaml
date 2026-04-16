@@ -44,9 +44,9 @@
 
                             <!-- 트랙 이름 + 색상 표시 + 선택 체크박스 -->
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
-                                <CheckBox IsChecked="{Binding IsSelected}"
+                                <CheckBox IsChecked="{Binding IsEnabled}"
                                           VerticalAlignment="Center"
-                                          ToolTip="{DynamicResource Track_Tooltip_Select}"
+                                          ToolTip="{DynamicResource Track_Tooltip_Enable}"
                                           Margin="0,0,5,0"/>
                                 <Rectangle Width="4" Height="16" Margin="0,0,6,0"
                                            RadiusX="2" RadiusY="2">
