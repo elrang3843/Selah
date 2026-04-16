@@ -24,6 +24,8 @@ public class MainViewModel : ViewModelBase, IDisposable
     private ProjectViewModel? _currentProject;
     private string _statusMessage;
     private bool _isBusy;
+    private string _progressTitle = string.Empty;
+    private double _progressPercent = -1;
     private HardwareInfo? _hardwareInfo;
     private bool _disposed;
 
@@ -36,6 +38,10 @@ public class MainViewModel : ViewModelBase, IDisposable
     public event Action<string>? ErrorOccurred;
     /// <summary>도구 미설치 오류 발생 시 설치 안내 페이지 열기를 요청합니다.</summary>
     public event Action? SetupGuideRequested;
+    /// <summary>시간이 걸리는 작업 시작 시 발생. 인수: 작업 제목.</summary>
+    public event Action<string>? ProgressStarted;
+    /// <summary>시간이 걸리는 작업 완료(또는 실패) 시 발생.</summary>
+    public event Action? ProgressFinished;
 
     public MainViewModel()
     {
@@ -130,8 +136,26 @@ public class MainViewModel : ViewModelBase, IDisposable
     public bool IsBusy
     {
         get => _isBusy;
-        set => SetField(ref _isBusy, value);
+        private set => SetField(ref _isBusy, value);
     }
+
+    public string ProgressTitle
+    {
+        get => _progressTitle;
+        private set => SetField(ref _progressTitle, value);
+    }
+
+    public double ProgressPercent
+    {
+        get => _progressPercent;
+        private set
+        {
+            SetField(ref _progressPercent, value);
+            OnPropertyChanged(nameof(IsProgressIndeterminate));
+        }
+    }
+
+    public bool IsProgressIndeterminate => _progressPercent < 0;
 
     public bool HasProject => CurrentProject != null;
     public bool IsFFmpegAvailable => FFmpegService.IsAvailable;
@@ -287,7 +311,7 @@ public class MainViewModel : ViewModelBase, IDisposable
             Directory.CreateDirectory(tempDir);
         }
 
-        IsBusy = true;
+        BeginProgress(Loc.Get("Progress_Title_Import"));
         int imported = 0;
 
         // 삽입 대상 트랙 (단일 소스 임포트 시만 사용)
@@ -300,7 +324,10 @@ public class MainViewModel : ViewModelBase, IDisposable
             try
             {
                 var progress = new Progress<double>(p =>
-                    StatusMessage = Loc.Format("Status_Converting", p.ToString("P0")));
+                {
+                    StatusMessage   = Loc.Format("Status_Converting", p.ToString("P0"));
+                    ProgressPercent = p * 100;
+                });
 
                 var sources = await CurrentProject.ImportAudioAutoAsync(file, progress);
 
@@ -344,7 +371,7 @@ public class MainViewModel : ViewModelBase, IDisposable
             }
         }
         AudioEngine.RebuildMixers();
-        IsBusy = false;
+        EndProgress();
         StatusMessage = Loc.Format("Status_ImportComplete", imported);
     }
 
@@ -424,7 +451,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         var path = await ExportPathRequested();
         if (path == null) return;
 
-        IsBusy = true;
+        BeginProgress(Loc.Get("Progress_Title_Export"));
         StatusMessage = Loc.Get("Status_Rendering");
         try
         {
@@ -435,8 +462,8 @@ public class MainViewModel : ViewModelBase, IDisposable
                 includeMetronome: false,
                 progress: new Progress<double>(p =>
                 {
-                    StatusMessage = Loc.Format("Status_RenderProgress", p.ToString("P0"));
-                    OnPropertyChanged(nameof(StatusMessage));
+                    StatusMessage   = Loc.Format("Status_RenderProgress", p.ToString("P0"));
+                    ProgressPercent = p * 100;
                 }));
             StatusMessage = Loc.Format("Status_ExportComplete", Path.GetFileName(path));
         }
@@ -445,7 +472,7 @@ public class MainViewModel : ViewModelBase, IDisposable
             StatusMessage = Loc.Format("Status_ExportFailed", ex.Message);
             ErrorOccurred?.Invoke(ex.Message);
         }
-        finally { IsBusy = false; }
+        finally { EndProgress(); }
     }
 
     private void OnSplitAtPlayhead()
@@ -505,6 +532,24 @@ public class MainViewModel : ViewModelBase, IDisposable
         });
     }
 
+    // ── 진행 팝업 헬퍼 ─────────────────────────────────────────────────
+
+    private void BeginProgress(string title)
+    {
+        ProgressTitle   = title;
+        ProgressPercent = -1;
+        IsBusy          = true;
+        ProgressStarted?.Invoke(title);
+    }
+
+    private void EndProgress()
+    {
+        IsBusy = false;
+        ProgressFinished?.Invoke();
+    }
+
+    // ── 스템 분리 ─────────────────────────────────────────────────────
+
     private async Task SeparateClipAsync()
     {
         if (CurrentProject == null || SelectedClip == null) return;
@@ -562,7 +607,7 @@ public class MainViewModel : ViewModelBase, IDisposable
             stemTracks[stemKey] = tv;
         }
 
-        IsBusy = true;
+        BeginProgress(Loc.Get("Status_Separating"));
         StatusMessage = Loc.Get("Status_Separating");
 
         string origName = src.Name;
@@ -573,7 +618,8 @@ public class MainViewModel : ViewModelBase, IDisposable
         {
             var progress = new Progress<SeparationProgress>(p =>
             {
-                StatusMessage = $"{p.Phase} {p.Percent:P0}";
+                StatusMessage   = $"{p.Phase} {p.Percent:P0}";
+                ProgressPercent = p.Percent * 100;
 
                 // Add clip to its track the moment each stem WAV is ready
                 if (p.StemKey != null && p.StemPath != null
@@ -687,7 +733,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         }
         finally
         {
-            IsBusy = false;
+            EndProgress();
         }
     }
 
@@ -727,14 +773,17 @@ public class MainViewModel : ViewModelBase, IDisposable
                          DateTime.Now.ToString("yyyyMMddHHmmss") + ".wav";
         var outputPath = Path.Combine(outputDir, outputName);
 
-        IsBusy = true;
+        BeginProgress(Loc.Get("Status_ReducingNoise"));
         StatusMessage = Loc.Get("Status_ReducingNoise");
         string origName = src.Name;
 
         try
         {
             var progress = new Progress<NoiseReductionProgress>(p =>
-                StatusMessage = $"{Loc.Get("Status_ReducingNoise")} {p.Percent:P0}");
+            {
+                StatusMessage   = $"{Loc.Get("Status_ReducingNoise")} {p.Percent:P0}";
+                ProgressPercent = p.Percent * 100;
+            });
 
             var result = await NoiseReducer.ReduceNoiseAsync(
                 src.AbsolutePath, outputPath,
@@ -801,7 +850,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         }
         finally
         {
-            IsBusy = false;
+            EndProgress();
         }
     }
 

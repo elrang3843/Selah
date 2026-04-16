@@ -127,6 +127,8 @@
     <sys:String x:Key="Status_MetronomeOn">Metronome on</sys:String>
     <sys:String x:Key="Status_MetronomeOff">Metronome off</sys:String>
     <sys:String x:Key="Status_PlaybackEnded">Playback complete</sys:String>
+    <sys:String x:Key="Progress_Title_Import">Importing Audio</sys:String>
+    <sys:String x:Key="Progress_Title_Export">Exporting WAV</sys:String>
     <sys:String x:Key="Status_Separating">Separating stems...</sys:String>
     <sys:String x:Key="Status_ReducingNoise">Reducing noise...</sys:String>
     <sys:String x:Key="Status_NoiseReduceComplete">'{0}' noise reduction complete</sys:String>

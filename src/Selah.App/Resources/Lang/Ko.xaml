@@ -127,6 +127,8 @@
     <sys:String x:Key="Status_MetronomeOn">메트로놈 켜짐</sys:String>
     <sys:String x:Key="Status_MetronomeOff">메트로놈 꺼짐</sys:String>
     <sys:String x:Key="Status_PlaybackEnded">재생 완료</sys:String>
+    <sys:String x:Key="Progress_Title_Import">오디오 가져오기</sys:String>
+    <sys:String x:Key="Progress_Title_Export">WAV 내보내기</sys:String>
     <sys:String x:Key="Status_Separating">음원 분리 중...</sys:String>
     <sys:String x:Key="Status_ReducingNoise">노이즈 감소 중...</sys:String>
     <sys:String x:Key="Status_NoiseReduceComplete">'{0}' 노이즈 감소 완료</sys:String>

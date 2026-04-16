@@ -7,6 +7,7 @@ namespace Selah.App;
 public partial class MainWindow : Window
 {
     private readonly MainViewModel _vm;
+    private ProgressWindow? _progressWindow;
 
     public MainWindow()
     {
@@ -22,6 +23,8 @@ public partial class MainWindow : Window
         _vm.ExportPathRequested += OnExportPathRequested;
         _vm.ErrorOccurred += OnErrorOccurred;
         _vm.SetupGuideRequested += OpenSetupGuide;
+        _vm.ProgressStarted  += OnProgressStarted;
+        _vm.ProgressFinished += OnProgressFinished;
 
         KeyDown += MainWindow_KeyDown;
         Closing += MainWindow_Closing;
@@ -150,6 +153,26 @@ public partial class MainWindow : Window
     private void OnErrorOccurred(string message)
     {
         MessageBox.Show(message, Loc.Get("Dialog_Error_Title"), MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    // ── 진행 팝업 ──
+
+    private void OnProgressStarted(string _)
+    {
+        _progressWindow = new ProgressWindow { DataContext = _vm, Owner = this };
+        IsEnabled = false;
+        _progressWindow.Show();
+    }
+
+    private void OnProgressFinished()
+    {
+        if (_progressWindow != null)
+        {
+            _progressWindow.AllowClose = true;
+            _progressWindow.Close();
+            _progressWindow = null;
+        }
+        IsEnabled = true;
     }
 
     // ── 메뉴 핸들러 ──
