@@ -49,8 +49,17 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from music21 import converter, stream, note, chord  # type: ignore
+    from music21 import converter, stream, note, chord, environment  # type: ignore
     import music21  # type: ignore
+    # 외부 프로그램(MuseScore, LilyPond 등) 자동 실행 완전 차단
+    _env = environment.Environment()
+    for _key in ("musescorePath", "musicxmlPath", "lilypondPath",
+                 "midiPath", "graphicsPath"):
+        try:
+            _env[_key] = ""
+        except Exception:
+            pass
+    _env["autoDownload"] = "deny"
 except ImportError:
     print("LOG:MUSIC21_MISSING — pip install music21", flush=True)
     sys.exit(1)
@@ -265,12 +274,16 @@ def main() -> None:
         sys.exit(1)
 
     # Step 4: MIDI 내보내기
+    # score.write("midi") 는 외부 프로그램(MuseScore 등)을 호출해 무한 대기할 수 있으므로
+    # music21 내부 MIDI 번역 모듈을 직접 사용합니다.
     print("PROGRESS:75", flush=True)
     print("LOG:MIDI 생성 중...", flush=True)
     midi_path = os.path.join(args.output_dir, "score.mid")
     try:
-        result_path = score.write("midi", fp=midi_path)
-        midi_path = str(result_path)
+        from music21.midi import translate as _midi_translate  # type: ignore
+        midi_file = _midi_translate.streamToMidiFile(score)
+        with open(midi_path, "wb") as _fh:
+            midi_file.writeFile(_fh)
     except Exception as exc:
         print(f"LOG:MIDI 변환 실패: {exc}", flush=True)
         sys.exit(1)
