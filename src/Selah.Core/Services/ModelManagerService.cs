@@ -54,6 +54,33 @@ public class ModelManagerService
     {
         _catalog = new List<ModelInfo>
         {
+            // ── MDX-Net (audio-separator) — 모든 음역대 보컬 특화 ──────────────
+            new()
+            {
+                Id            = "uvr-mdx-net-voc-ft",
+                Name          = "UVR MDX-NET Vocal FT",
+                ModelFilename = "UVR-MDX-NET-Voc_FT.onnx",
+                Description   =
+                    "MDX-Net 기반 보컬/반주 2-stem 분리 모델.\n" +
+                    "남성·여성·어린이·비서양권 창법 등 모든 음역대의 목소리를 인식합니다.\n" +
+                    "Demucs보다 보컬 커버리지가 넓고 분리 정확도가 높습니다.\n" +
+                    "audio-separator 패키지로 실행 — ONNX Runtime 별도 설치 불필요.",
+                License    = "MIT",
+                LicenseUrl = "https://github.com/nomadkaraoke/python-audio-separator/blob/main/LICENSE",
+                SourceUrl  = "https://github.com/nomadkaraoke/python-audio-separator",
+                Version    = "MDX-NET-Voc_FT (UVR / Anjok07)",
+                ModelType  = ModelType.VocalSeparation,
+                StemType   = StemType.TwoStem,
+                Engine     = ModelEngine.AudioSeparator,
+                SizeBytes  = 65L * 1024 * 1024,
+                SuitableForPublicWorship = true,
+                WorshipNote =
+                    "모델 가중치: MIT 라이선스 (Anjok07 / Ultimate Vocal Remover)\n" +
+                    "패키지: MIT 라이선스 (nomadkaraoke/python-audio-separator)\n\n" +
+                    "처리 대상 음원(찬양곡)의 저작권은 별도로 확인하세요.\n" +
+                    "CCL 또는 원저작자 허락 여부를 먼저 확인하십시오.",
+                Tags = new List<string> { "추천", "2-stem", "보컬 특화", "모든 음역대", "MIT" }
+            },
             new()
             {
                 Id          = "htdemucs",
@@ -115,19 +142,43 @@ public class ModelManagerService
 
     public void RefreshInstallStatus()
     {
-        bool runtimeOk = CheckPythonPackage("onnxruntime");
+        bool onnxRuntimeOk    = CheckPythonPackage("onnxruntime");
+        bool audioSeparatorOk = CheckPythonPackage("audio_separator");
 
         foreach (var model in _catalog)
         {
-            if (model.Engine != ModelEngine.OnnxRuntime) continue;
-
-            var onnxFile = Path.Combine(_modelsDir, model.Id + ".onnx");
-            model.IsInstalled = runtimeOk && File.Exists(onnxFile);
-            model.LocalPath   = model.IsInstalled ? onnxFile : null;
+            switch (model.Engine)
+            {
+                case ModelEngine.OnnxRuntime:
+                {
+                    var onnxFile = Path.Combine(_modelsDir, model.Id + ".onnx");
+                    model.IsInstalled = onnxRuntimeOk && File.Exists(onnxFile);
+                    model.LocalPath   = model.IsInstalled ? onnxFile : null;
+                    break;
+                }
+                case ModelEngine.AudioSeparator:
+                {
+                    // audio-separator 패키지만 설치되면 사용 가능.
+                    // 모델 파일은 첫 실행 시 자동 다운로드됩니다.
+                    model.IsInstalled = audioSeparatorOk;
+                    model.LocalPath   = audioSeparatorOk
+                        ? Path.Combine(GetAudioSeparatorCacheDir(),
+                                       model.ModelFilename ?? "")
+                        : null;
+                    break;
+                }
+            }
         }
     }
 
-    public bool IsOnnxRuntimeInstalled() => CheckPythonPackage("onnxruntime");
+    public bool IsOnnxRuntimeInstalled()    => CheckPythonPackage("onnxruntime");
+    public bool IsAudioSeparatorInstalled() => CheckPythonPackage("audio_separator");
+
+    /// <summary>audio-separator 모델 캐시 폴더 경로 (플랫폼 무관).</summary>
+    public static string GetAudioSeparatorCacheDir() =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".cache", "audio-separator");
 
     private static bool CheckPythonPackage(string package)
     {
@@ -328,13 +379,23 @@ public class ModelManagerService
     // ── 통합 셋업 (런타임 + 모델 다운로드) ────────────────────────
 
     /// <summary>
-    /// ONNX Runtime pip 설치 → 모델 .onnx 다운로드를 순서대로 실행합니다.
+    /// 엔진 유형에 따라 적절한 설치 흐름을 실행합니다.
+    ///   AudioSeparator → pip install audio-separator[cpu]
+    ///   OnnxRuntime    → pip install onnxruntime numpy scipy → 모델 다운로드
     /// </summary>
     public async Task SetupModelAsync(
         ModelInfo model,
         IProgress<string>? progress = null,
         CancellationToken ct = default)
     {
+        if (model.Engine == ModelEngine.AudioSeparator)
+        {
+            await SetupAudioSeparatorModelAsync(model, progress, ct);
+            return;
+        }
+
+        // ── OnnxRuntime 기존 흐름 ──────────────────────────────────────────────
+
         // Step 1: pip install onnxruntime numpy scipy
         if (!IsOnnxRuntimeInstalled())
         {
@@ -360,6 +421,74 @@ public class ModelManagerService
         }
 
         RefreshInstallStatus();
+    }
+
+    /// <summary>
+    /// audio-separator 엔진 설치 흐름.
+    ///   Step 1: pip install "audio-separator[cpu]"
+    ///   Step 2: 안내 메시지 (모델은 첫 분리 실행 시 자동 다운로드됨)
+    /// </summary>
+    private async Task SetupAudioSeparatorModelAsync(
+        ModelInfo model,
+        IProgress<string>? progress,
+        CancellationToken ct)
+    {
+        var python = FindPython()
+            ?? throw new InvalidOperationException(
+                "Python을 찾을 수 없습니다.\n" +
+                "python.org에서 Python 3.10 이상을 설치하고 PATH에 추가하세요.");
+
+        // Step 1: audio-separator 설치
+        if (!IsAudioSeparatorInstalled())
+        {
+            progress?.Report("─── Step 1: audio-separator 설치 ───");
+            await InstallAudioSeparatorAsync(python, progress, ct);
+            progress?.Report(string.Empty);
+        }
+        else
+        {
+            progress?.Report("✓ audio-separator 이미 설치됨 — 건너뜁니다.");
+        }
+
+        // Step 2: 안내
+        var modelFilename = model.ModelFilename ?? "";
+        var cacheFile = Path.Combine(GetAudioSeparatorCacheDir(), modelFilename);
+        if (File.Exists(cacheFile))
+            progress?.Report($"✓ {model.Name} 모델 캐시 확인됨: {cacheFile}");
+        else
+            progress?.Report(
+                $"ℹ {model.Name} 모델({modelFilename})은 처음 분리 실행 시 자동 다운로드됩니다. (~65 MB)");
+
+        RefreshInstallStatus();
+    }
+
+    /// <summary>pip install audio-separator[cpu]를 실행합니다.</summary>
+    public async Task InstallAudioSeparatorAsync(
+        string python,
+        IProgress<string>? progress = null,
+        CancellationToken ct = default)
+    {
+        const string pkg = "\"audio-separator[cpu]\"";
+        progress?.Report($"pip install {pkg}");
+
+        var psi = new ProcessStartInfo(python, $"-m pip install {pkg}")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError  = true,
+            UseShellExecute        = false,
+            CreateNoWindow         = true
+        };
+
+        using var proc = new Process { StartInfo = psi };
+        proc.OutputDataReceived += (_, e) => { if (e.Data != null) progress?.Report(e.Data); };
+        proc.ErrorDataReceived  += (_, e) => { if (e.Data != null) progress?.Report(e.Data); };
+        proc.Start();
+        proc.BeginOutputReadLine();
+        proc.BeginErrorReadLine();
+        await proc.WaitForExitAsync(ct);
+
+        if (proc.ExitCode != 0)
+            throw new Exception($"pip install 실패 (코드 {proc.ExitCode})");
     }
 
     // ── 레거시 호환 ───────────────────────────────────────────────

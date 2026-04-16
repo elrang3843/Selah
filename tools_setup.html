@@ -104,8 +104,9 @@
   <p>목차 / Contents</p>
   <ol>
     <li><a href="#python">Python 설치</a> — MR 추출(스템 분리)에 필요</li>
-    <li><a href="#onnx">ONNX Runtime 설치</a> — AI 추론 엔진</li>
+    <li><a href="#onnx">ONNX Runtime 설치</a> — AI 추론 엔진 (Demucs 모델용)</li>
     <li><a href="#noisereduce">noisereduce 설치</a> — 노이즈 감소 기능</li>
+    <li><a href="#audioseparator">audio-separator 설치</a> — <strong>권장</strong> 보컬 분리 (모든 음역대 지원)</li>
     <li><a href="#ffmpeg">FFmpeg 설치</a> — MP3·MP4 임포트 및 오디오 처리</li>
     <li><a href="#model">분리 모델 다운로드</a> — 셀라 내 모델 관리자에서 진행</li>
   </ol>
@@ -204,9 +205,52 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════
-     4. FFmpeg
+     4. audio-separator
      ════════════════════════════════════════════════════════ -->
-<h2 id="ffmpeg">4. FFmpeg 설치 <span class="badge">필수 — MP3·MP4 임포트 &amp; MR 추출</span></h2>
+<h2 id="audioseparator">4. audio-separator 설치 <span class="badge">권장 — 보컬 분리</span></h2>
+
+<p>
+  <strong>스템 분리 (보컬/반주)</strong> 기능에 <code>audio-separator</code>를 사용하면
+  Demucs보다 훨씬 넓은 범위의 목소리를 정확하게 분리할 수 있습니다.<br>
+  남성·여성·어린이·비서양권 창법 등 <strong>모든 음역대의 목소리</strong>를 인식합니다.<br>
+  <span class="note">Using <code>audio-separator</code> for stem separation gives far better vocal coverage than Demucs —
+  it recognizes voices of all ranges, genders, and vocal styles.</span>
+</p>
+
+<div class="step">
+  <h3>설치 방법</h3>
+  <p>명령 프롬프트(CMD) 또는 PowerShell을 열고 실행합니다:</p>
+  <pre><code>pip install "audio-separator[cpu]"</code></pre>
+  <p>pip을 찾지 못하면:</p>
+  <pre><code>python -m pip install "audio-separator[cpu]"</code></pre>
+  <p class="note">GPU 가속을 원한다면 <code>[cpu]</code> 대신 <code>[gpu]</code>를 사용하세요.
+  (CUDA 12.x + PyTorch 필요)</p>
+</div>
+
+<p>설치 확인:</p>
+<pre><code>python -c "import audio_separator; print('audio-separator OK')"</code></pre>
+
+<div class="step">
+  <h3>모델 다운로드</h3>
+  <p>
+    모델 파일(<code>UVR-MDX-NET-Voc_FT.onnx</code>, ~65 MB)은
+    <strong>셀라 모델 관리자에서 설치</strong>하거나,
+    처음 분리 실행 시 자동으로 다운로드됩니다.
+  </p>
+  <p class="note">모델은 <code>~/.cache/audio-separator/</code> 폴더에 캐시됩니다.</p>
+</div>
+
+<div class="warn">
+  ⚠ <strong>가상 환경(venv) 사용 시 주의</strong><br>
+  가상 환경에 설치된 경우 셀라가 인식하지 못합니다.
+  전역(global) Python에 설치하세요:
+  <pre style="margin:8px 0 0"><code>py -m pip install "audio-separator[cpu]"</code></pre>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     5. FFmpeg
+     ════════════════════════════════════════════════════════ -->
+<h2 id="ffmpeg">5. FFmpeg 설치 <span class="badge">필수 — MP3·MP4 임포트 &amp; MR 추출</span></h2>
 
 <p>
   MP3, MP4, MKV 등 비(非)WAV 파일 임포트와 MR 추출(오디오 디코딩/인코딩)에
@@ -244,7 +288,7 @@
 <!-- ════════════════════════════════════════════════════════
      4. Model Download
      ════════════════════════════════════════════════════════ -->
-<h2 id="model">5. 분리 모델 다운로드 <span class="badge">필수 — MR 추출</span></h2>
+<h2 id="model">6. 분리 모델 다운로드 <span class="badge">필수 — MR 추출</span></h2>
 
 <p>
   위의 1~3 단계 완료 후, 셀라 내 <strong>모델 관리자</strong>에서 AI 모델 파일을
