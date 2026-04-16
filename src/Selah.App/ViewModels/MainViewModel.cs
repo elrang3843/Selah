@@ -54,17 +54,17 @@ public class MainViewModel : ViewModelBase, IDisposable
         SaveAsCommand = new AsyncRelayCommand(OnSaveAs, () => CurrentProject != null);
         ImportAudioCommand = new AsyncRelayCommand(OnImportAudio, () => CurrentProject != null);
         AddTrackCommand = new RelayCommand(OnAddTrack, () => CurrentProject != null);
-        DeleteSelectedTrackCommand = new RelayCommand(OnDeleteSelectedTrack, () => SelectedTrack != null);
+        DeleteSelectedTrackCommand = new RelayCommand(OnDeleteSelectedTrack, () => SelectedTrack?.IsEnabled == true);
         PlayCommand = new RelayCommand(OnTogglePlay, () => CurrentProject != null);
         StopCommand = new RelayCommand(OnStop, () => CurrentProject != null);
         ReturnToStartCommand = new RelayCommand(OnReturnToStart, () => CurrentProject != null);
         ExportCommand = new AsyncRelayCommand(OnExport, () => CurrentProject != null);
-        SplitAtPlayheadCommand = new RelayCommand(OnSplitAtPlayhead, () => CurrentProject != null);
+        SplitAtPlayheadCommand = new RelayCommand(OnSplitAtPlayhead, () => CurrentProject != null && SelectedTrack?.IsEnabled == true);
         ToggleMetronomeCommand = new RelayCommand(OnToggleMetronome, () => CurrentProject != null);
         ToggleSnapCommand = new RelayCommand(() => Timeline.SnapEnabled = !Timeline.SnapEnabled);
-        DeleteCommand = new RelayCommand(OnDelete, () => CurrentProject != null);
+        DeleteCommand = new RelayCommand(OnDelete, () => CurrentProject != null && SelectedTrack?.IsEnabled == true);
         SeparateClipCommand = new AsyncRelayCommand(SeparateClipAsync,
-            () => CurrentProject != null && SelectedClip != null);
+            () => CurrentProject != null && SelectedClip != null && SelectedTrack?.IsEnabled == true);
 
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
         AudioEngine.PlaybackStopped += OnPlaybackStopped;
@@ -285,8 +285,8 @@ public class MainViewModel : ViewModelBase, IDisposable
         IsBusy = true;
         int imported = 0;
 
-        // 삽입 대상 트랙: 선택된 트랙이 있으면 사용, 없으면 새 트랙 생성
-        var targetTrack = SelectedTrack ?? CurrentProject.AddTrack();
+        // 삽입 대상 트랙: 선택된 트랙이 활성화된 경우 사용, 없거나 비활성화된 경우 새 트랙 생성
+        var targetTrack = (SelectedTrack?.IsEnabled == true) ? SelectedTrack : CurrentProject.AddTrack();
 
         // 플레이헤드가 기존 클립 위에 있으면 그 클립의 끝에서부터 삽입
         long insertPosition = ResolveInsertPosition(targetTrack, Timeline.PlayheadFrames);
@@ -330,7 +330,7 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private void OnDeleteSelectedTrack()
     {
-        if (CurrentProject == null || SelectedTrack == null) return;
+        if (CurrentProject == null || SelectedTrack == null || !SelectedTrack.IsEnabled) return;
         CurrentProject.RemoveTrack(SelectedTrack);
         SelectedTrack = CurrentProject.Tracks.LastOrDefault();
         AudioEngine.RebuildMixers();
@@ -338,7 +338,7 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private void OnDelete()
     {
-        if (CurrentProject == null) return;
+        if (CurrentProject == null || SelectedTrack?.IsEnabled != true) return;
         if (SelectedClip != null && SelectedTrack != null)
         {
             SelectedTrack.RemoveClip(SelectedClip);
@@ -424,7 +424,7 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private void OnSplitAtPlayhead()
     {
-        if (CurrentProject == null || SelectedTrack == null) return;
+        if (CurrentProject == null || SelectedTrack == null || !SelectedTrack.IsEnabled) return;
         SelectedTrack.SplitClipAt(Timeline.PlayheadFrames);
         AudioEngine.RebuildMixers();
     }
