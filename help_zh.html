@@ -204,9 +204,13 @@ function scrollToSection(id) {
 <p>步骤 1 — 安装原生库（<code>libfluidsynth-3.dll</code>）：</p>
 <div class="code">choco install fluidsynth</div>
 <p>或从 <strong>fluidsynth.org</strong> 下载 Windows 安装程序并运行。Selah 会自动检测 DLL，无需配置 PATH。</p>
+<div class="note">Chocolatey 可能将 FluidSynth 安装到 <code>C:\Program Files\FluidSynth\bin\</code> 或 <code>C:\tools\fluidsynth\bin\</code>，具体取决于版本。Selah 会自动搜索这两个路径。</div>
 <p>步骤 2 — 安装 Python 包装器：</p>
 <div class="code">pip install fluidsynth</div>
 <div class="warn">⚠ 仅安装 pip 包而跳过原生安装程序将导致合成时出错。两个步骤都必须完成。</div>
+<p><strong>故障排除 — "FLUIDSYNTH_DLL_MISSING" 错误：</strong>合成时出现此错误表示 Selah 找不到 <code>libfluidsynth-3.dll</code>。请在管理员 PowerShell 中运行以下命令查找 DLL：</p>
+<div class="code">Get-ChildItem -Path C:\ -Filter "libfluidsynth*.dll" -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName</div>
+<p>找到 DLL 后，将其所在文件夹（例如 <code>C:\tools\fluidsynth\bin</code>）添加到系统 PATH 环境变量，然后重新启动 Selah。</p>
 
 <h3>⑨ 安装 SoundFont (.sf2) — 必须（乐器音色）</h3>
 <p>SoundFont 是 FluidSynth 用于将 MIDI 渲染为真实乐器音色的乐器采样库。</p>

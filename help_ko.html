@@ -207,9 +207,13 @@ function scrollToSection(id) {
 <p>Step 1 — 네이티브 라이브러리 설치 (<code>libfluidsynth-3.dll</code>):</p>
 <div class="code">choco install fluidsynth</div>
 <p>또는 <strong>fluidsynth.org</strong>에서 Windows 설치 프로그램을 다운로드하여 실행합니다. 셀라가 DLL을 자동 탐지하므로 PATH 설정은 불필요합니다.</p>
+<div class="note">Chocolatey는 버전에 따라 <code>C:\Program Files\FluidSynth\bin\</code> 또는 <code>C:\tools\fluidsynth\bin\</code>에 설치할 수 있습니다. 셀라는 두 경로를 모두 자동으로 탐지합니다.</div>
 <p>Step 2 — Python 래퍼 설치:</p>
 <div class="code">pip install fluidsynth</div>
 <div class="warn">⚠ pip만 설치하고 네이티브 설치 프로그램을 생략하면 합성 시 오류가 발생합니다. 반드시 두 단계를 모두 수행하세요.</div>
+<p><strong>문제 해결 — "FLUIDSYNTH_DLL_MISSING" 오류:</strong> 합성 시 이 오류가 발생하면 셀라가 <code>libfluidsynth-3.dll</code>을 찾지 못한 것입니다. 관리자 PowerShell에서 아래 명령으로 DLL 위치를 확인하세요:</p>
+<div class="code">Get-ChildItem -Path C:\ -Filter "libfluidsynth*.dll" -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName</div>
+<p>DLL이 발견되면 해당 폴더(예: <code>C:\tools\fluidsynth\bin</code>)를 시스템 PATH에 추가한 뒤 셀라를 재시작하세요.</p>
 
 <h3>⑨ SoundFont(.sf2) 설치 — 필수 (악기 음색)</h3>
 <p>FluidSynth가 MIDI를 실제 악기 음색으로 변환하는 악기 샘플 뱅크입니다.</p>

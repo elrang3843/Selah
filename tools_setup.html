@@ -369,6 +369,11 @@
   <h3>Step 1 — 네이티브 라이브러리 설치 (libfluidsynth-3.dll)</h3>
   <p>방법 A — Chocolatey (관리자 PowerShell):</p>
   <pre><code>choco install fluidsynth</code></pre>
+  <p class="note">
+    Chocolatey는 버전에 따라 <code>C:\Program Files\FluidSynth\bin\</code> 또는
+    <code>C:\tools\fluidsynth\bin\</code>에 설치할 수 있습니다.
+    셀라는 두 경로를 모두 자동으로 탐지합니다.
+  </p>
   <p>방법 B — 공식 설치 프로그램:</p>
   <ol>
     <li>
@@ -398,6 +403,27 @@
 
 <p>설치 확인:</p>
 <pre><code>python -c "import fluidsynth; print('fluidsynth OK')"</code></pre>
+
+<div class="step">
+  <h3>문제 해결 — "FLUIDSYNTH_DLL_MISSING" 오류</h3>
+  <p>
+    합성 시 <code>FLUIDSYNTH_DLL_MISSING</code> 오류가 발생하면
+    셀라가 <code>libfluidsynth-3.dll</code>을 찾지 못한 것입니다.
+    Python 패키지는 설치되어 있지만 네이티브 DLL 경로를 인식하지 못한 경우입니다.
+  </p>
+  <p>관리자 PowerShell에서 아래 명령으로 DLL 위치를 확인하세요:</p>
+  <pre><code>Get-ChildItem -Path C:\ -Filter "libfluidsynth*.dll" -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName</code></pre>
+  <p>
+    DLL이 발견되면 해당 폴더(예: <code>C:\tools\fluidsynth\bin</code>)를
+    시스템 환경 변수 <strong>PATH</strong>에 추가한 뒤 셀라를 재시작하세요.
+  </p>
+  <p>PATH 추가 방법 (관리자 PowerShell):</p>
+  <pre><code>[System.Environment]::SetEnvironmentVariable(
+    "PATH",
+    [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";C:\tools\fluidsynth\bin",
+    "Machine"
+)</code></pre>
+</div>
 
 <!-- ════════════════════════════════════════════════════════
      9. SoundFont

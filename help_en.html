@@ -209,9 +209,13 @@ function scrollToSection(id) {
 <p>Step 1 — Install the native library (<code>libfluidsynth-3.dll</code>):</p>
 <div class="code">choco install fluidsynth</div>
 <p>Or download the Windows installer from <strong>fluidsynth.org</strong>. Selah detects the DLL automatically — no PATH change needed.</p>
+<div class="note">Chocolatey may install to <code>C:\Program Files\FluidSynth\bin\</code> or <code>C:\tools\fluidsynth\bin\</code> depending on the version. Selah searches both paths automatically.</div>
 <p>Step 2 — Install the Python wrapper:</p>
 <div class="code">pip install fluidsynth</div>
 <div class="warn">⚠ Installing only the pip package without the native installer will cause synthesis errors. Both steps are required.</div>
+<p><strong>Troubleshooting — "FLUIDSYNTH_DLL_MISSING" error:</strong> If you see this error during synthesis, Selah cannot find <code>libfluidsynth-3.dll</code>. Run the following command in an Administrator PowerShell to locate the DLL:</p>
+<div class="code">Get-ChildItem -Path C:\ -Filter "libfluidsynth*.dll" -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName</div>
+<p>If a DLL is found, add its folder (e.g. <code>C:\tools\fluidsynth\bin</code>) to the system PATH, then restart Selah.</p>
 
 <h3>⑨ Install SoundFont (.sf2) — Required (instrument tones)</h3>
 <p>A SoundFont is an instrument sample bank FluidSynth uses to render MIDI to audio.</p>
