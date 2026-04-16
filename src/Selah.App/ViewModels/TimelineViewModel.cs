@@ -7,7 +7,7 @@ public class TimelineViewModel : ViewModelBase
     private double _scrollOffsetX;
     private bool _isPlaying;
     private bool _snapEnabled = true;
-    private SnapMode _snapMode = SnapMode.Bar;
+    private SnapMode _snapMode = SnapMode.Millisecond500;
     private bool _showBarBeat = true;
 
     public double PixelsPerSecond
@@ -57,6 +57,20 @@ public class TimelineViewModel : ViewModelBase
         get => _showBarBeat;
         set => SetField(ref _showBarBeat, value);
     }
+
+    public static IReadOnlyList<SnapModeItem> SnapModeItems { get; } =
+    [
+        new(SnapMode.Millisecond1,   "0.001s"),
+        new(SnapMode.Millisecond5,   "0.005s"),
+        new(SnapMode.Millisecond10,  "0.01s"),
+        new(SnapMode.Millisecond50,  "0.05s"),
+        new(SnapMode.Millisecond100, "0.1s"),
+        new(SnapMode.Millisecond500, "0.5s"),
+        new(SnapMode.Second,         "1s"),
+        new(SnapMode.HalfBeat,       "1/2 Beat"),
+        new(SnapMode.Beat,           "Beat"),
+        new(SnapMode.Bar,            "Bar"),
+    ];
 
     // ── 변환 헬퍼 ──
 
@@ -114,12 +128,16 @@ public class TimelineViewModel : ViewModelBase
 
         return SnapMode switch
         {
-            SnapMode.Millisecond10 => RoundToNearest(frame, sampleRate / 100),
+            SnapMode.Millisecond1   => RoundToNearest(frame, sampleRate / 1000),
+            SnapMode.Millisecond5   => RoundToNearest(frame, sampleRate / 200),
+            SnapMode.Millisecond10  => RoundToNearest(frame, sampleRate / 100),
+            SnapMode.Millisecond50  => RoundToNearest(frame, sampleRate / 20),
             SnapMode.Millisecond100 => RoundToNearest(frame, sampleRate / 10),
-            SnapMode.Second => RoundToNearest(frame, sampleRate),
-            SnapMode.Beat => RoundToNearest(frame, tempoMap.SamplesPerBeat(sampleRate)),
-            SnapMode.HalfBeat => RoundToNearest(frame, tempoMap.SamplesPerBeat(sampleRate) / 2),
-            SnapMode.Bar => RoundToNearest(frame,
+            SnapMode.Millisecond500 => RoundToNearest(frame, sampleRate / 2),
+            SnapMode.Second         => RoundToNearest(frame, sampleRate),
+            SnapMode.Beat           => RoundToNearest(frame, tempoMap.SamplesPerBeat(sampleRate)),
+            SnapMode.HalfBeat       => RoundToNearest(frame, tempoMap.SamplesPerBeat(sampleRate) / 2),
+            SnapMode.Bar            => RoundToNearest(frame,
                 tempoMap.SamplesPerBeat(sampleRate) * tempoMap.GetNumerator()),
             _ => frame
         };
@@ -135,10 +153,16 @@ public class TimelineViewModel : ViewModelBase
 public enum SnapMode
 {
     None,
+    Millisecond1,
+    Millisecond5,
     Millisecond10,
+    Millisecond50,
     Millisecond100,
+    Millisecond500,
     Second,
     HalfBeat,
     Beat,
     Bar
 }
+
+public record SnapModeItem(SnapMode Mode, string Label);

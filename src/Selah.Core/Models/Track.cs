@@ -15,6 +15,7 @@ public class Track
     /// <summary>패닝 (-1.0 = 왼쪽, 0 = 중앙, 1.0 = 오른쪽)</summary>
     public float Pan { get; set; } = 0f;
 
+    public bool IsEnabled { get; set; } = true;
     public bool Muted { get; set; } = false;
     public bool Solo { get; set; } = false;
 

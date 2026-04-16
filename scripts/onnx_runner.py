@@ -52,7 +52,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    print("LOG:ONNX_RUNTIME_MISSING", flush=True)
+    sys.exit(1)
 
 # ── htdemucs 기본 파라미터 ────────────────────────────────────
 SAMPLE_RATE   = 44_100
@@ -284,18 +288,24 @@ def overlap_add(
     total_samples: int,
 ) -> np.ndarray:
     """
-    선형 크로스페이드를 적용한 Overlap-Add.
+    Hann 크로스페이드를 적용한 Overlap-Add.
+    선형 페이드 대비 청크 경계에서 더 부드러운 전환을 제공합니다.
     chunks_out : list of [n_stems, 2, CHUNK_SAMPLES]
     반환값     : [n_stems, 2, total_samples]
     """
-    n_stems = chunks_out[0].shape[0]
-    out     = np.zeros((n_stems, 2, total_samples), dtype=np.float32)
-    norm    = np.zeros(total_samples, dtype=np.float32)
+    n_stems  = chunks_out[0].shape[0]
+    out      = np.zeros((n_stems, 2, total_samples), dtype=np.float32)
+    norm     = np.zeros(total_samples, dtype=np.float32)
 
-    fade_len = CHUNK_SAMPLES - HOP_SAMPLES      # = OVERLAP * CHUNK_SAMPLES
-    win      = np.ones(CHUNK_SAMPLES, dtype=np.float32)
-    win[:fade_len]                 = np.linspace(0.0, 1.0, fade_len)
-    win[CHUNK_SAMPLES - fade_len:] = np.linspace(1.0, 0.0, fade_len)
+    # Hann 페이드: 0→1 (fade-in), 1→0 (fade-out) — 반코사인 곡선
+    fade_len = CHUNK_SAMPLES - HOP_SAMPLES
+    t        = np.arange(fade_len, dtype=np.float32)
+    fade_in  = 0.5 * (1.0 - np.cos(np.pi * t / fade_len))
+    fade_out = fade_in[::-1].copy()
+
+    win = np.ones(CHUNK_SAMPLES, dtype=np.float32)
+    win[:fade_len]                 = fade_in
+    win[CHUNK_SAMPLES - fade_len:] = fade_out
 
     for i, chunk in enumerate(chunks_out):
         start = i * HOP_SAMPLES
@@ -379,9 +389,18 @@ def separate(
 
     for i, chunk in enumerate(chunks_in):
         try:
-            raw = run_chunk(session, input_names, chunk)
+            # 청크 RMS 정규화: 모델을 훈련 범위 내에서 동작시켜 분리 품질 향상
+            rms = float(np.sqrt(np.mean(chunk ** 2)))
+            if rms > 1e-6:
+                chunk_norm = chunk / rms
+            else:
+                chunk_norm = chunk
+                rms = 1.0
+
+            raw = run_chunk(session, input_names, chunk_norm)
             td  = _to_timedomain(raw, CHUNK_SAMPLES)
-            chunks_out.append(td)
+            # 정규화 해제: 원래 음량으로 복원
+            chunks_out.append(td * rms)
         except Exception as e:
             log(f"청크 {i} 추론 오류: {e}")
             return 1

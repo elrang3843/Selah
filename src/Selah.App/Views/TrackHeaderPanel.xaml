@@ -35,62 +35,134 @@
                     <Border Height="{Binding HeightPixels}"
                             BorderBrush="{DynamicResource Surface1Brush}" BorderThickness="0,0,0,1"
                             Background="{DynamicResource BgBrush}">
-                        <Grid Margin="6,4">
+                        <Grid Margin="7,5,7,5">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>  <!-- 이름 행 -->
+                                <RowDefinition Height="*"/>     <!-- 볼륨 행 -->
                             </Grid.RowDefinitions>
 
-                            <!-- 트랙 이름 + 색상 표시 + 선택 체크박스 -->
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
-                                <CheckBox IsChecked="{Binding IsSelected}"
+                            <!-- ① 활성화 체크박스 + 색상 바 + 트랙 이름 + M / S 버튼 -->
+                            <Grid Grid.Row="0" Margin="0,0,0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>  <!-- 체크박스 -->
+                                    <ColumnDefinition Width="Auto"/>  <!-- 색상 바 -->
+                                    <ColumnDefinition Width="*"/>     <!-- 이름 -->
+                                    <ColumnDefinition Width="Auto"/>  <!-- M -->
+                                    <ColumnDefinition Width="Auto"/>  <!-- S -->
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Column="0"
+                                          IsChecked="{Binding IsEnabled}"
                                           VerticalAlignment="Center"
-                                          ToolTip="{DynamicResource Track_Tooltip_Select}"
+                                          ToolTip="{DynamicResource Track_Tooltip_Enable}"
                                           Margin="0,0,5,0"/>
-                                <Rectangle Width="4" Height="16" Margin="0,0,6,0"
-                                           RadiusX="2" RadiusY="2">
+
+                                <Rectangle Grid.Column="1"
+                                           Width="3" Height="14"
+                                           Margin="0,0,6,0" VerticalAlignment="Center"
+                                           RadiusX="1.5" RadiusY="1.5">
                                     <Rectangle.Fill>
                                         <SolidColorBrush Color="{Binding Color,
                                             Converter={StaticResource HexToColorConverter}}"/>
                                     </Rectangle.Fill>
                                 </Rectangle>
-                                <!-- TextBox는 TextTrimming 미지원 → MaxWidth로 대체 -->
-                                <TextBox Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
-                                         Background="Transparent" BorderThickness="0"
-                                         Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold"
-                                         FontSize="12" MaxWidth="118"/>
-                            </StackPanel>
 
-                            <!-- 뮤트 / 솔로 버튼 -->
-                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,4">
-                                <ToggleButton Content="M" ToolTip="{DynamicResource Track_Tooltip_Mute}"
+                                <TextBox Grid.Column="2"
+                                         Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
+                                         Background="Transparent" BorderThickness="0"
+                                         Foreground="{DynamicResource TextBrush}"
+                                         FontWeight="SemiBold" FontSize="12"
+                                         VerticalAlignment="Center"/>
+
+                                <!-- M 버튼: 항상 Peach 테두리, 뮤트 시 Peach 배경 -->
+                                <ToggleButton Grid.Column="3"
+                                              ToolTip="{DynamicResource Track_Tooltip_Mute}"
                                               IsChecked="{Binding Muted}"
                                               Command="{Binding MuteCommand}"
-                                              Width="24" Height="20" FontSize="10"
-                                              Foreground="{Binding Muted,
-                                                  Converter={StaticResource MuteColorConverter}}"/>
-                                <ToggleButton Content="S" ToolTip="{DynamicResource Track_Tooltip_Solo}"
+                                              Width="24" Height="18" Padding="0"
+                                              Margin="3,0,0,0">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="ToggleButton"
+                                               BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                            <Setter Property="BorderBrush" Value="{DynamicResource PeachBrush}"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter Property="Background"
+                                                            Value="{DynamicResource PeachBrush}"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                    <TextBlock FontSize="10" FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="M"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource PeachBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Muted}" Value="True">
+                                                        <Setter Property="Foreground"
+                                                                Value="{DynamicResource SurfaceBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </ToggleButton>
+
+                                <!-- S 버튼: 항상 Yellow 테두리, 솔로 시 Yellow 배경 -->
+                                <ToggleButton Grid.Column="4"
+                                              ToolTip="{DynamicResource Track_Tooltip_Solo}"
                                               IsChecked="{Binding Solo}"
                                               Command="{Binding SoloCommand}"
-                                              Width="24" Height="20" FontSize="10"
-                                              Margin="3,0,0,0"
-                                              Foreground="{Binding Solo,
-                                                  Converter={StaticResource SoloColorConverter}}"/>
-                            </StackPanel>
+                                              Width="24" Height="18" Padding="0"
+                                              Margin="2,0,0,0">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="ToggleButton"
+                                               BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                            <Setter Property="BorderBrush" Value="{DynamicResource YellowBrush}"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter Property="Background"
+                                                            Value="{DynamicResource YellowBrush}"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                    <TextBlock FontSize="10" FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="S"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource YellowBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Solo}" Value="True">
+                                                        <Setter Property="Foreground"
+                                                                Value="{DynamicResource SurfaceBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </ToggleButton>
+                            </Grid>
 
-                            <!-- 볼륨 슬라이더 -->
-                            <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="{DynamicResource Track_Vol}" Foreground="{DynamicResource Overlay0Brush}" FontSize="10"
-                                           VerticalAlignment="Center" Margin="0,0,3,0"/>
-                                <Slider Minimum="-60" Maximum="12"
+                            <!-- ② 볼륨 슬라이더 (전체 너비) -->
+                            <Grid Grid.Row="1" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>   <!-- 슬라이더 -->
+                                    <ColumnDefinition Width="34"/>  <!-- dB 값 -->
+                                </Grid.ColumnDefinitions>
+                                <Slider Grid.Column="0"
+                                        Minimum="-24" Maximum="24"
                                         Value="{Binding GainDb}"
-                                        Width="80" VerticalAlignment="Center"
+                                        VerticalAlignment="Center"
                                         ToolTip="{Binding GainDb, StringFormat='{}{0:F1} dB'}"/>
-                                <TextBlock Text="{Binding GainDb, StringFormat='{}{0:F1}'}"
-                                           Foreground="{DynamicResource SubtextBrush}" FontSize="10"
-                                           VerticalAlignment="Center" Margin="4,0,0,0" Width="30"/>
-                            </StackPanel>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding GainDb, StringFormat='{}{0:F1}'}"
+                                           Foreground="{DynamicResource SubtextBrush}"
+                                           FontSize="10" VerticalAlignment="Center"
+                                           Margin="5,0,0,0" TextAlignment="Right"/>
+                            </Grid>
+
                         </Grid>
                     </Border>
                 </DataTemplate>

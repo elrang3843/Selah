@@ -56,6 +56,7 @@
                           InputGestureText="Del"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource Menu_Edit_Separate}" Command="{Binding SeparateClipCommand}"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_ReduceNoise}" Command="{Binding ReduceNoiseCommand}"/>
             </MenuItem>
 
             <MenuItem Header="{DynamicResource Menu_Track}">

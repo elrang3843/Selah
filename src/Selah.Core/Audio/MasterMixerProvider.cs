@@ -76,6 +76,7 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
         long max = 0;
         foreach (var track in _project.Tracks)
         {
+            if (!track.IsEnabled) continue;
             if (track.Muted) continue;
             if (anySolo && !track.Solo) continue;
             foreach (var clip in track.Clips)
@@ -122,6 +123,7 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
             {
                 var track = _project.Tracks.FirstOrDefault(t => t.Id == mixer.TrackId);
                 if (track == null) continue;
+                if (!track.IsEnabled) continue;
                 if (track.Muted) continue;
                 if (anySolo && !track.Solo) continue;
 
