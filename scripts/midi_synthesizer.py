@@ -71,12 +71,34 @@ def _register_dll_paths() -> None:
     exe = _shutil.which("fluidsynth") or _shutil.which("fluidsynth.exe")
     if exe:
         candidates.append(os.path.dirname(exe))
+
+    import ctypes as _ctypes
     for path in candidates:
-        if os.path.isdir(path):
-            try:
-                os.add_dll_directory(path)   # Python 3.8+
-            except (AttributeError, OSError):
-                pass
+        if not os.path.isdir(path):
+            continue
+        # ① os.add_dll_directory: Python 3.8+ DLL 로딩 해결
+        try:
+            os.add_dll_directory(path)
+        except (AttributeError, OSError):
+            pass
+        # ② PATH 추가: ctypes.util.find_library()는 PATH를 참조하므로 필수
+        if path not in os.environ.get("PATH", ""):
+            os.environ["PATH"] = path + os.pathsep + os.environ.get("PATH", "")
+
+    # ③ DLL 직접 선로드: pyfluidsynth의 내부 ctypes.CDLL() 호출 전에
+    #    DLL을 프로세스 메모리에 올려 두면 이후 이름 기반 로딩이 캐시에서 해결됩니다.
+    for path in candidates:
+        if not os.path.isdir(path):
+            continue
+        for dll_name in ("libfluidsynth-3.dll", "libfluidsynth.dll",
+                         "libfluidsynth-2.dll"):
+            dll_path = os.path.join(path, dll_name)
+            if os.path.isfile(dll_path):
+                try:
+                    _ctypes.WinDLL(dll_path)
+                    return   # 로드 성공 — 이후 pyfluidsynth가 캐시에서 찾음
+                except OSError:
+                    pass
 
 _register_dll_paths()
 
