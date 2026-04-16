@@ -41,16 +41,47 @@ try:
     import mido  # type: ignore
     _MIDO_OK = True
 except ImportError:
-    print("LOG:MIDO_MISSING — pip install mido", flush=True)
+    print("LOG:MIDO_MISSING: pip install mido", flush=True)
     _MIDO_OK = False
 
-# fluidsynth Python 패키지는 런타임에 libfluidsynth DLL을 로드합니다.
-# import 자체는 성공하지만, DLL이 없으면 첫 번째 C 함수 호출 시 OSError가 발생합니다.
+# ── FluidSynth DLL 경로 사전 등록 ────────────────────────────────────────────
+# pyfluidsynth은 import 시점에 libfluidsynth DLL을 ctypes로 로드하고,
+# 로드에 실패하면 Synth 클래스를 정의하지 않습니다.
+# os.add_dll_directory()는 import 전에 호출해야 적용됩니다.
+def _register_dll_paths() -> None:
+    if sys.platform != "win32":
+        return
+    import shutil as _shutil
+    candidates = [
+        os.path.join(os.environ.get("PROGRAMFILES",      r"C:\Program Files"),
+                     "FluidSynth", "bin"),
+        os.path.join(os.environ.get("PROGRAMFILES",      r"C:\Program Files"),
+                     "FluidSynth", "lib"),
+        os.path.join(os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"),
+                     "FluidSynth", "bin"),
+        r"C:\FluidSynth\bin",
+        r"C:\FluidSynth\lib",
+    ]
+    # fluidsynth.exe 가 PATH에 있으면 그 디렉터리도 후보에 추가
+    exe = _shutil.which("fluidsynth") or _shutil.which("fluidsynth.exe")
+    if exe:
+        candidates.append(os.path.dirname(exe))
+    for path in candidates:
+        if os.path.isdir(path):
+            try:
+                os.add_dll_directory(path)   # Python 3.8+
+            except (AttributeError, OSError):
+                pass
+
+_register_dll_paths()
+
 try:
     import fluidsynth as _pyfs  # type: ignore
-    _PYFLUIDSYNTH_IMPORTED = True
+    # DLL 로드 실패 시 pyfluidsynth은 import는 성공하지만 Synth 클래스를 정의하지 않음
+    _PYFLUIDSYNTH_OK = hasattr(_pyfs, "Synth")
 except ImportError:
-    _PYFLUIDSYNTH_IMPORTED = False
+    _pyfs = None             # type: ignore
+    _PYFLUIDSYNTH_OK = False
 
 _DRUMS_CHANNEL = 9   # MIDI 채널 9 (0-indexed) = GM 드럼
 
@@ -95,26 +126,6 @@ def patch_midi(input_path: str, output_path: str, patch: int, is_drums: bool) ->
 
 # ── Python API 합성 ───────────────────────────────────────────────────────────
 
-def _add_dll_search_paths() -> None:
-    """Windows에서 libfluidsynth DLL을 찾을 수 있도록 표준 경로를 추가합니다."""
-    if sys.platform != "win32":
-        return
-    candidates = [
-        os.path.join(os.environ.get("PROGRAMFILES", r"C:\Program Files"),
-                     "FluidSynth", "bin"),
-        os.path.join(os.environ.get("PROGRAMFILES", r"C:\Program Files"),
-                     "FluidSynth", "lib"),
-        r"C:\FluidSynth\bin",
-        r"C:\FluidSynth\lib",
-    ]
-    for path in candidates:
-        if os.path.isdir(path):
-            try:
-                os.add_dll_directory(path)  # Python 3.8+
-            except (AttributeError, OSError):
-                pass
-
-
 def synthesize_python_player(soundfont: str, midi_path: str, output_wav: str,
                               sample_rate: int, patch: int, is_drums: bool) -> None:
     """
@@ -122,9 +133,7 @@ def synthesize_python_player(soundfont: str, midi_path: str, output_wav: str,
     fluid_player_add → fluid_player_play → fluid_player_join 순서로 동기 렌더링.
     오디오 드라이버를 'file'로 설정하면 실시간 재생 없이 WAV로 직접 씁니다.
     """
-    _add_dll_search_paths()
-    import fluidsynth  # type: ignore  — DLL 로드는 여기서 발생
-
+    import fluidsynth  # type: ignore
     fs = fluidsynth.Synth(samplerate=float(sample_rate))
 
     # 파일 출력 드라이버 설정 (start() 전에 설정해야 합니다)
@@ -156,11 +165,9 @@ def synthesize_python_manual(soundfont: str, midi_path: str, output_wav: str,
     mido로 이벤트를 파싱하고 get_samples()로 수동 렌더링합니다.
     """
     if not _MIDO_OK:
-        raise RuntimeError("mido 미설치 — pip install mido")
+        raise RuntimeError("mido 미설치: pip install mido")
 
-    _add_dll_search_paths()
     import fluidsynth  # type: ignore
-
     fs = fluidsynth.Synth(samplerate=float(sample_rate))
     sfid = fs.sfload(soundfont)
     if sfid < 0:
@@ -235,7 +242,7 @@ def synthesize_python_api(soundfont: str, midi_path: str, output_wav: str,
                                  sample_rate, patch, is_drums)
         return
     except (AttributeError, Exception) as player_err:
-        print(f"LOG:플레이어 API 실패 — 수동 렌더링으로 전환: {player_err}", flush=True)
+        print(f"LOG:플레이어 API 실패, 수동 렌더링으로 전환: {player_err}", flush=True)
 
     synthesize_python_manual(soundfont, midi_path, output_wav,
                              sample_rate, patch, is_drums)
@@ -281,7 +288,7 @@ def main() -> None:
             patch_midi(args.midi, patched_midi, args.patch, is_drums)
             midi_to_use = patched_midi
         except Exception as e:
-            print(f"LOG:MIDI 패치 실패 — 원본 사용: {e}", flush=True)
+            print(f"LOG:MIDI 패치 실패 (원본 사용): {e}", flush=True)
             midi_to_use = args.midi
     else:
         midi_to_use = args.midi
@@ -292,8 +299,8 @@ def main() -> None:
     errors: list[str] = []
     success = False
 
-    # ① Python API 시도 (pip install fluidsynth)
-    if _PYFLUIDSYNTH_IMPORTED:
+    # ① Python API 시도 (pip install fluidsynth + native DLL)
+    if _PYFLUIDSYNTH_OK:
         try:
             synthesize_python_api(args.soundfont, midi_to_use, args.output,
                                   args.sample_rate, args.patch, is_drums)
@@ -320,8 +327,15 @@ def main() -> None:
         pass
 
     if not success:
-        if not _PYFLUIDSYNTH_IMPORTED:
-            print("LOG:FLUIDSYNTH_MISSING — pip install fluidsynth", flush=True)
+        if not _PYFLUIDSYNTH_OK:
+            # DLL 없이 import만 성공한 경우와 완전 미설치 구분
+            import importlib.util
+            if importlib.util.find_spec("fluidsynth") is not None:
+                print("LOG:FLUIDSYNTH_DLL_MISSING: libfluidsynth.dll을 찾을 수 없습니다. "
+                      "fluidsynth.org 에서 FluidSynth 를 설치하거나 PATH 에 bin 폴더를 추가하세요.",
+                      flush=True)
+            else:
+                print("LOG:FLUIDSYNTH_MISSING: pip install fluidsynth", flush=True)
         else:
             print(f"LOG:SYNTHESIS_FAILED: {' | '.join(errors)}", flush=True)
         sys.exit(1)
