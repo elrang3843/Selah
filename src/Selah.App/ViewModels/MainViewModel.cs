@@ -19,6 +19,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     public readonly AudioEngine AudioEngine = new();
     public readonly AudioRenderer AudioRenderer = new();
     public readonly StemSeparatorService StemSeparator;
+    public readonly NoiseReductionService NoiseReducer;
 
     private ProjectViewModel? _currentProject;
     private string _statusMessage;
@@ -43,6 +44,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         FFmpegService.Detect();
         _hardwareInfo = HardwareDetectionService.Detect();
         StemSeparator = new StemSeparatorService(ModelManagerService);
+        NoiseReducer  = new NoiseReductionService();
 
         Timeline = new TimelineViewModel();
         ModelManager = new ModelManagerViewModel(ModelManagerService);
@@ -64,6 +66,8 @@ public class MainViewModel : ViewModelBase, IDisposable
         ToggleSnapCommand = new RelayCommand(() => Timeline.SnapEnabled = !Timeline.SnapEnabled);
         DeleteCommand = new RelayCommand(OnDelete, () => CurrentProject != null && SelectedTrack?.IsEnabled == true);
         SeparateClipCommand = new AsyncRelayCommand(SeparateClipAsync,
+            () => CurrentProject != null && SelectedClip != null && SelectedTrack?.IsEnabled == true);
+        ReduceNoiseCommand = new AsyncRelayCommand(ReduceNoiseClipAsync,
             () => CurrentProject != null && SelectedClip != null && SelectedTrack?.IsEnabled == true);
 
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
@@ -180,6 +184,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     public ICommand ToggleSnapCommand { get; }
     public ICommand DeleteCommand { get; }
     public ICommand SeparateClipCommand { get; }
+    public ICommand ReduceNoiseCommand  { get; }
 
     // ── 커맨드 핸들러 ──
 
@@ -674,6 +679,115 @@ public class MainViewModel : ViewModelBase, IDisposable
             AudioEngine.RebuildMixers();
             int total = addedStems.Count + result.OutputFiles.Keys.Count(k => !addedStems.Contains(k));
             StatusMessage = Loc.Format("Status_SeparateComplete", origName, total);
+        }
+        catch (Exception ex)
+        {
+            ErrorOccurred?.Invoke(ex.Message);
+            StatusMessage = Loc.Format("Status_Error", ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task ReduceNoiseClipAsync()
+    {
+        if (CurrentProject == null || SelectedClip == null) return;
+
+        var clip = SelectedClip;
+        var proj = CurrentProject;
+
+        // 소스 파일 확인
+        var src = proj.Model.AudioSources.FirstOrDefault(s => s.Id == clip.Model.SourceId);
+        if (src?.AbsolutePath == null || !File.Exists(src.AbsolutePath))
+        {
+            ErrorOccurred?.Invoke(Loc.Get("Status_Separate_NoSource"));
+            return;
+        }
+
+        // Python 가용성 확인
+        if (!NoiseReducer.IsPythonAvailable)
+        {
+            StatusMessage = Loc.Get("Status_Separate_NoPython");
+            SetupGuideRequested?.Invoke();
+            return;
+        }
+
+        // 프로젝트 저장 경로 확보
+        if (proj.Model.FilePath == null)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "Selah", proj.Model.Id);
+            proj.Model.FilePath = tempDir;
+            Directory.CreateDirectory(tempDir);
+        }
+
+        var outputDir  = Path.Combine(proj.Model.FilePath, "audio", "processed");
+        var outputName = Path.GetFileNameWithoutExtension(src.Name) + "_nr_" +
+                         DateTime.Now.ToString("yyyyMMddHHmmss") + ".wav";
+        var outputPath = Path.Combine(outputDir, outputName);
+
+        IsBusy = true;
+        StatusMessage = Loc.Get("Status_ReducingNoise");
+        string origName = src.Name;
+
+        try
+        {
+            var progress = new Progress<NoiseReductionProgress>(p =>
+                StatusMessage = $"{Loc.Get("Status_ReducingNoise")} {p.Percent:P0}");
+
+            var result = await NoiseReducer.ReduceNoiseAsync(
+                src.AbsolutePath, outputPath,
+                strength: 0.75,
+                progress: progress);
+
+            if (!result.Success)
+            {
+                if (result.IsNoiseReduceMissing)
+                    ErrorOccurred?.Invoke(Loc.Get("Status_NoiseReduce_Missing"));
+                else
+                    ErrorOccurred?.Invoke(Loc.Format("Status_NoiseReduceFailed", result.Error ?? ""));
+                return;
+            }
+
+            // WAV 메타데이터 읽기
+            long lengthSamples;
+            int outSr, outCh;
+            using (var wr = new WaveFileReader(result.OutputPath!))
+            {
+                lengthSamples = wr.SampleCount;
+                outSr = wr.WaveFormat.SampleRate;
+                outCh = wr.WaveFormat.Channels;
+            }
+
+            var nrSource = new AudioSource
+            {
+                Name          = Path.GetFileNameWithoutExtension(outputName),
+                RelPath       = Path.GetRelativePath(proj.Model.FilePath!, result.OutputPath!),
+                AbsolutePath  = result.OutputPath,
+                SampleRate    = outSr,
+                Channels      = outCh,
+                LengthSamples = lengthSamples,
+                SourceType    = SourceType.Processed
+            };
+            proj.Model.AudioSources.Add(nrSource);
+
+            string trackName = $"NR: {origName}";
+            var trackVm = proj.Tracks.FirstOrDefault(t => t.Name == trackName)
+                          ?? proj.AddTrack(trackName);
+
+            var nrClip = new Clip
+            {
+                SourceId             = nrSource.Id,
+                TimelineStartSamples = clip.TimelineStartSamples,
+                SourceInSamples      = clip.SourceInSamples,
+                SourceOutSamples     = Math.Min(clip.SourceOutSamples, lengthSamples)
+            };
+            trackVm.AddClip(new ClipViewModel(nrClip, proj.Model));
+
+            proj.Model.IsDirty = true;
+            AudioEngine.RebuildMixers();
+            StatusMessage = Loc.Format("Status_NoiseReduceComplete", origName);
         }
         catch (Exception ex)
         {
