@@ -26,8 +26,6 @@ import os
 import argparse
 import json
 import subprocess
-import threading
-import time
 
 # ── 의존 패키지 확인 ──────────────────────────────────────────────────────────
 
@@ -171,6 +169,71 @@ def run_omr(image_path: str, output_dir: str) -> str:
 
 # ── ScoreProfile 빌드 ─────────────────────────────────────────────────────────
 
+def _write_midi_via_mido(score: "music21.stream.Score", midi_path: str) -> None:
+    """
+    music21 Score → MIDI 변환을 mido로 직접 수행합니다.
+    music21의 streamToMidiFile()을 완전히 우회하므로
+    외부 프로그램 호출이나 I/O 블로킹이 발생하지 않습니다.
+    """
+    import mido  # type: ignore
+
+    ticks_per_beat = 480
+    tempo = 500_000  # 기본 120 BPM
+
+    # 악보에서 템포 추출
+    try:
+        from music21 import tempo as m21tempo  # type: ignore
+        t = score.flat.getElementsByClass(m21tempo.MetronomeMark).first()
+        if t and t.number:
+            tempo = int(60_000_000 / t.number)
+    except Exception:
+        pass
+
+    mid = mido.MidiFile(ticks_per_beat=ticks_per_beat)
+
+    # 트랙 0: 템포
+    meta_track = mido.MidiTrack()
+    mid.tracks.append(meta_track)
+    meta_track.append(mido.MetaMessage("set_tempo", tempo=tempo, time=0))
+    meta_track.append(mido.MetaMessage("end_of_track", time=0))
+
+    # 파트별 MIDI 트랙
+    parts = score.parts if score.parts else [score]
+    for ch_idx, part in enumerate(parts):
+        track = mido.MidiTrack()
+        mid.tracks.append(track)
+
+        # (절대 tick, 'note_on'|'note_off', pitch, velocity) 이벤트 수집
+        events: list[tuple[int, str, int, int]] = []
+        for el in part.flat.notesAndRests:
+            offset_ticks = int(float(el.offset) * ticks_per_beat)
+            dur_ticks    = max(1, int(float(el.duration.quarterLength) * ticks_per_beat))
+
+            if hasattr(el, "pitches"):          # Note 또는 Chord
+                vel = 64
+                try:
+                    if el.volume and el.volume.velocity:
+                        vel = int(el.volume.velocity)
+                except Exception:
+                    pass
+                for p in el.pitches:
+                    events.append((offset_ticks,              "note_on",  p.midi, vel))
+                    events.append((offset_ticks + dur_ticks,  "note_off", p.midi, 0))
+
+        events.sort(key=lambda x: x[0])
+
+        prev_tick = 0
+        for abs_tick, msg_type, pitch, vel in events:
+            delta = abs_tick - prev_tick
+            track.append(mido.Message(msg_type, channel=ch_idx % 16,
+                                      note=pitch, velocity=vel, time=delta))
+            prev_tick = abs_tick
+
+        track.append(mido.MetaMessage("end_of_track", time=0))
+
+    mid.save(midi_path)
+
+
 def build_score_profile(score: "music21.stream.Score", midi_path: str) -> dict:
     """
     music21 Score 객체에서 ScoreProfile 딕셔너리를 추출합니다.
@@ -276,50 +339,15 @@ def main() -> None:
         sys.exit(1)
 
     # Step 4: MIDI 내보내기
-    # score.write("midi") 는 외부 프로그램을 호출할 수 있으므로 내부 모듈을 직접 사용.
-    # streamToMidiFile()이 복잡한 악보에서 수 분 걸릴 수 있으므로
-    # 별도 스레드에서 실행하고 10초마다 heartbeat를 출력합니다.
-    # 타임아웃(180초) 초과 시 오류 처리합니다.
+    # music21의 streamToMidiFile()은 CPU 0% 상태로 무한 대기하는 경우가 있어
+    # (외부 프로그램 호출 또는 I/O 블로킹) mido로 직접 변환합니다.
     print("PROGRESS:75", flush=True)
     print("LOG:MIDI 생성 중...", flush=True)
     midi_path = os.path.join(args.output_dir, "score.mid")
-
-    _midi_result: list  = [None, None]   # [MidiFile | None, Exception | None]
-
-    def _convert():
-        try:
-            from music21.midi import translate as _t  # type: ignore
-            _midi_result[0] = _t.streamToMidiFile(score)
-        except Exception as _e:
-            _midi_result[1] = _e
-
-    _t = threading.Thread(target=_convert, daemon=True)
-    _t.start()
-
-    _timeout   = 180   # 초
-    _heartbeat = 10    # 초마다 상태 출력
-    _elapsed   = 0
-    while _t.is_alive():
-        _t.join(timeout=_heartbeat)
-        _elapsed += _heartbeat
-        if _t.is_alive():
-            if _elapsed >= _timeout:
-                print(f"LOG:MIDI 변환 시간 초과 ({_timeout}초). 악보가 너무 복잡할 수 있습니다.", flush=True)
-                sys.exit(1)
-            pct = 75 + int(_elapsed / _timeout * 10)   # 75→85 사이로 진행률 표시
-            print(f"PROGRESS:{pct}", flush=True)
-            print(f"LOG:MIDI 변환 중... ({_elapsed}초 경과)", flush=True)
-
-    if _midi_result[1] is not None:
-        print(f"LOG:MIDI 변환 실패: {_midi_result[1]}", flush=True)
-        sys.exit(1)
-
     try:
-        _midi_result[0].open(midi_path, "wb")
-        _midi_result[0].write()
-        _midi_result[0].close()
+        _write_midi_via_mido(score, midi_path)
     except Exception as exc:
-        print(f"LOG:MIDI 파일 저장 실패: {exc}", flush=True)
+        print(f"LOG:MIDI 변환 실패: {exc}", flush=True)
         sys.exit(1)
 
     # Step 5: ScoreProfile 빌드 및 출력
