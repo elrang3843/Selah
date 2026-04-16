@@ -31,11 +31,10 @@
         </Style>
         <!-- 패널 내 카테고리 헤더 -->
         <Style x:Key="CatHead" TargetType="TextBlock">
-            <Setter Property="FontSize"       Value="10"/>
-            <Setter Property="FontWeight"     Value="SemiBold"/>
-            <Setter Property="Foreground"     Value="{DynamicResource Overlay0Brush}"/>
-            <Setter Property="Margin"         Value="0,22,0,10"/>
-            <Setter Property="CharacterSpacing" Value="120"/>
+            <Setter Property="FontSize"   Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource Overlay0Brush}"/>
+            <Setter Property="Margin"     Value="0,22,0,10"/>
         </Style>
         <!-- 구분선 -->
         <Style x:Key="Divider" TargetType="Border">
