@@ -139,8 +139,9 @@ public class StemSeparatorService
         using var proc = new Process { StartInfo = psi };
 
         double lastPct = 0;
-        var logLines = new List<string>();
-        var logLock  = new object();
+        var logLines  = new List<string>();
+        var stderrLines = new List<string>();
+        var logLock   = new object();
 
         proc.OutputDataReceived += (_, e) =>
         {
@@ -176,8 +177,12 @@ public class StemSeparatorService
             }
         };
 
-        // stderr 비동기 드레인 — 파이프 버퍼 교착 방지
-        proc.ErrorDataReceived += (_, _) => { };
+        // stderr 캡처 — 파이프 버퍼 교착 방지 + 오류 진단용
+        proc.ErrorDataReceived += (_, e) =>
+        {
+            if (e.Data == null) return;
+            lock (logLock) stderrLines.Add(e.Data);
+        };
 
         proc.Start();
         proc.BeginOutputReadLine();
@@ -185,7 +190,12 @@ public class StemSeparatorService
         await proc.WaitForExitAsync(ct);
 
         string errorDetail;
-        lock (logLock) errorDetail = string.Join("\n", logLines.TakeLast(15));
+        lock (logLock)
+        {
+            errorDetail = logLines.Count > 0
+                ? string.Join("\n", logLines.TakeLast(15))
+                : string.Join("\n", stderrLines.TakeLast(15));
+        }
         return (proc.ExitCode, errorDetail);
     }
 }

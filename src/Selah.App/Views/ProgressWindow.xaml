@@ -1,0 +1,36 @@
+<Window x:Class="Selah.App.Views.ProgressWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding ProgressTitle}"
+        Width="400" SizeToContent="Height"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SurfaceBrush}"
+        ShowInTaskbar="False">
+
+    <StackPanel Margin="24,20,24,24">
+
+        <!-- 작업 제목 -->
+        <TextBlock Text="{Binding ProgressTitle}"
+                   FontSize="13" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextBrush}"
+                   Margin="0,0,0,14"/>
+
+        <!-- 진행 바 -->
+        <ProgressBar Height="8" Minimum="0" Maximum="100"
+                     Value="{Binding ProgressPercent, Mode=OneWay}"
+                     IsIndeterminate="{Binding IsProgressIndeterminate}"
+                     Foreground="{DynamicResource AccentBrush}"
+                     Background="{DynamicResource Surface1Brush}"
+                     BorderBrush="{DynamicResource Surface2Brush}"
+                     Margin="0,0,0,10"/>
+
+        <!-- 현재 단계 메시지 -->
+        <TextBlock Text="{Binding StatusMessage}"
+                   FontSize="11"
+                   Foreground="{DynamicResource SubtextBrush}"
+                   TextTrimming="CharacterEllipsis"/>
+
+    </StackPanel>
+</Window>

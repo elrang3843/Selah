@@ -18,10 +18,23 @@
     <PackageReference Include="NAudio" Version="2.2.1" />
   </ItemGroup>
   <ItemGroup>
-    <!-- demucs_runner.py를 빌드 출력의 scripts/ 폴더에 복사 -->
+    <!-- Python 스크립트를 빌드 출력의 scripts/ 폴더에 복사 -->
     <Content Include="..\..\scripts\demucs_runner.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>scripts\demucs_runner.py</TargetPath>
+    </Content>
+    <Content Include="..\..\scripts\onnx_runner.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>scripts\onnx_runner.py</TargetPath>
+    </Content>
+    <Content Include="..\..\scripts\noise_reducer.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>scripts\noise_reducer.py</TargetPath>
+    </Content>
+    <!-- 도구 설치 안내 HTML을 실행 파일과 같은 폴더에 복사 -->
+    <Content Include="..\..\tools_setup.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>tools_setup.html</TargetPath>
     </Content>
   </ItemGroup>
 </Project>

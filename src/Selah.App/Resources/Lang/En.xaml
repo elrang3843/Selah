@@ -21,13 +21,14 @@
     <sys:String x:Key="Menu_Edit_Split">Split Clip</sys:String>
     <sys:String x:Key="Menu_Edit_Delete">Delete Selection</sys:String>
     <sys:String x:Key="Menu_Edit_Separate">Separate Stems (Selected Clip)...</sys:String>
+    <sys:String x:Key="Menu_Edit_ReduceNoise">Reduce Noise (Selected Clip)...</sys:String>
     <sys:String x:Key="Menu_Track">Track(_T)</sys:String>
     <sys:String x:Key="Menu_Track_Add">Add Track</sys:String>
     <sys:String x:Key="Menu_Track_Delete">Delete Selected Track</sys:String>
     <sys:String x:Key="Menu_Tools">Tools(_O)</sys:String>
     <sys:String x:Key="Menu_Tools_ModelManager">Model Manager...</sys:String>
     <sys:String x:Key="Menu_Tools_HardwareDiag">Hardware Diagnostics...</sys:String>
-    <sys:String x:Key="Menu_Tools_FFmpegGuide">FFmpeg Install Guide...</sys:String>
+    <sys:String x:Key="Menu_Tools_FFmpegGuide">Essential Tools Setup Guide...</sys:String>
     <sys:String x:Key="Menu_Help">Help(_H)</sys:String>
     <sys:String x:Key="Menu_Help_Shortcuts">Keyboard Shortcuts</sys:String>
     <sys:String x:Key="Menu_Help_Ethics">Ethical Use Guidelines...</sys:String>
@@ -57,6 +58,7 @@
     <sys:String x:Key="Transport_Tooltip_Stop">Stop + Return to Start (Shift+Space)</sys:String>
     <sys:String x:Key="Transport_Tooltip_Metronome">Toggle Metronome (M)</sys:String>
     <sys:String x:Key="Transport_Tooltip_Snap">Toggle Snap (N)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_SnapMode">Snap unit</sys:String>
     <sys:String x:Key="Transport_Tooltip_ZoomOut">Zoom Out (Ctrl+-)</sys:String>
     <sys:String x:Key="Transport_Tooltip_ZoomIn">Zoom In (Ctrl++)</sys:String>
 
@@ -66,7 +68,7 @@
     <sys:String x:Key="Track_Vol">Vol</sys:String>
     <sys:String x:Key="Track_Tooltip_Mute">Mute</sys:String>
     <sys:String x:Key="Track_Tooltip_Solo">Solo</sys:String>
-    <sys:String x:Key="Track_Tooltip_Select">Select / deselect track</sys:String>
+    <sys:String x:Key="Track_Tooltip_Enable">Enable / disable track playback</sys:String>
 
     <!-- ── Model Manager ── -->
     <sys:String x:Key="ModelManager_Title">Model Manager</sys:String>
@@ -125,16 +127,24 @@
     <sys:String x:Key="Status_MetronomeOn">Metronome on</sys:String>
     <sys:String x:Key="Status_MetronomeOff">Metronome off</sys:String>
     <sys:String x:Key="Status_PlaybackEnded">Playback complete</sys:String>
+    <sys:String x:Key="Progress_Title_Import">Importing Audio</sys:String>
+    <sys:String x:Key="Progress_Title_Export">Exporting WAV</sys:String>
     <sys:String x:Key="Status_Separating">Separating stems...</sys:String>
+    <sys:String x:Key="Status_ReducingNoise">Reducing noise...</sys:String>
+    <sys:String x:Key="Status_NoiseReduceComplete">'{0}' noise reduction complete</sys:String>
+    <sys:String x:Key="Status_NoiseReduceFailed">Noise reduction failed: {0}</sys:String>
+    <sys:String x:Key="Status_NoiseReduce_Missing">noisereduce library is not installed.&#x0a;Install it with: pip install noisereduce</sys:String>
+    <sys:String x:Key="Status_NoiseReduce_Missing_Short">noisereduce not installed — opening setup guide...</sys:String>
     <sys:String x:Key="Status_SeparateComplete">'{0}' separation complete ({1} stems)</sys:String>
     <sys:String x:Key="Status_SeparateFailed">Separation failed: {0}</sys:String>
     <sys:String x:Key="Status_Separate_NoSource">Source file not found.</sys:String>
     <sys:String x:Key="Status_Separate_NoPython">Python is not installed. Install from python.org.</sys:String>
     <sys:String x:Key="Status_Separate_NoModel">No separation model installed. Install from Model Manager.</sys:String>
-    <sys:String x:Key="Status_Separate_NeedTorchCodec">Stem separation requires TorchCodec (torchaudio 2.6+).&#x0a;&#x0a;Run one of the following in a Command Prompt:&#x0a;&#x0a;① Install TorchCodec:&#x0a;    pip install torchcodec&#x0a;&#x0a;② Or downgrade torchaudio:&#x0a;    pip install "torchaudio&lt;2.6" --force-reinstall</sys:String>
-    <sys:String x:Key="Status_Separate_TorchCodecBroken">TorchCodec is installed but its DLL could not be loaded.&#x0a;&#x0a;Remove it with the following command, then try again:&#x0a;&#x0a;    pip uninstall torchcodec</sys:String>
-    <sys:String x:Key="Status_Separate_OnnxRuntimeMissing">Stem separation requires ONNX Runtime.&#x0a;&#x0a;Run the following command in a Command Prompt:&#x0a;&#x0a;    pip install onnxruntime numpy scipy&#x0a;&#x0a;Or click 'Install Model / Download' in Tools &gt; Model Manager.</sys:String>
-    <sys:String x:Key="Status_Separate_OnnxModelMissing">ONNX model file not found.&#x0a;Download the model from Tools &gt; Model Manager.</sys:String>
+    <sys:String x:Key="Status_Separate_NeedTorchCodec">TorchCodec error — opening setup guide...</sys:String>
+    <sys:String x:Key="Status_Separate_TorchCodecBroken">TorchCodec DLL error — opening setup guide...</sys:String>
+    <sys:String x:Key="Status_Separate_OnnxRuntimeMissing">ONNX Runtime not installed — opening setup guide...</sys:String>
+    <sys:String x:Key="Status_Separate_OnnxModelMissing">ONNX model file missing — opening setup guide...</sys:String>
+    <sys:String x:Key="Status_SetupRequired">Tool setup required. Opening setup guide...</sys:String>
     <sys:String x:Key="Stem_Vocals">Vocals</sys:String>
     <sys:String x:Key="Stem_NoVocals">Backing</sys:String>
     <sys:String x:Key="Stem_Drums">Drums</sys:String>
@@ -168,8 +178,7 @@
     <sys:String x:Key="Dialog_Error_Title">Selah Error</sys:String>
     <sys:String x:Key="Dialog_HardwareDiag_Message">Hardware acceleration diagnosis:&#x0a;&#x0a;{0}&#x0a;&#x0a;You can force CPU mode in Settings &gt; Acceleration Backend.</sys:String>
     <sys:String x:Key="Dialog_HardwareDiag_Title">Hardware Diagnostics</sys:String>
-    <sys:String x:Key="Dialog_FFmpegGuide_Message">FFmpeg Installation Guide&#x0a;&#x0a;1. Download the Windows build from https://ffmpeg.org/download.html&#x0a;2. Extract and add the bin folder to your system PATH.&#x0a;3. Verify with 'ffmpeg -version' in a command prompt.&#x0a;&#x0a;After installing FFmpeg, restart Selah to import MP3, MP4, and other formats.</sys:String>
-    <sys:String x:Key="Dialog_FFmpegGuide_Title">FFmpeg Install Guide</sys:String>
+    <!-- Dialog_FFmpegGuide_* removed — menu item now opens tools_setup.html in browser -->
     <sys:String x:Key="Dialog_Shortcuts_Message">Selah Keyboard Shortcuts&#x0a;&#x0a;── File ──&#x0a;  Ctrl+N          New Project&#x0a;  Ctrl+O          Open&#x0a;  Ctrl+S          Save&#x0a;  Ctrl+Shift+S    Save As&#x0a;  Ctrl+E          Export as WAV&#x0a;&#x0a;── Playback ──&#x0a;  Space           Play / Stop&#x0a;  Home            Return to Start&#x0a;&#x0a;── Edit ──&#x0a;  S               Split at Cursor&#x0a;  Delete          Delete Selection&#x0a;  Ctrl+Z          Undo&#x0a;  Ctrl+Y          Redo&#x0a;&#x0a;── Tools ──&#x0a;  M               Toggle Metronome&#x0a;  N               Toggle Snap&#x0a;  Ctrl+Wheel      Timeline Zoom In/Out&#x0a;  F1              This Shortcut List</sys:String>
     <sys:String x:Key="Dialog_Shortcuts_Title">Keyboard Shortcuts (F1)</sys:String>
     <sys:String x:Key="Dialog_Ethics_Message">Selah Ethical Use Guidelines&#x0a;&#x0a;This software was created for worship ministry workers serving in Christian churches.&#x0a;&#x0a;Permitted uses:&#x0a;  • Creating backing tracks (MR) for church worship&#x0a;  • Processing audio you own or have permission to use&#x0a;  • Church music within the scope of CCL licensing&#x0a;&#x0a;Prohibited uses:&#x0a;  • Unauthorized separation and redistribution of copyrighted audio&#x0a;  • Copyright infringement for commercial purposes&#x0a;  • Distorting or altering works against the original author's intent&#x0a;&#x0a;Always verify the copyright status of audio before processing.</sys:String>
@@ -179,12 +188,7 @@
     <sys:String x:Key="Dialog_UnsavedChanges_Message">Project '{0}' has unsaved changes.&#x0a;Do you want to save?</sys:String>
     <sys:String x:Key="Dialog_UnsavedChanges_Title">Selah</sys:String>
 
-    <!-- ── Startup dependency guide ── -->
-    <sys:String x:Key="Startup_Setup_Title">Selah Setup Guide</sys:String>
-    <sys:String x:Key="Startup_Setup_Intro">The following tools are not installed. Some features are unavailable.</sys:String>
-    <sys:String x:Key="Startup_Python_Guide">❌  Python not installed → Stem separation (MR extraction) unavailable&#x0a;   1. Install Python 3.10 or later from https://www.python.org/downloads/&#x0a;      (Make sure to check "Add Python to PATH" during installation.)&#x0a;   2. Restart Selah.&#x0a;   3. Click 'Install Model / Download' in Tools &gt; Model Manager.</sys:String>
-    <sys:String x:Key="Startup_FFmpeg_Guide">⚠️  FFmpeg not installed → MP3, MP4 and other non-WAV import unavailable&#x0a;   See Tools &gt; FFmpeg Install Guide for instructions.</sys:String>
-    <sys:String x:Key="Startup_Setup_Footer">This notice will not appear again once the required tools are installed.&#x0a;You can still edit WAV files without installing anything.</sys:String>
+    <!-- Startup dependency guide removed — tools_setup.html is opened in browser on first run -->
 
     <!-- ── Misc ── -->
     <sys:String x:Key="Clip_UnknownSource">Unknown source</sys:String>
