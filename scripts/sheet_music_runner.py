@@ -129,10 +129,11 @@ def run_omr(image_path: str, output_dir: str) -> str:
         sys.exit(1)
 
     proc_oemer = subprocess.Popen(
-        oemer_cmd + [image_path, "-o", output_dir, "--without-deskew"],
+        oemer_cmd + [image_path, "-o", output_dir],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        errors="replace",   # 디코딩 실패 시 문자 대체 (CP949 등 비UTF-8 환경 대응)
     )
 
     # 15초마다 경과 시간을 출력 — C#이 수신하여 UI 상태 메시지를 갱신함
@@ -150,12 +151,18 @@ def run_omr(image_path: str, output_dir: str) -> str:
     stdout_data, stderr_data = proc_oemer.communicate()
 
     if proc_oemer.returncode != 0:
-        # oemer는 오류를 stderr 대신 stdout에 출력하는 경우가 있음
+        # oemer는 오류를 stderr 대신 stdout에 출력하는 경우가 있음.
+        # 오류 키워드를 포함한 줄 우선 노출, 없으면 마지막 10줄을 표시.
         stderr_text = (stderr_data or "").strip()
         stdout_text = (stdout_data or "").strip()
-        # stderr 우선, 없으면 stdout 마지막 10줄 사용
-        output_for_error = stderr_text or stdout_text
-        err_tail = "\n".join(output_for_error.splitlines()[-10:]) if output_for_error else "(출력 없음)"
+        combined = (stderr_text + "\n" + stdout_text).strip()
+        if combined:
+            lines = combined.splitlines()
+            error_lines = [l for l in lines if any(
+                kw in l.lower() for kw in ("error", "exception", "traceback", "failed", "오류"))]
+            err_tail = "\n".join(error_lines[-5:]) if error_lines else "\n".join(lines[-10:])
+        else:
+            err_tail = f"(출력 없음, 종료코드 {proc_oemer.returncode})"
         print(f"LOG:OMR 실패: {err_tail}", flush=True)
         sys.exit(1)
 
@@ -422,18 +429,11 @@ def main() -> None:
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # Step 1: 이미지 전처리
-    print("PROGRESS:5", flush=True)
-    preprocessed = os.path.join(args.output_dir, "preprocessed.png")
-    try:
-        preprocess_image(args.input, preprocessed)
-    except Exception as exc:
-        print(f"LOG:전처리 실패 — 원본 이미지 사용: {exc}", flush=True)
-        preprocessed = args.input
-
-    # Step 2: OMR (오래 걸림 — 15초마다 진행 상태 출력)
+    # Step 1: oemer에는 원본 이미지를 직접 전달합니다.
+    # oemer는 자체 전처리 파이프라인(그레이스케일·이진화·deskew)을 내장하고 있으며
+    # 외부에서 이미 이진화된 이미지를 받으면 오히려 staff 검출 정확도가 떨어집니다.
     print("PROGRESS:15", flush=True)
-    xml_path = run_omr(preprocessed, args.output_dir)
+    xml_path = run_omr(args.input, args.output_dir)
     print(f"LOG:MusicXML 생성: {os.path.basename(xml_path)}", flush=True)
 
     # Step 3: MIDI 내보내기 (직접 XML 파싱 — music21 불필요, blocking 없음)
