@@ -169,69 +169,135 @@ def run_omr(image_path: str, output_dir: str) -> str:
 
 # ── ScoreProfile 빌드 ─────────────────────────────────────────────────────────
 
-def _write_midi_via_mido(score: "music21.stream.Score", midi_path: str) -> None:
+def _musicxml_to_midi(xml_path: str, midi_path: str) -> None:
     """
-    music21 Score → MIDI 변환을 mido로 직접 수행합니다.
-    music21의 streamToMidiFile()을 완전히 우회하므로
-    외부 프로그램 호출이나 I/O 블로킹이 발생하지 않습니다.
+    MusicXML → MIDI 변환.
+    music21 Score 객체를 전혀 사용하지 않습니다.
+    stdlib xml.etree.ElementTree 로 XML을 직접 파싱하고
+    mido 로 MIDI 파일을 생성합니다.
+    외부 프로그램 호출·네트워크 접근·I/O 블로킹이 없습니다.
     """
+    import xml.etree.ElementTree as ET
     import mido  # type: ignore
+
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+
+    # 네임스페이스 처리 ({http://...}tag 형식)
+    ns = ""
+    if root.tag.startswith("{"):
+        ns = root.tag.split("}")[0] + "}"
+
+    def t(name: str) -> str:
+        return f"{ns}{name}"
 
     ticks_per_beat = 480
     tempo = 500_000  # 기본 120 BPM
 
-    # 악보에서 템포 추출
-    try:
-        from music21 import tempo as m21tempo  # type: ignore
-        t = score.flat.getElementsByClass(m21tempo.MetronomeMark).first()
-        if t and t.number:
-            tempo = int(60_000_000 / t.number)
-    except Exception:
-        pass
+    # 최초 <sound tempo="…"> 에서 템포 추출
+    for sound in root.iter(t("sound")):
+        val = sound.get("tempo")
+        if val:
+            try:
+                tempo = int(60_000_000 / float(val))
+            except ValueError:
+                pass
+            break
 
     mid = mido.MidiFile(ticks_per_beat=ticks_per_beat)
 
-    # 트랙 0: 템포
     meta_track = mido.MidiTrack()
     mid.tracks.append(meta_track)
     meta_track.append(mido.MetaMessage("set_tempo", tempo=tempo, time=0))
     meta_track.append(mido.MetaMessage("end_of_track", time=0))
 
-    # 파트별 MIDI 트랙
-    parts = score.parts if score.parts else [score]
-    for ch_idx, part in enumerate(parts):
+    # MIDI 음번호: step + octave + alter
+    _STEP = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+
+    def pitch_midi(pitch_el) -> int | None:
+        step  = pitch_el.find(t("step"))
+        oct_  = pitch_el.find(t("octave"))
+        alter = pitch_el.find(t("alter"))
+        if step is None or oct_ is None:
+            return None
+        num = (int(oct_.text) + 1) * 12 + _STEP.get(step.text, 0)
+        if alter is not None:
+            num += round(float(alter.text))
+        return max(0, min(127, num))
+
+    # 파트별 처리
+    for part_idx, part in enumerate(root.findall(t("part"))):
         track = mido.MidiTrack()
         mid.tracks.append(track)
 
-        # (절대 tick, 'note_on'|'note_off', pitch, velocity) 이벤트 수집
         events: list[tuple[int, str, int, int]] = []
-        for el in part.flat.notesAndRests:
-            offset_ticks = int(float(el.offset) * ticks_per_beat)
-            dur_ticks    = max(1, int(float(el.duration.quarterLength) * ticks_per_beat))
+        divisions = 1      # MusicXML <divisions>: 4분음표당 XML 틱 수
+        cursor    = 0      # 현재 절대 MIDI 틱
 
-            if hasattr(el, "pitches"):          # Note 또는 Chord
-                vel = 64
-                try:
-                    if el.volume and el.volume.velocity:
-                        vel = int(el.volume.velocity)
-                except Exception:
-                    pass
-                for p in el.pitches:
-                    events.append((offset_ticks,              "note_on",  p.midi, vel))
-                    events.append((offset_ticks + dur_ticks,  "note_off", p.midi, 0))
+        for measure in part.findall(t("measure")):
+            attrs = measure.find(t("attributes"))
+            if attrs is not None:
+                div_el = attrs.find(t("divisions"))
+                if div_el is not None:
+                    divisions = max(1, int(div_el.text))
+
+            measure_start = cursor
+            advance       = 0   # 이 마디 내 최대 전진량
+            note_pos      = 0   # 현재 음표 위치 (마디 기준)
+
+            for child in measure:
+                local = child.tag.replace(ns, "")
+
+                if local == "note":
+                    is_chord = child.find(t("chord")) is not None
+                    is_rest  = child.find(t("rest"))  is not None
+
+                    dur_el  = child.find(t("duration"))
+                    dur_xml = int(dur_el.text) if dur_el is not None else divisions
+                    dur_tck = max(1, round(dur_xml * ticks_per_beat / divisions))
+
+                    if not is_chord:
+                        note_pos = advance
+
+                    if not is_rest:
+                        pitch_el = child.find(t("pitch"))
+                        if pitch_el is not None:
+                            midi_num = pitch_midi(pitch_el)
+                            if midi_num is not None:
+                                vel = 64
+                                abs_on  = measure_start + note_pos
+                                abs_off = abs_on + dur_tck
+                                events.append((abs_on,  "note_on",  midi_num, vel))
+                                events.append((abs_off, "note_off", midi_num, 0))
+
+                    if not is_chord:
+                        advance = note_pos + dur_tck
+
+                elif local == "backup":
+                    dur_el = child.find(t("duration"))
+                    if dur_el is not None:
+                        advance -= round(int(dur_el.text) * ticks_per_beat / divisions)
+
+                elif local == "forward":
+                    dur_el = child.find(t("duration"))
+                    if dur_el is not None:
+                        advance += round(int(dur_el.text) * ticks_per_beat / divisions)
+
+            cursor = measure_start + advance
 
         events.sort(key=lambda x: x[0])
 
-        prev_tick = 0
-        for abs_tick, msg_type, pitch, vel in events:
-            delta = abs_tick - prev_tick
-            track.append(mido.Message(msg_type, channel=ch_idx % 16,
-                                      note=pitch, velocity=vel, time=delta))
-            prev_tick = abs_tick
+        prev = 0
+        for abs_t, msg, pitch, vel in events:
+            track.append(mido.Message(msg, channel=part_idx % 16,
+                                      note=pitch, velocity=vel,
+                                      time=abs_t - prev))
+            prev = abs_t
 
         track.append(mido.MetaMessage("end_of_track", time=0))
 
     mid.save(midi_path)
+    print(f"LOG:MIDI 저장 완료 ({len(mid.tracks) - 1}개 트랙)", flush=True)
 
 
 def build_score_profile(score: "music21.stream.Score", midi_path: str) -> dict:
@@ -345,7 +411,7 @@ def main() -> None:
     print("LOG:MIDI 생성 중...", flush=True)
     midi_path = os.path.join(args.output_dir, "score.mid")
     try:
-        _write_midi_via_mido(score, midi_path)
+        _musicxml_to_midi(xml_path, midi_path)
     except Exception as exc:
         print(f"LOG:MIDI 변환 실패: {exc}", flush=True)
         sys.exit(1)
