@@ -26,6 +26,8 @@ import os
 import argparse
 import json
 import subprocess
+import threading
+import time
 
 # ── 의존 패키지 확인 ──────────────────────────────────────────────────────────
 
@@ -274,19 +276,50 @@ def main() -> None:
         sys.exit(1)
 
     # Step 4: MIDI 내보내기
-    # score.write("midi") 는 외부 프로그램(MuseScore 등)을 호출해 무한 대기할 수 있으므로
-    # music21 내부 MIDI 번역 모듈을 직접 사용합니다.
+    # score.write("midi") 는 외부 프로그램을 호출할 수 있으므로 내부 모듈을 직접 사용.
+    # streamToMidiFile()이 복잡한 악보에서 수 분 걸릴 수 있으므로
+    # 별도 스레드에서 실행하고 10초마다 heartbeat를 출력합니다.
+    # 타임아웃(180초) 초과 시 오류 처리합니다.
     print("PROGRESS:75", flush=True)
     print("LOG:MIDI 생성 중...", flush=True)
     midi_path = os.path.join(args.output_dir, "score.mid")
+
+    _midi_result: list  = [None, None]   # [MidiFile | None, Exception | None]
+
+    def _convert():
+        try:
+            from music21.midi import translate as _t  # type: ignore
+            _midi_result[0] = _t.streamToMidiFile(score)
+        except Exception as _e:
+            _midi_result[1] = _e
+
+    _t = threading.Thread(target=_convert, daemon=True)
+    _t.start()
+
+    _timeout   = 180   # 초
+    _heartbeat = 10    # 초마다 상태 출력
+    _elapsed   = 0
+    while _t.is_alive():
+        _t.join(timeout=_heartbeat)
+        _elapsed += _heartbeat
+        if _t.is_alive():
+            if _elapsed >= _timeout:
+                print(f"LOG:MIDI 변환 시간 초과 ({_timeout}초). 악보가 너무 복잡할 수 있습니다.", flush=True)
+                sys.exit(1)
+            pct = 75 + int(_elapsed / _timeout * 10)   # 75→85 사이로 진행률 표시
+            print(f"PROGRESS:{pct}", flush=True)
+            print(f"LOG:MIDI 변환 중... ({_elapsed}초 경과)", flush=True)
+
+    if _midi_result[1] is not None:
+        print(f"LOG:MIDI 변환 실패: {_midi_result[1]}", flush=True)
+        sys.exit(1)
+
     try:
-        from music21.midi import translate as _midi_translate  # type: ignore
-        midi_file = _midi_translate.streamToMidiFile(score)
-        midi_file.open(midi_path, "wb")
-        midi_file.write()
-        midi_file.close()
+        _midi_result[0].open(midi_path, "wb")
+        _midi_result[0].write()
+        _midi_result[0].close()
     except Exception as exc:
-        print(f"LOG:MIDI 변환 실패: {exc}", flush=True)
+        print(f"LOG:MIDI 파일 저장 실패: {exc}", flush=True)
         sys.exit(1)
 
     # Step 5: ScoreProfile 빌드 및 출력
