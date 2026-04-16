@@ -51,11 +51,13 @@ except ImportError:
 def _register_dll_paths() -> None:
     if sys.platform != "win32":
         return
+    import ctypes as _ctypes
     import shutil as _shutil
-    choco_lib = os.path.join(
-        os.environ.get("PROGRAMDATA", r"C:\ProgramData"),
-        "chocolatey", "lib", "fluidsynth", "tools")
-    candidates = [
+
+    choco_root = os.path.join(os.environ.get("PROGRAMDATA", r"C:\ProgramData"), "chocolatey")
+    choco_lib  = os.path.join(choco_root, "lib", "fluidsynth", "tools")
+
+    candidates: list[str] = [
         os.path.join(os.environ.get("PROGRAMFILES",      r"C:\Program Files"),
                      "FluidSynth", "bin"),
         os.path.join(os.environ.get("PROGRAMFILES",      r"C:\Program Files"),
@@ -67,36 +69,61 @@ def _register_dll_paths() -> None:
         r"C:\FluidSynth\bin",
         r"C:\FluidSynth\lib",
     ]
+
+    # Chocolatey shim 파일에서 실제 exe 경로 읽기
+    # C:\ProgramData\chocolatey\bin\fluidsynth.exe.shim 에 "path = <실제경로>" 형식으로 저장됨
+    shim_file = os.path.join(choco_root, "bin", "fluidsynth.exe.shim")
+    if os.path.isfile(shim_file):
+        try:
+            with open(shim_file, "r", encoding="utf-8", errors="ignore") as _f:
+                for _line in _f:
+                    if "=" in _line:
+                        _actual = _line.split("=", 1)[1].strip().strip('"')
+                        if _actual and os.path.isfile(_actual):
+                            candidates.insert(0, os.path.dirname(_actual))
+                        break
+        except Exception:
+            pass
+
     # fluidsynth.exe 가 PATH에 있으면 그 디렉터리도 후보에 추가
     exe = _shutil.which("fluidsynth") or _shutil.which("fluidsynth.exe")
     if exe:
         candidates.append(os.path.dirname(exe))
 
-    import ctypes as _ctypes
+    # Chocolatey lib 하위 재귀 탐색: 버전별 하위폴더(예: tools\fluidsynth-2.4.7-win10-x64\bin)에 대응
+    choco_lib_root = os.path.join(choco_root, "lib", "fluidsynth")
+    if os.path.isdir(choco_lib_root):
+        try:
+            _dll_names = {"libfluidsynth-3.dll", "libfluidsynth.dll", "libfluidsynth-2.dll"}
+            for _root, _dirs, _files in os.walk(choco_lib_root):
+                if _dll_names.intersection(_files):
+                    candidates.insert(0, _root)   # 찾은 경로를 최우선 후보로 삽입
+                    break
+        except Exception:
+            pass
+
+    # ① os.add_dll_directory + ② PATH 등록
     for path in candidates:
         if not os.path.isdir(path):
             continue
-        # ① os.add_dll_directory: Python 3.8+ DLL 로딩 해결
         try:
             os.add_dll_directory(path)
         except (AttributeError, OSError):
             pass
-        # ② PATH 추가: ctypes.util.find_library()는 PATH를 참조하므로 필수
         if path not in os.environ.get("PATH", ""):
             os.environ["PATH"] = path + os.pathsep + os.environ.get("PATH", "")
 
-    # ③ DLL 직접 선로드: pyfluidsynth의 내부 ctypes.CDLL() 호출 전에
-    #    DLL을 프로세스 메모리에 올려 두면 이후 이름 기반 로딩이 캐시에서 해결됩니다.
+    # ③ DLL 직접 선로드: ctypes.WinDLL 로 DLL을 프로세스에 올려두면
+    #    이후 pyfluidsynth의 이름 기반 CDLL() 호출이 캐시에서 해결됨
     for path in candidates:
         if not os.path.isdir(path):
             continue
-        for dll_name in ("libfluidsynth-3.dll", "libfluidsynth.dll",
-                         "libfluidsynth-2.dll"):
+        for dll_name in ("libfluidsynth-3.dll", "libfluidsynth.dll", "libfluidsynth-2.dll"):
             dll_path = os.path.join(path, dll_name)
             if os.path.isfile(dll_path):
                 try:
                     _ctypes.WinDLL(dll_path)
-                    return   # 로드 성공 — 이후 pyfluidsynth가 캐시에서 찾음
+                    return   # 로드 성공
                 except OSError:
                     pass
 
