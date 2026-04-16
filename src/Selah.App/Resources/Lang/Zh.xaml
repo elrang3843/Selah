@@ -1,0 +1,201 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- ── 应用 ── -->
+    <sys:String x:Key="App_Error_Title">Selah 错误</sys:String>
+    <sys:String x:Key="App_UnexpectedError">发生意外错误：&#x0a;&#x0a;{0}</sys:String>
+
+    <!-- ── 菜单 ── -->
+    <sys:String x:Key="Menu_File">文件(_F)</sys:String>
+    <sys:String x:Key="Menu_File_New">新建项目(_N)...</sys:String>
+    <sys:String x:Key="Menu_File_Open">打开(_O)...</sys:String>
+    <sys:String x:Key="Menu_File_Save">保存</sys:String>
+    <sys:String x:Key="Menu_File_SaveAs">另存为...</sys:String>
+    <sys:String x:Key="Menu_File_Import">导入音频/视频...</sys:String>
+    <sys:String x:Key="Menu_File_Export">导出为 WAV...</sys:String>
+    <sys:String x:Key="Menu_File_Exit">退出(_X)</sys:String>
+    <sys:String x:Key="Menu_Edit">编辑(_E)</sys:String>
+    <sys:String x:Key="Menu_Edit_Undo">撤销</sys:String>
+    <sys:String x:Key="Menu_Edit_Redo">重做</sys:String>
+    <sys:String x:Key="Menu_Edit_Split">分割片段</sys:String>
+    <sys:String x:Key="Menu_Edit_Delete">删除所选</sys:String>
+    <sys:String x:Key="Menu_Edit_Separate">分离音轨（所选片段）...</sys:String>
+    <sys:String x:Key="Menu_Edit_ReduceNoise">降噪（所选片段）...</sys:String>
+    <sys:String x:Key="Menu_Track">轨道(_T)</sys:String>
+    <sys:String x:Key="Menu_Track_Add">添加轨道</sys:String>
+    <sys:String x:Key="Menu_Track_Delete">删除所选轨道</sys:String>
+    <sys:String x:Key="Menu_Tools">工具(_O)</sys:String>
+    <sys:String x:Key="Menu_Tools_ModelManager">模型管理器...</sys:String>
+    <sys:String x:Key="Menu_Tools_HardwareDiag">硬件诊断...</sys:String>
+    <sys:String x:Key="Menu_Tools_FFmpegGuide">必要工具安装指南...</sys:String>
+    <sys:String x:Key="Menu_Help">帮助(_H)</sys:String>
+    <sys:String x:Key="Menu_Help_Shortcuts">键盘快捷键</sys:String>
+    <sys:String x:Key="Menu_Help_UserGuide">使用指南...</sys:String>
+    <sys:String x:Key="Menu_Help_Ethics">伦理使用准则...</sys:String>
+    <sys:String x:Key="Menu_Help_About">关于 Selah...</sys:String>
+    <sys:String x:Key="Menu_Language">语言</sys:String>
+    <sys:String x:Key="Menu_Theme">主题</sys:String>
+    <sys:String x:Key="Menu_Theme_Dark">深色主题</sys:String>
+    <sys:String x:Key="Menu_Theme_Light">浅色主题</sys:String>
+
+    <!-- ── 欢迎界面 ── -->
+    <sys:String x:Key="Welcome_Title">Selah</sys:String>
+    <sys:String x:Key="Welcome_Subtitle">敬拜事工 MR 编辑器</sys:String>
+    <sys:String x:Key="Welcome_NewProject">＋ 新建项目</sys:String>
+    <sys:String x:Key="Welcome_OpenProject">📂 打开项目</sys:String>
+    <sys:String x:Key="Welcome_Feature1_Title">🎵  MR（伴奏）提取</sys:String>
+    <sys:String x:Key="Welcome_Feature1_Desc">使用 AI 从音乐/视频文件中去除人声，提取伴奏。请先在"模型管理器"中安装分离模型。</sys:String>
+    <sys:String x:Key="Welcome_Feature2_Title">🎛️  多轨编辑 / 混音</sys:String>
+    <sys:String x:Key="Welcome_Feature2_Desc">无需模型即可将 WAV 文件导入轨道，进行剪切、音量、声像和淡化编辑，并导出为 WAV/FLAC。</sys:String>
+    <sys:String x:Key="Welcome_Shortcuts">Space: 播放/停止  |  S: 分割片段  |  Ctrl+S: 保存  |  Ctrl+E: 导出  |  F1: 帮助</sys:String>
+    <sys:String x:Key="Welcome_License">Selah 是开源软件 (GPLv3)。请自行确认所处理音频的版权状态。</sys:String>
+
+    <!-- ── 传输栏 ── -->
+    <sys:String x:Key="Transport_Beat">拍</sys:String>
+    <sys:String x:Key="Transport_Metronome">♩ 节拍器</sys:String>
+    <sys:String x:Key="Transport_Snap">⊞ 吸附</sys:String>
+    <sys:String x:Key="Transport_Tooltip_ReturnToStart">返回开头 (Home)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_PlayStop">播放/停止 (Space)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_Stop">停止 + 返回开头 (Shift+Space)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_Metronome">切换节拍器 (M)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_Snap">切换吸附 (N)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_SnapMode">吸附单位</sys:String>
+    <sys:String x:Key="Transport_Tooltip_ZoomOut">缩小 (Ctrl+-)</sys:String>
+    <sys:String x:Key="Transport_Tooltip_ZoomIn">放大 (Ctrl++)</sys:String>
+
+    <!-- ── 轨道标题 ── -->
+    <sys:String x:Key="Track_Header">轨道</sys:String>
+    <sys:String x:Key="Track_Metronome">节拍器</sys:String>
+    <sys:String x:Key="Track_Vol">音量</sys:String>
+    <sys:String x:Key="Track_Tooltip_Mute">静音</sys:String>
+    <sys:String x:Key="Track_Tooltip_Solo">独奏</sys:String>
+    <sys:String x:Key="Track_Tooltip_Enable">启用/禁用轨道播放</sys:String>
+
+    <!-- ── 模型管理器 ── -->
+    <sys:String x:Key="ModelManager_Title">模型管理器</sys:String>
+    <sys:String x:Key="ModelManager_Refresh">刷新</sys:String>
+    <sys:String x:Key="ModelManager_InstallDemucs">安装模型 / 下载</sys:String>
+    <sys:String x:Key="ModelManager_PipHint">需要 Python + pip。安装 ONNX Runtime 后下载模型文件（约 300 MB）。</sys:String>
+    <sys:String x:Key="ModelManager_Version">版本：</sys:String>
+    <sys:String x:Key="ModelManager_StemType">分离类型</sys:String>
+    <sys:String x:Key="ModelManager_Engine">引擎</sys:String>
+    <sys:String x:Key="ModelManager_License">许可证</sys:String>
+    <sys:String x:Key="ModelManager_Copyright">⚠ 版权/许可证说明</sys:String>
+    <sys:String x:Key="ModelManager_OpenSource">打开源码/GitHub</sys:String>
+    <sys:String x:Key="ModelManager_OpenLicense">查看许可证</sys:String>
+    <sys:String x:Key="ModelManager_Installed">✓ 已安装 — MR 提取功能可用</sys:String>
+    <sys:String x:Key="ModelManager_NotInstalled">未安装 — 请点击上方"安装模型 / 下载"按钮。</sys:String>
+    <sys:String x:Key="ModelManager_InstallLog_Title">安装输出日志 — 完成后点击"刷新"按钮关闭。</sys:String>
+    <sys:String x:Key="Model_Installed">已安装</sys:String>
+    <sys:String x:Key="Model_NotInstalled">未安装</sys:String>
+
+    <!-- ── 新建项目对话框 ── -->
+    <sys:String x:Key="NewProject_Title">新建项目</sys:String>
+    <sys:String x:Key="NewProject_Heading">新建项目</sys:String>
+    <sys:String x:Key="NewProject_NameLabel">项目名称</sys:String>
+    <sys:String x:Key="NewProject_DefaultName">新建项目</sys:String>
+    <sys:String x:Key="NewProject_SampleRate">采样率 (Sample Rate)</sys:String>
+    <sys:String x:Key="NewProject_32k">32 kHz  — 低质量 / 语音·现场录音（体积↓，CPU↓）</sys:String>
+    <sys:String x:Key="NewProject_44k">44.1 kHz  — 音乐文件</sys:String>
+    <sys:String x:Key="NewProject_48k">48 kHz  — 视频/流媒体 ★ 推荐</sys:String>
+    <sys:String x:Key="NewProject_96k">96 kHz  — 高质量（体积↑，CPU↑）— 建议高性能硬件</sys:String>
+    <sys:String x:Key="NewProject_Cancel">取消</sys:String>
+    <sys:String x:Key="NewProject_Create">创建</sys:String>
+    <sys:String x:Key="NewProject_NameRequired">请输入项目名称。</sys:String>
+    <sys:String x:Key="NewProject_AppTitle">Selah</sys:String>
+
+    <!-- ── 状态消息 ── -->
+    <sys:String x:Key="Status_Ready">就绪</sys:String>
+    <sys:String x:Key="Status_Detecting">检测中...</sys:String>
+    <sys:String x:Key="Status_NewProject">新项目"{0}"已创建（{1:G4} kHz）</sys:String>
+    <sys:String x:Key="Status_Loading">正在加载项目...</sys:String>
+    <sys:String x:Key="Status_LoadComplete">"{0}"加载完成</sys:String>
+    <sys:String x:Key="Status_OpenFailed">打开失败：{0}</sys:String>
+    <sys:String x:Key="Status_Saving">保存中...</sys:String>
+    <sys:String x:Key="Status_Saved">已保存</sys:String>
+    <sys:String x:Key="Status_SaveFailed">保存失败：{0}</sys:String>
+    <sys:String x:Key="Status_Importing">导入中：{0}</sys:String>
+    <sys:String x:Key="Status_Converting">转换中：{0}</sys:String>
+    <sys:String x:Key="Status_Error">错误：{0}</sys:String>
+    <sys:String x:Key="Status_ImportComplete">{0} 个文件导入完成</sys:String>
+    <sys:String x:Key="Status_Stopped">已停止</sys:String>
+    <sys:String x:Key="Status_Playing">播放中...</sys:String>
+    <sys:String x:Key="Status_NoContent">没有可播放的内容</sys:String>
+    <sys:String x:Key="Status_Rendering">渲染中...</sys:String>
+    <sys:String x:Key="Status_RenderProgress">渲染中... {0}</sys:String>
+    <sys:String x:Key="Status_ExportComplete">导出完成：{0}</sys:String>
+    <sys:String x:Key="Status_ExportFailed">导出失败：{0}</sys:String>
+    <sys:String x:Key="Status_MetronomeOn">节拍器已开启</sys:String>
+    <sys:String x:Key="Status_MetronomeOff">节拍器已关闭</sys:String>
+    <sys:String x:Key="Status_PlaybackEnded">播放完成</sys:String>
+    <sys:String x:Key="Progress_Title_Import">导入音频</sys:String>
+    <sys:String x:Key="Progress_Title_Export">导出 WAV</sys:String>
+    <sys:String x:Key="Status_Separating">正在分离音轨...</sys:String>
+    <sys:String x:Key="Status_ReducingNoise">正在降噪...</sys:String>
+    <sys:String x:Key="Status_NoiseReduceComplete">"{0}"降噪完成</sys:String>
+    <sys:String x:Key="Status_NoiseReduceFailed">降噪失败：{0}</sys:String>
+    <sys:String x:Key="Status_NoiseReduce_Missing">未安装 noisereduce 库。&#x0a;请使用以下命令安装：pip install noisereduce</sys:String>
+    <sys:String x:Key="Status_NoiseReduce_Missing_Short">noisereduce 未安装 — 正在打开安装指南...</sys:String>
+    <sys:String x:Key="Status_SeparateComplete">"{0}"分离完成（{1} 条音轨）</sys:String>
+    <sys:String x:Key="Status_SeparateFailed">分离失败：{0}</sys:String>
+    <sys:String x:Key="Status_Separate_NoSource">找不到源文件。</sys:String>
+    <sys:String x:Key="Status_Separate_NoPython">未安装 Python。请从 python.org 安装。</sys:String>
+    <sys:String x:Key="Status_Separate_NoModel">没有已安装的分离模型。请在模型管理器中安装。</sys:String>
+    <sys:String x:Key="Status_Separate_NeedTorchCodec">TorchCodec 错误 — 正在打开安装指南...</sys:String>
+    <sys:String x:Key="Status_Separate_TorchCodecBroken">TorchCodec DLL 错误 — 正在打开安装指南...</sys:String>
+    <sys:String x:Key="Status_Separate_OnnxRuntimeMissing">ONNX Runtime 未安装 — 正在打开安装指南...</sys:String>
+    <sys:String x:Key="Status_Separate_OnnxModelMissing">ONNX 模型文件缺失 — 正在打开安装指南...</sys:String>
+    <sys:String x:Key="Status_Separate_AudioSeparatorMissing">audio-separator 未安装 — 正在打开安装指南...</sys:String>
+    <sys:String x:Key="Status_SetupRequired">需要安装工具。正在打开安装指南...</sys:String>
+    <sys:String x:Key="Stem_Vocals">人声</sys:String>
+    <sys:String x:Key="Stem_NoVocals">伴奏</sys:String>
+    <sys:String x:Key="Stem_Drums">鼓</sys:String>
+    <sys:String x:Key="Stem_Bass">贝斯</sys:String>
+    <sys:String x:Key="Stem_Other">其他乐器</sys:String>
+    <sys:String x:Key="Status_DemucsInstalling">正在准备模型安装...</sys:String>
+    <sys:String x:Key="Status_DemucsInstalled">模型安装完成！MR 提取功能现已可用。</sys:String>
+    <sys:String x:Key="Status_ModelSetupComplete">模型设置完成！MR 提取功能现已可用。</sys:String>
+    <sys:String x:Key="Status_ModelRefreshed">模型列表已刷新</sys:String>
+    <sys:String x:Key="Status_ModelManager">模型管理器</sys:String>
+    <sys:String x:Key="Status_InstallFailed">安装失败：{0}</sys:String>
+
+    <!-- ── 窗口标题 ── -->
+    <sys:String x:Key="WindowTitle_Default">Selah - 敬拜事工 MR 编辑器</sys:String>
+    <sys:String x:Key="WindowTitle_Suffix"> - Selah</sys:String>
+
+    <!-- ── 对话框 ── -->
+    <sys:String x:Key="Dialog_Open_Title">打开 Selah 项目</sys:String>
+    <sys:String x:Key="Dialog_Open_Filter">Selah 项目 (project.json.gz)|project.json.gz</sys:String>
+    <sys:String x:Key="Dialog_Save_Title">选择项目保存位置</sys:String>
+    <sys:String x:Key="Dialog_Save_Filter">Selah 项目文件夹|*.selah</sys:String>
+    <sys:String x:Key="Dialog_Save_DefaultName">新建项目</sys:String>
+    <sys:String x:Key="Dialog_Export_DefaultName">混音</sys:String>
+    <sys:String x:Key="Dialog_Import_Title">导入音频/视频文件</sys:String>
+    <sys:String x:Key="Dialog_Import_Filter_Full">音频/视频文件|*.wav;*.mp3;*.flac;*.m4a;*.aac;*.ogg;*.mp4;*.mkv;*.mov|所有文件|*.*</sys:String>
+    <sys:String x:Key="Dialog_Import_Filter_Wav">WAV 文件（未安装 FFmpeg）|*.wav|所有文件|*.*</sys:String>
+    <sys:String x:Key="Dialog_FFmpegMissing_Message">未安装 FFmpeg。&#x0a;只能直接导入 WAV 文件。&#x0a;&#x0a;要支持 MP3/MP4 等格式，请参阅"工具 &gt; FFmpeg 安装指南"。&#x0a;&#x0a;是否继续？</sys:String>
+    <sys:String x:Key="Dialog_FFmpegMissing_Title">FFmpeg 未安装</sys:String>
+    <sys:String x:Key="Dialog_Export_Title">导出为 WAV</sys:String>
+    <sys:String x:Key="Dialog_Export_Filter">WAV 文件 (24-bit)|*.wav</sys:String>
+    <sys:String x:Key="Dialog_Error_Title">Selah 错误</sys:String>
+    <sys:String x:Key="Dialog_HardwareDiag_Message">硬件加速诊断结果：&#x0a;&#x0a;{0}&#x0a;&#x0a;可在"设置 &gt; 加速后端"中强制使用 CPU 模式。</sys:String>
+    <sys:String x:Key="Dialog_HardwareDiag_Title">硬件诊断</sys:String>
+    <sys:String x:Key="Dialog_UnsavedChanges_Message">项目"{0}"有未保存的更改。&#x0a;是否保存？</sys:String>
+    <sys:String x:Key="Dialog_UnsavedChanges_Title">Selah</sys:String>
+
+    <!-- ── 帮助窗口导航 ── -->
+    <sys:String x:Key="Help_Window_Title">帮助 — Selah</sys:String>
+    <sys:String x:Key="Help_Nav_Label">帮助中心</sys:String>
+    <sys:String x:Key="Help_Nav_Shortcuts">⌨  键盘快捷键</sys:String>
+    <sys:String x:Key="Help_Nav_UserGuide">📖  使用指南</sys:String>
+    <sys:String x:Key="Help_Nav_Ethics">⚖  伦理使用</sys:String>
+    <sys:String x:Key="Help_Nav_About">ℹ  关于 Selah</sys:String>
+
+    <!-- ── 其他 ── -->
+    <sys:String x:Key="Clip_UnknownSource">未知来源</sys:String>
+    <sys:String x:Key="Project_SaveFirst">请先保存项目。</sys:String>
+    <sys:String x:Key="Project_NoSavePath">未指定保存路径。</sys:String>
+    <sys:String x:Key="Project_FFmpegRequired">"{0}"格式需要 FFmpeg。&#x0a;请安装 FFmpeg 或使用 WAV 文件。</sys:String>
+
+</ResourceDictionary>
