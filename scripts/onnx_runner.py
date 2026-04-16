@@ -52,7 +52,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    print("LOG:ONNX_RUNTIME_MISSING", flush=True)
+    sys.exit(1)
 
 # ── htdemucs 기본 파라미터 ────────────────────────────────────
 SAMPLE_RATE   = 44_100
