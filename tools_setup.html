@@ -109,6 +109,9 @@
     <li><a href="#audioseparator">audio-separator 설치</a> — <strong>권장</strong> 보컬 분리 (모든 음역대 지원)</li>
     <li><a href="#ffmpeg">FFmpeg 설치</a> — MP3·MP4 임포트 및 오디오 처리</li>
     <li><a href="#model">분리 모델 다운로드</a> — 셀라 내 모델 관리자에서 진행</li>
+    <li><a href="#omr">악보 인식(OMR) 패키지</a> — oemer · music21 · mido · Pillow · scipy</li>
+    <li><a href="#fluidsynth">FluidSynth 설치</a> — <strong>필수</strong> 악보 → 오디오 변환 (MIDI 합성)</li>
+    <li><a href="#soundfont">SoundFont(.sf2) 설치</a> — <strong>필수</strong> FluidSynth 악기 음색 데이터</li>
   </ol>
 </div>
 
@@ -312,6 +315,142 @@
 <div class="warn">
   📥 모델 파일 크기: 약 303 MB. 다운로드 중 인터넷 연결이 유지되어야 합니다.<br>
   모델 출처: HuggingFace — MrCitron/demucs-v4-onnx (MIT 라이선스, Meta AI Research)
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     7. OMR 악보 인식 패키지
+     ════════════════════════════════════════════════════════ -->
+<h2 id="omr">7. 악보 인식(OMR) 패키지 설치 <span class="badge">필수 — 악보 이미지 가져오기</span></h2>
+
+<p>
+  <strong>파일 → 악보 이미지 가져오기</strong> 기능에 아래 Python 패키지가 필요합니다.<br>
+  <span class="note">Required for File → Import Sheet Music: image preprocessing, OMR recognition, and MIDI export.</span>
+</p>
+
+<div class="step">
+  <h3>한 줄 설치</h3>
+  <pre><code>pip install oemer music21 mido Pillow scipy</code></pre>
+  <p>pip을 찾지 못하면:</p>
+  <pre><code>python -m pip install oemer music21 mido Pillow scipy</code></pre>
+</div>
+
+<table style="width:100%; border-collapse:collapse; margin:4px 0 16px;">
+  <thead>
+    <tr>
+      <th style="text-align:left; padding:6px 12px; border-bottom:1px solid var(--surface1); color:var(--subtext); font-size:0.85em;">패키지</th>
+      <th style="text-align:left; padding:6px 12px; border-bottom:1px solid var(--surface1); color:var(--subtext); font-size:0.85em;">역할</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="padding:5px 12px;"><code>oemer</code></td><td style="padding:5px 12px; color:var(--subtext);">광학 음악 인식(OMR) 엔진</td></tr>
+    <tr><td style="padding:5px 12px;"><code>music21</code></td><td style="padding:5px 12px; color:var(--subtext);">MusicXML → MIDI 분석·변환</td></tr>
+    <tr><td style="padding:5px 12px;"><code>mido</code></td><td style="padding:5px 12px; color:var(--subtext);">MIDI 파일 조작 및 GM 패치 교체</td></tr>
+    <tr><td style="padding:5px 12px;"><code>Pillow</code></td><td style="padding:5px 12px; color:var(--subtext);">악보 이미지 전처리 (그레이스케일·이진화)</td></tr>
+    <tr><td style="padding:5px 12px;"><code>scipy</code></td><td style="padding:5px 12px; color:var(--subtext);">이미지 노이즈 제거 필터</td></tr>
+  </tbody>
+</table>
+
+<p>설치 확인:</p>
+<pre><code>python -c "import oemer, music21, mido, PIL, scipy; print('OMR OK')"</code></pre>
+<p class="note">oemer는 첫 실행 시 자체 모델 가중치를 자동 다운로드합니다 (인터넷 연결 필요).</p>
+
+<!-- ════════════════════════════════════════════════════════
+     8. FluidSynth
+     ════════════════════════════════════════════════════════ -->
+<h2 id="fluidsynth">8. FluidSynth 설치 <span class="badge">필수 — MIDI 합성</span></h2>
+
+<p>
+  인식된 악보의 MIDI를 악기 오디오(WAV)로 변환하는 합성 엔진입니다.
+  <strong>두 단계</strong>가 모두 필요합니다.<br>
+  <span class="note">FluidSynth converts the recognized MIDI to instrument audio. Both steps below are required.</span>
+</p>
+
+<div class="step">
+  <h3>Step 1 — 네이티브 라이브러리 설치 (libfluidsynth-3.dll)</h3>
+  <p>방법 A — Chocolatey (관리자 PowerShell):</p>
+  <pre><code>choco install fluidsynth</code></pre>
+  <p>방법 B — 공식 설치 프로그램:</p>
+  <ol>
+    <li>
+      <a href="https://www.fluidsynth.org/" target="_blank">fluidsynth.org</a> →
+      <em>Download</em> → Windows 설치 프로그램 실행
+    </li>
+    <li>기본 경로(<code>C:\Program Files\FluidSynth\</code>)로 설치합니다.</li>
+    <li>셀라가 DLL을 자동으로 탐지합니다 — PATH 설정 불필요.</li>
+  </ol>
+</div>
+
+<div class="step">
+  <h3>Step 2 — Python 래퍼 설치</h3>
+  <pre><code>pip install fluidsynth</code></pre>
+  <p>pip을 찾지 못하면:</p>
+  <pre><code>python -m pip install fluidsynth</code></pre>
+</div>
+
+<div class="warn">
+  ⚠ <strong>두 단계가 모두 필요한 이유</strong><br>
+  <code>pip install fluidsynth</code>은 Python에서 FluidSynth를 호출하는
+  <em>래퍼(ctypes 바인딩)</em>만 설치합니다.
+  실제로 소리를 합성하는 <code>libfluidsynth-3.dll</code>은
+  <strong>네이티브 설치 프로그램</strong>이 제공합니다.
+  Step 1 없이 Step 2만 설치하면 합성 시 오류가 발생합니다.
+</div>
+
+<p>설치 확인:</p>
+<pre><code>python -c "import fluidsynth; print('fluidsynth OK')"</code></pre>
+
+<!-- ════════════════════════════════════════════════════════
+     9. SoundFont
+     ════════════════════════════════════════════════════════ -->
+<h2 id="soundfont">9. SoundFont(.sf2) 설치 <span class="badge">필수 — MIDI 합성</span></h2>
+
+<p>
+  SoundFont는 FluidSynth가 MIDI 음표를 실제 악기 음색으로 렌더링하는
+  악기 샘플 뱅크입니다. 셀라에는 포함되어 있지 않으므로 별도로 다운로드합니다.<br>
+  <span class="note">A SoundFont is an instrument sample bank FluidSynth uses to render MIDI. Not bundled — download separately.</span>
+</p>
+
+<div class="step">
+  <h3>추천 무료 SoundFont — GeneralUser GS (~29 MB)</h3>
+  <ol>
+    <li>
+      <a href="http://schristiancollins.com/generaluser.php" target="_blank">schristiancollins.com/generaluser.php</a>
+      에서 다운로드합니다.
+    </li>
+    <li>압축을 해제하고 <code>GeneralUser GS.sf2</code> 파일을 꺼냅니다.</li>
+    <li>아래 <strong>배치 위치</strong> 중 하나에 복사합니다.</li>
+  </ol>
+</div>
+
+<h3>SoundFont 파일 배치 위치 (우선순위 순)</h3>
+
+<table style="width:100%; border-collapse:collapse; margin:4px 0 12px;">
+  <thead>
+    <tr>
+      <th style="text-align:left; padding:6px 12px; border-bottom:1px solid var(--surface1); color:var(--subtext); font-size:0.85em;">우선순위</th>
+      <th style="text-align:left; padding:6px 12px; border-bottom:1px solid var(--surface1); color:var(--subtext); font-size:0.85em;">경로</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="padding:5px 12px; color:var(--green);">1 (최우선)</td><td style="padding:5px 12px;"><code>%AppData%\Selah\soundfonts\</code></td></tr>
+    <tr><td style="padding:5px 12px; color:var(--subtext);">2</td><td style="padding:5px 12px;"><code>&lt;앱 폴더&gt;\soundfonts\</code></td></tr>
+    <tr><td style="padding:5px 12px; color:var(--subtext);">3</td><td style="padding:5px 12px;"><code>C:\Program Files\FluidSynth\</code></td></tr>
+    <tr><td style="padding:5px 12px; color:var(--subtext);">4</td><td style="padding:5px 12px;"><code>C:\soundfonts\</code></td></tr>
+  </tbody>
+</table>
+
+<p>
+  <strong>권장 위치:</strong> <code>%AppData%\Selah\soundfonts\</code><br>
+  탐색기 주소 표시줄에 위 경로를 그대로 붙여넣으면 폴더가 열립니다.
+  (셀라가 첫 실행 시 자동으로 생성합니다.)
+</p>
+
+<div class="step">
+  <h3>기타 추천 무료 SoundFont</h3>
+  <ul>
+    <li><strong>FluidR3_GM.sf2</strong> (~141 MB) — 다양한 Linux 배포판에 포함, 광범위하게 사용됨</li>
+    <li><strong>MuseScore_General.sf2</strong> — MuseScore에 번들로 제공, 고품질·대용량</li>
+  </ul>
 </div>
 
 <hr>

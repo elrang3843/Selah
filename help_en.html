@@ -149,6 +149,14 @@ function scrollToSection(id) {
 4. Each stem is automatically added as a new track.</p>
 <p><strong>Noise Reduction:</strong> Edit → Reduce Noise. (Requires: <code>pip install noisereduce</code>)</p>
 
+<h2>Import Sheet Music</h2>
+<p>Automatically generate per-instrument audio tracks from a scanned or photographed score image (PNG, JPG, TIFF).</p>
+<p>1. Choose <strong>File → Import Sheet Music</strong>.<br>
+2. Select a score image file, then click <strong>Recognize</strong>.<br>
+3. After recognition, select the instruments you want. (★ = auto-recommended)<br>
+4. Click <strong>Insert into Track</strong> — a new track is added for each instrument.</p>
+<p>This feature requires Python packages (oemer, music21, etc.), FluidSynth, and a SoundFont (.sf2). See <strong>Required Tools ⑦⑧⑨</strong> below.</p>
+
 <h2>Exporting</h2>
 <p>Use <strong>File → Export as WAV</strong> (<span class="kbd">Ctrl+E</span>) to render the entire timeline to a 24-bit WAV. Muted tracks are excluded. If the metronome is on, it will be included — turn it off before exporting.</p>
 
@@ -191,6 +199,27 @@ function scrollToSection(id) {
   <div class="credit-meta">vocal/backing 2-stem · 65 MB · requires audio-separator</div>
 </div>
 <p>Select a model, click <strong>Install Model / Download</strong>, then click <strong>Refresh</strong> when done.</p>
+
+<h3>⑦ Install OMR packages — Required (sheet music import)</h3>
+<div class="code">pip install oemer music21 mido Pillow scipy</div>
+<div class="note">oemer downloads its own model weights automatically on first run (internet required).</div>
+
+<h3>⑧ Install FluidSynth — Required (sheet music → audio)</h3>
+<p><strong>Both steps are required.</strong></p>
+<p>Step 1 — Install the native library (<code>libfluidsynth-3.dll</code>):</p>
+<div class="code">choco install fluidsynth</div>
+<p>Or download the Windows installer from <strong>fluidsynth.org</strong>. Selah detects the DLL automatically — no PATH change needed.</p>
+<p>Step 2 — Install the Python wrapper:</p>
+<div class="code">pip install fluidsynth</div>
+<div class="warn">⚠ Installing only the pip package without the native installer will cause synthesis errors. Both steps are required.</div>
+
+<h3>⑨ Install SoundFont (.sf2) — Required (instrument tones)</h3>
+<p>A SoundFont is an instrument sample bank FluidSynth uses to render MIDI to audio.</p>
+<p><strong>Recommended free SoundFont:</strong> GeneralUser GS (~29 MB)<br>
+Download from <strong>schristiancollins.com/generaluser.php</strong>, then copy<br>
+<code>GeneralUser GS.sf2</code> to:</p>
+<div class="code">%AppData%\Selah\soundfonts\</div>
+<div class="note">Type or paste this path directly into Windows Explorer's address bar to open the folder.</div>
 </section>
 
 <!-- ═══════════════════════════════════════════

@@ -144,6 +144,14 @@ function scrollToSection(id) {
 4. 分离完成后，每个音轨将自动添加为新轨道。</p>
 <p><strong>降噪：</strong> 编辑 → 降噪。（需要：<code>pip install noisereduce</code>）</p>
 
+<h2>导入乐谱</h2>
+<p>从扫描或拍摄的乐谱图像（PNG、JPG、TIFF）自动生成各乐器的音频轨道。</p>
+<p>1. 选择 <strong>文件 → 导入乐谱图像</strong>。<br>
+2. 选择乐谱图像文件，点击 <strong>开始识别</strong>。<br>
+3. 识别完成后，从乐器列表中选择所需乐器（★ = 自动推荐）。<br>
+4. 点击 <strong>插入轨道</strong>，每个乐器将自动添加为新轨道。</p>
+<p>此功能需要 Python 包（oemer、music21 等）、FluidSynth 和 SoundFont (.sf2)。请参阅下方 <strong>必要工具安装 ⑦⑧⑨</strong>。</p>
+
 <h2>导出</h2>
 <p>编辑完成后，使用 <strong>文件 → 导出为 WAV</strong>（<span class="kbd">Ctrl+E</span>）将整个时间轴渲染为 24-bit WAV 文件。静音轨道不会包含在输出中。如果节拍器处于开启状态，它将被包含在输出中——导出前请确认。</p>
 
@@ -186,6 +194,27 @@ function scrollToSection(id) {
   <div class="credit-meta">人声/伴奏 2音轨 · 65 MB · 需要 audio-separator</div>
 </div>
 <p>选择模型后点击 <strong>安装模型 / 下载</strong>，完成后点击 <strong>刷新</strong>。</p>
+
+<h3>⑦ 安装 OMR 包 — 必须（乐谱导入）</h3>
+<div class="code">pip install oemer music21 mido Pillow scipy</div>
+<div class="note">oemer 首次运行时会自动下载模型权重（需要网络连接）。</div>
+
+<h3>⑧ 安装 FluidSynth — 必须（乐谱 → 音频合成）</h3>
+<p><strong>以下两个步骤都必须完成。</strong></p>
+<p>步骤 1 — 安装原生库（<code>libfluidsynth-3.dll</code>）：</p>
+<div class="code">choco install fluidsynth</div>
+<p>或从 <strong>fluidsynth.org</strong> 下载 Windows 安装程序并运行。Selah 会自动检测 DLL，无需配置 PATH。</p>
+<p>步骤 2 — 安装 Python 包装器：</p>
+<div class="code">pip install fluidsynth</div>
+<div class="warn">⚠ 仅安装 pip 包而跳过原生安装程序将导致合成时出错。两个步骤都必须完成。</div>
+
+<h3>⑨ 安装 SoundFont (.sf2) — 必须（乐器音色）</h3>
+<p>SoundFont 是 FluidSynth 用于将 MIDI 渲染为真实乐器音色的乐器采样库。</p>
+<p><strong>推荐免费 SoundFont：</strong> GeneralUser GS（约 29 MB）<br>
+从 <strong>schristiancollins.com/generaluser.php</strong> 下载，将<br>
+<code>GeneralUser GS.sf2</code> 复制到以下路径：</p>
+<div class="code">%AppData%\Selah\soundfonts\</div>
+<div class="note">在 Windows 资源管理器地址栏中直接输入或粘贴上述路径即可打开文件夹。</div>
 </section>
 
 <!-- ═══════════════════════════════════════════
