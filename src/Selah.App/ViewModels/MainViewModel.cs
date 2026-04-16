@@ -20,6 +20,8 @@ public class MainViewModel : ViewModelBase, IDisposable
     public readonly AudioRenderer AudioRenderer = new();
     public readonly StemSeparatorService StemSeparator;
     public readonly NoiseReductionService NoiseReducer;
+    public readonly FluidSynthService FluidSynthService = new();
+    public readonly SheetMusicService SheetMusicService;
 
     private ProjectViewModel? _currentProject;
     private string _statusMessage;
@@ -38,6 +40,8 @@ public class MainViewModel : ViewModelBase, IDisposable
     public event Action<string>? ErrorOccurred;
     /// <summary>도구 미설치 오류 발생 시 설치 안내 페이지 열기를 요청합니다.</summary>
     public event Action? SetupGuideRequested;
+    /// <summary>악보 인식 다이얼로그 열기를 요청합니다. null 반환 시 취소.</summary>
+    public event Func<Task<SheetMusicDialogResult?>>? ImportSheetMusicRequested;
     /// <summary>시간이 걸리는 작업 시작 시 발생. 인수: 작업 제목.</summary>
     public event Action<string>? ProgressStarted;
     /// <summary>시간이 걸리는 작업 완료(또는 실패) 시 발생.</summary>
@@ -48,9 +52,11 @@ public class MainViewModel : ViewModelBase, IDisposable
         _statusMessage = Loc.Get("Status_Ready");
 
         FFmpegService.Detect();
-        _hardwareInfo = HardwareDetectionService.Detect();
-        StemSeparator = new StemSeparatorService(ModelManagerService);
-        NoiseReducer  = new NoiseReductionService();
+        FluidSynthService.Detect();
+        _hardwareInfo    = HardwareDetectionService.Detect();
+        StemSeparator    = new StemSeparatorService(ModelManagerService);
+        NoiseReducer     = new NoiseReductionService();
+        SheetMusicService = new SheetMusicService(FluidSynthService);
 
         Timeline = new TimelineViewModel();
         ModelManager = new ModelManagerViewModel(ModelManagerService);
@@ -75,6 +81,8 @@ public class MainViewModel : ViewModelBase, IDisposable
             () => CurrentProject != null && SelectedClip != null && SelectedTrack?.IsEnabled == true);
         ReduceNoiseCommand = new AsyncRelayCommand(ReduceNoiseClipAsync,
             () => CurrentProject != null && SelectedClip != null && SelectedTrack?.IsEnabled == true);
+        ImportSheetMusicCommand = new AsyncRelayCommand(ImportSheetMusicAsync,
+            () => CurrentProject != null);
 
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
         AudioEngine.PlaybackStopped += OnPlaybackStopped;
@@ -207,8 +215,9 @@ public class MainViewModel : ViewModelBase, IDisposable
     public ICommand ToggleMetronomeCommand { get; }
     public ICommand ToggleSnapCommand { get; }
     public ICommand DeleteCommand { get; }
-    public ICommand SeparateClipCommand { get; }
-    public ICommand ReduceNoiseCommand  { get; }
+    public ICommand SeparateClipCommand      { get; }
+    public ICommand ReduceNoiseCommand       { get; }
+    public ICommand ImportSheetMusicCommand  { get; }
 
     // ── 커맨드 핸들러 ──
 
@@ -862,6 +871,133 @@ public class MainViewModel : ViewModelBase, IDisposable
         }
     }
 
+    // ── 악보 인식 ─────────────────────────────────────────────────────────────
+
+    private async Task ImportSheetMusicAsync()
+    {
+        if (CurrentProject == null) return;
+
+        // Python 가용성 확인
+        if (!SheetMusicService.IsPythonAvailable)
+        {
+            StatusMessage = Loc.Get("Status_SheetMusic_NoPython");
+            SetupGuideRequested?.Invoke();
+            return;
+        }
+
+        // FluidSynth + SoundFont 확인
+        if (!FluidSynthService.IsAvailable)
+        {
+            var msg = !FluidSynthService.IsFluidSynthFound
+                ? Loc.Get("Status_SheetMusic_NoFluidSynth")
+                : Loc.Get("Status_SheetMusic_NoSoundFont");
+            ErrorOccurred?.Invoke(msg);
+            return;
+        }
+
+        // 악보 인식 다이얼로그 열기 (코드 비하인드에서 처리)
+        if (ImportSheetMusicRequested == null) return;
+        var dlgResult = await ImportSheetMusicRequested();
+        if (dlgResult == null) return;   // 취소
+
+        if (dlgResult.SelectedInstruments.Length == 0) return;
+
+        // 프로젝트 저장 경로 확보
+        if (CurrentProject.Model.FilePath == null)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "Selah", CurrentProject.Model.Id);
+            CurrentProject.Model.FilePath = tempDir;
+            Directory.CreateDirectory(tempDir);
+        }
+
+        BeginProgress(Loc.Get("Progress_Title_SheetMusic"));
+        int inserted = 0;
+
+        try
+        {
+            long insertPosition = Timeline.PlayheadFrames;
+
+            foreach (var instrument in dlgResult.SelectedInstruments)
+            {
+                var wavDir  = Path.Combine(CurrentProject.Model.FilePath!, "audio", "sheetmusic");
+                var wavName = $"{instrument}_{DateTime.Now:yyyyMMddHHmmss}.wav";
+                var wavPath = Path.Combine(wavDir, wavName);
+
+                StatusMessage = Loc.Format("Status_SheetMusic_Synthesizing", instrument);
+
+                var progress = new Progress<SheetMusicProgress>(p =>
+                {
+                    StatusMessage   = p.Phase;
+                    ProgressPercent = p.Percent * 100;
+                });
+
+                await SheetMusicService.SynthesizeAsync(
+                    dlgResult.MidiPath, instrument, wavPath,
+                    CurrentProject.SampleRate, progress);
+
+                // WAV 메타데이터 읽기
+                long lengthSamples;
+                int sr, ch;
+                using (var wr = new WaveFileReader(wavPath))
+                {
+                    lengthSamples = wr.SampleCount;
+                    sr = wr.WaveFormat.SampleRate;
+                    ch = wr.WaveFormat.Channels;
+                }
+
+                var source = new AudioSource
+                {
+                    Name          = Path.GetFileNameWithoutExtension(wavName),
+                    RelPath       = Path.GetRelativePath(CurrentProject.Model.FilePath!, wavPath),
+                    AbsolutePath  = wavPath,
+                    SampleRate    = sr,
+                    Channels      = ch,
+                    LengthSamples = lengthSamples,
+                    SourceType    = SourceType.SheetMusic
+                };
+                CurrentProject.Model.AudioSources.Add(source);
+
+                string trackName = GetInstrumentTrackName(instrument);
+                var trackVm = CurrentProject.AddTrack(trackName);
+                trackVm.AddClip(new ClipViewModel(new Clip
+                {
+                    SourceId             = source.Id,
+                    TimelineStartSamples = insertPosition,
+                    SourceInSamples      = 0,
+                    SourceOutSamples     = lengthSamples
+                }, CurrentProject.Model));
+
+                AudioEngine.RebuildMixers();
+                inserted++;
+            }
+
+            CurrentProject.Model.IsDirty = true;
+            StatusMessage = Loc.Format("Status_SheetMusicComplete", inserted);
+        }
+        catch (Exception ex)
+        {
+            ErrorOccurred?.Invoke(ex.Message);
+            StatusMessage = Loc.Format("Status_SheetMusicFailed", ex.Message);
+        }
+        finally
+        {
+            EndProgress();
+        }
+    }
+
+    private static string GetInstrumentTrackName(string key) => key switch
+    {
+        "Piano"          => Loc.Get("Instrument_Piano"),
+        "AcousticGuitar" => Loc.Get("Instrument_AcousticGuitar"),
+        "ElectricGuitar" => Loc.Get("Instrument_ElectricGuitar"),
+        "BassGuitar"     => Loc.Get("Instrument_BassGuitar"),
+        "Drums"          => Loc.Get("Instrument_Drums"),
+        "Synthesizer"    => Loc.Get("Instrument_Synthesizer"),
+        "Saxophone"      => Loc.Get("Instrument_Saxophone"),
+        "Flute"          => Loc.Get("Instrument_Flute"),
+        _                => key
+    };
+
     private static string GetStemTrackName(string stemKey) => stemKey switch
     {
         "vocals"    => Loc.Get("Stem_Vocals"),
@@ -886,4 +1022,14 @@ public class MainViewModel : ViewModelBase, IDisposable
         Loc.LanguageChanged -= OnLanguageChanged;
         AudioEngine.Dispose();
     }
+}
+
+/// <summary>SheetMusicDialog의 OK 결과. MainViewModel.ImportSheetMusicAsync()가 소비합니다.</summary>
+public class SheetMusicDialogResult
+{
+    /// <summary>OMR이 생성한 MIDI 파일 절대 경로.</summary>
+    public string MidiPath { get; init; } = string.Empty;
+
+    /// <summary>사용자가 선택한 악기 키 배열 (예: ["Piano", "Flute"]).</summary>
+    public string[] SelectedInstruments { get; init; } = [];
 }

@@ -192,6 +192,35 @@
     <sys:String x:Key="Help_Nav_Ethics">⚖  Ethical Use</sys:String>
     <sys:String x:Key="Help_Nav_About">ℹ  About Selah</sys:String>
 
+    <!-- ── Sheet Music Recognition ── -->
+    <sys:String x:Key="Menu_File_SheetMusic">Add Track from Sheet Music...</sys:String>
+    <sys:String x:Key="SheetMusic_Title">Sheet Music Recognition</sys:String>
+    <sys:String x:Key="SheetMusic_ImageLabel">Sheet Music Image File</sys:String>
+    <sys:String x:Key="SheetMusic_Browse">Browse</sys:String>
+    <sys:String x:Key="SheetMusic_Recognize">Start Recognition</sys:String>
+    <sys:String x:Key="SheetMusic_ScoreInfo">Analysis Result</sys:String>
+    <sys:String x:Key="SheetMusic_InstrumentLabel">Select Instruments to Insert  (★ = recommended by score)</sys:String>
+    <sys:String x:Key="SheetMusic_RecommendHint">★ = recommended based on score characteristics</sys:String>
+    <sys:String x:Key="SheetMusic_Insert">Insert as Tracks</sys:String>
+    <sys:String x:Key="SheetMusic_Cancel">Cancel</sys:String>
+    <sys:String x:Key="Progress_Title_SheetMusic">Synthesizing instrument tracks from sheet music...</sys:String>
+    <sys:String x:Key="Status_SheetMusic_Synthesizing">Synthesizing {0}...</sys:String>
+    <sys:String x:Key="Status_SheetMusicComplete">{0} sheet music track(s) inserted</sys:String>
+    <sys:String x:Key="Status_SheetMusicFailed">Sheet music track insertion failed: {0}</sys:String>
+    <sys:String x:Key="Status_SheetMusic_NoPython">Python is not installed. Install from python.org.</sys:String>
+    <sys:String x:Key="Status_SheetMusic_NoFluidSynth">FluidSynth not found. Install from fluidsynth.org and add to PATH.</sys:String>
+    <sys:String x:Key="Status_SheetMusic_NoSoundFont">SoundFont (.sf2) not found.&#x0a;Place a .sf2 file in %AppData%\Selah\soundfonts\</sys:String>
+
+    <!-- ── Instrument track names ── -->
+    <sys:String x:Key="Instrument_Piano">Piano</sys:String>
+    <sys:String x:Key="Instrument_AcousticGuitar">Acoustic Guitar</sys:String>
+    <sys:String x:Key="Instrument_ElectricGuitar">Electric Guitar</sys:String>
+    <sys:String x:Key="Instrument_BassGuitar">Bass Guitar</sys:String>
+    <sys:String x:Key="Instrument_Drums">Drums</sys:String>
+    <sys:String x:Key="Instrument_Synthesizer">Synthesizer</sys:String>
+    <sys:String x:Key="Instrument_Saxophone">Saxophone</sys:String>
+    <sys:String x:Key="Instrument_Flute">Flute</sys:String>
+
     <!-- ── Misc ── -->
     <sys:String x:Key="Clip_UnknownSource">Unknown source</sys:String>
     <sys:String x:Key="Project_SaveFirst">Please save the project first.</sys:String>

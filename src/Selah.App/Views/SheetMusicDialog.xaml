@@ -1,0 +1,154 @@
+<Window x:Class="Selah.App.Views.SheetMusicDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource SheetMusic_Title}"
+        Width="520" SizeToContent="Height"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SurfaceBrush}">
+
+    <StackPanel Margin="20,16,20,20">
+
+        <!-- 이미지 선택 -->
+        <TextBlock Text="{DynamicResource SheetMusic_ImageLabel}"
+                   FontSize="12" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextBrush}"
+                   Margin="0,0,0,6"/>
+
+        <Grid Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0"
+                     Text="{Binding ImagePath, Mode=OneWay}"
+                     IsReadOnly="True"
+                     Background="{DynamicResource Surface1Brush}"
+                     Foreground="{DynamicResource TextBrush}"
+                     BorderBrush="{DynamicResource Surface2Brush}"
+                     Padding="6,5"
+                     VerticalContentAlignment="Center"
+                     Margin="0,0,8,0"/>
+            <Button Grid.Column="1"
+                    Content="{DynamicResource SheetMusic_Browse}"
+                    Click="BrowseButton_Click"
+                    MinWidth="72" Padding="10,5"/>
+        </Grid>
+
+        <!-- 인식 시작 버튼 -->
+        <Button Content="{DynamicResource SheetMusic_Recognize}"
+                Command="{Binding RecognizeCommand}"
+                HorizontalAlignment="Left"
+                MinWidth="100" Padding="16,6"
+                Margin="0,0,0,12"
+                Background="{DynamicResource AccentBrush}"
+                Foreground="White"
+                FontWeight="SemiBold"
+                BorderThickness="0"/>
+
+        <!-- 진행 바 (인식 중에만 표시) -->
+        <ProgressBar Height="6"
+                     Minimum="0" Maximum="100"
+                     Value="{Binding RecognitionPercent, Mode=OneWay}"
+                     IsIndeterminate="{Binding IsRecognizing}"
+                     Foreground="{DynamicResource AccentBrush}"
+                     Background="{DynamicResource Surface1Brush}"
+                     BorderBrush="{DynamicResource Surface2Brush}"
+                     Visibility="{Binding IsRecognizing, Converter={StaticResource BoolToVis}}"
+                     Margin="0,0,0,6"/>
+
+        <!-- 상태 메시지 -->
+        <TextBlock Text="{Binding RecognitionStatus}"
+                   FontSize="11"
+                   Foreground="{DynamicResource SubtextBrush}"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,12"/>
+
+        <!-- 악보 분석 결과 패널 (인식 완료 후 표시) -->
+        <Border Background="{DynamicResource Surface1Brush}"
+                CornerRadius="4"
+                Padding="12,10"
+                Visibility="{Binding HasProfile, Converter={StaticResource BoolToVis}}"
+                Margin="0,0,0,14">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource SheetMusic_ScoreInfo}"
+                           FontSize="10" FontWeight="SemiBold"
+                           Foreground="{DynamicResource SubtextBrush}"
+                           Margin="0,0,0,4"/>
+                <TextBlock Text="{Binding ScoreInfoText}"
+                           FontSize="11"
+                           Foreground="{DynamicResource TextBrush}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 악기 선택 (인식 완료 후 표시) -->
+        <TextBlock Text="{DynamicResource SheetMusic_InstrumentLabel}"
+                   FontSize="12" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextBrush}"
+                   Visibility="{Binding HasProfile, Converter={StaticResource BoolToVis}}"
+                   Margin="0,0,0,8"/>
+
+        <ItemsControl ItemsSource="{Binding Instruments}"
+                      Visibility="{Binding HasProfile, Converter={StaticResource BoolToVis}}"
+                      Margin="0,0,0,16">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="2"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox IsChecked="{Binding IsChecked}"
+                              Margin="4,3"
+                              Foreground="{DynamicResource TextBrush}"
+                              VerticalContentAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding DisplayName}"
+                                       VerticalAlignment="Center"/>
+                            <!-- ★ 추천 표시 (악보 특성 기반) -->
+                            <TextBlock Text=" ★"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding IsRecommended,
+                                           Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
+                    </CheckBox>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- 확인 / 취소 -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ★ 추천 안내 -->
+            <TextBlock Grid.Column="0"
+                       Text="{DynamicResource SheetMusic_RecommendHint}"
+                       FontSize="10"
+                       Foreground="{DynamicResource SubtextBrush}"
+                       VerticalAlignment="Center"
+                       Visibility="{Binding HasProfile, Converter={StaticResource BoolToVis}}"/>
+
+            <Button Grid.Column="1"
+                    Content="{DynamicResource SheetMusic_Insert}"
+                    IsDefault="True"
+                    IsEnabled="{Binding CanInsert}"
+                    Click="InsertButton_Click"
+                    MinWidth="88" Padding="10,6"
+                    Margin="0,0,8,0"/>
+
+            <Button Grid.Column="2"
+                    Content="{DynamicResource SheetMusic_Cancel}"
+                    IsCancel="True"
+                    MinWidth="72" Padding="10,6"/>
+        </Grid>
+
+    </StackPanel>
+</Window>

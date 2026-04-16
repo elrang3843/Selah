@@ -31,6 +31,7 @@ public enum SourceType
 {
     Import,
     Recording,
-    Separated,  // 분리 엔진으로 생성된 스템
-    Processed   // 노이즈 감소 등 후처리로 생성된 클립
+    Separated,   // 분리 엔진으로 생성된 스템
+    Processed,   // 노이즈 감소 등 후처리로 생성된 클립
+    SheetMusic   // 악보 인식(OMR) + FluidSynth 합성으로 생성된 트랙
 }

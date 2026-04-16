@@ -52,7 +52,8 @@ public enum ModelType
 {
     VocalSeparation,    // 보컬/반주 2-stem
     StemSeparation,     // 드럼/베이스/기타/보컬 4-stem
-    NoiseReduction
+    NoiseReduction,
+    SheetMusicOmr       // 광학 악보 인식 (OMR) — oemer + music21
 }
 
 public enum StemType

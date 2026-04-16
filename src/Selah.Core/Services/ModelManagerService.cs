@@ -174,6 +174,13 @@ public class ModelManagerService
     public bool IsOnnxRuntimeInstalled()    => CheckPythonPackage("onnxruntime");
     public bool IsAudioSeparatorInstalled() => CheckPythonPackage("audio_separator");
 
+    /// <summary>oemer OMR 패키지 설치 여부를 확인합니다.</summary>
+    public bool IsOmerInstalled()   => CheckPythonPackage("oemer");
+    /// <summary>music21 악보 분석 패키지 설치 여부를 확인합니다.</summary>
+    public bool IsMusic21Installed() => CheckPythonPackage("music21");
+    /// <summary>mido MIDI 조작 패키지 설치 여부를 확인합니다.</summary>
+    public bool IsMidoInstalled()   => CheckPythonPackage("mido");
+
     /// <summary>audio-separator 모델 캐시 폴더 경로 (플랫폼 무관).</summary>
     public static string GetAudioSeparatorCacheDir() =>
         Path.Combine(
@@ -472,6 +479,44 @@ public class ModelManagerService
         progress?.Report($"pip install {pkg}");
 
         var psi = new ProcessStartInfo(python, $"-m pip install {pkg}")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError  = true,
+            UseShellExecute        = false,
+            CreateNoWindow         = true
+        };
+
+        using var proc = new Process { StartInfo = psi };
+        proc.OutputDataReceived += (_, e) => { if (e.Data != null) progress?.Report(e.Data); };
+        proc.ErrorDataReceived  += (_, e) => { if (e.Data != null) progress?.Report(e.Data); };
+        proc.Start();
+        proc.BeginOutputReadLine();
+        proc.BeginErrorReadLine();
+        await proc.WaitForExitAsync(ct);
+
+        if (proc.ExitCode != 0)
+            throw new Exception($"pip install 실패 (코드 {proc.ExitCode})");
+    }
+
+    // ── OMR 패키지 설치 ──────────────────────────────────────────────
+
+    /// <summary>
+    /// 악보 인식(OMR)에 필요한 Python 패키지를 설치합니다.
+    ///   pip install oemer music21 mido Pillow scipy
+    /// </summary>
+    public async Task InstallOmerPackagesAsync(
+        IProgress<string>? progress = null,
+        CancellationToken ct = default)
+    {
+        var python = FindPython()
+            ?? throw new InvalidOperationException(
+                "Python을 찾을 수 없습니다.\n" +
+                "python.org에서 Python 3.10 이상을 설치하고 PATH에 추가하세요.");
+
+        const string packages = "oemer music21 mido Pillow scipy";
+        progress?.Report($"pip install {packages}");
+
+        var psi = new ProcessStartInfo(python, $"-m pip install {packages}")
         {
             RedirectStandardOutput = true,
             RedirectStandardError  = true,

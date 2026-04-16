@@ -16,15 +16,16 @@ public partial class MainWindow : Window
         DataContext = _vm;
 
         // ViewModel 이벤트를 코드 비하인드에서 처리 (다이얼로그 열기 등)
-        _vm.NewProjectRequested += OnNewProjectRequested;
+        _vm.NewProjectRequested       += OnNewProjectRequested;
         _vm.OpenProjectFolderRequested += OnOpenProjectFolderRequested;
         _vm.SaveProjectFolderRequested += OnSaveProjectFolderRequested;
-        _vm.ImportAudioRequested += OnImportAudioRequested;
-        _vm.ExportPathRequested += OnExportPathRequested;
-        _vm.ErrorOccurred += OnErrorOccurred;
-        _vm.SetupGuideRequested += OpenSetupGuide;
-        _vm.ProgressStarted  += OnProgressStarted;
-        _vm.ProgressFinished += OnProgressFinished;
+        _vm.ImportAudioRequested      += OnImportAudioRequested;
+        _vm.ExportPathRequested       += OnExportPathRequested;
+        _vm.ErrorOccurred             += OnErrorOccurred;
+        _vm.SetupGuideRequested       += OpenSetupGuide;
+        _vm.ProgressStarted           += OnProgressStarted;
+        _vm.ProgressFinished          += OnProgressFinished;
+        _vm.ImportSheetMusicRequested += OnImportSheetMusicRequested;
 
         KeyDown += MainWindow_KeyDown;
         Closing += MainWindow_Closing;
@@ -173,6 +174,31 @@ public partial class MainWindow : Window
             _progressWindow = null;
         }
         IsEnabled = true;
+    }
+
+    // ── 메뉴 핸들러 ──
+
+    private Task<SheetMusicDialogResult?> OnImportSheetMusicRequested()
+    {
+        // OMR 중간 결과 디렉터리 결정 (프로젝트 경로 또는 임시 폴더)
+        var proj = _vm.CurrentProject;
+        string basePath = proj?.Model.FilePath
+            ?? System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(), "Selah",
+                proj?.Model.Id ?? "omr");
+        var omrDir = System.IO.Path.Combine(basePath, "audio", "sheetmusic", "omr",
+            DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+        var dlg = new Views.SheetMusicDialog(_vm.SheetMusicService, omrDir) { Owner = this };
+        if (dlg.ShowDialog() == true && dlg.SelectedInstruments.Length > 0)
+        {
+            return Task.FromResult<SheetMusicDialogResult?>(new SheetMusicDialogResult
+            {
+                MidiPath            = dlg.MidiPath,
+                SelectedInstruments = dlg.SelectedInstruments
+            });
+        }
+        return Task.FromResult<SheetMusicDialogResult?>(null);
     }
 
     // ── 메뉴 핸들러 ──

@@ -39,6 +39,7 @@
                           InputGestureText="Ctrl+Shift+S"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource Menu_File_Import}" Command="{Binding ImportAudioCommand}"/>
+                <MenuItem Header="{DynamicResource Menu_File_SheetMusic}" Command="{Binding ImportSheetMusicCommand}"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource Menu_File_Export}" Command="{Binding ExportCommand}"
                           InputGestureText="Ctrl+E"/>
