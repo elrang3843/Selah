@@ -262,6 +262,35 @@ public partial class MainWindow : Window
         {
             OpenHelp(0);
             e.Handled = true;
+            return;
+        }
+
+        bool ctrl = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Control) != 0;
+
+        if (ctrl)
+        {
+            switch (e.Key)
+            {
+                case System.Windows.Input.Key.C:
+                    if (_vm.CopyCommand.CanExecute(null)) { _vm.CopyCommand.Execute(null); e.Handled = true; }
+                    break;
+                case System.Windows.Input.Key.V:
+                    if (_vm.PasteCommand.CanExecute(null)) { _vm.PasteCommand.Execute(null); e.Handled = true; }
+                    break;
+                case System.Windows.Input.Key.X:
+                    if (_vm.CutCommand.CanExecute(null)) { _vm.CutCommand.Execute(null); e.Handled = true; }
+                    break;
+                case System.Windows.Input.Key.M:
+                    if (_vm.MergeCommand.CanExecute(null)) { _vm.MergeCommand.Execute(null); e.Handled = true; }
+                    break;
+                case System.Windows.Input.Key.J:
+                    if (_vm.MoveAfterPreviousCommand.CanExecute(null)) { _vm.MoveAfterPreviousCommand.Execute(null); e.Handled = true; }
+                    break;
+            }
+        }
+        else if (e.Key == System.Windows.Input.Key.Delete)
+        {
+            if (_vm.DeleteCommand.CanExecute(null)) { _vm.DeleteCommand.Execute(null); e.Handled = true; }
         }
     }
 

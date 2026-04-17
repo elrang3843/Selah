@@ -83,6 +83,16 @@ public class MainViewModel : ViewModelBase, IDisposable
             () => CurrentProject != null && SelectedClip != null && SelectedTrack?.IsEnabled == true);
         ImportSheetMusicCommand = new AsyncRelayCommand(ImportSheetMusicAsync,
             () => CurrentProject != null);
+        CopyCommand = new RelayCommand(OnCopy,
+            () => CurrentProject != null && SelectedClip != null);
+        PasteCommand = new RelayCommand(OnPaste,
+            () => CurrentProject != null && _clipboard?.Count > 0);
+        CutCommand = new RelayCommand(OnCut,
+            () => CurrentProject != null && SelectedClip != null && SelectedTrack?.IsEnabled == true);
+        MergeCommand = new RelayCommand(OnMerge,
+            () => CurrentProject != null && SelectedClip != null);
+        MoveAfterPreviousCommand = new RelayCommand(OnMoveAfterPrevious,
+            () => CurrentProject != null && SelectedClip != null && SelectedTrack != null);
 
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
         AudioEngine.PlaybackStopped += OnPlaybackStopped;
@@ -174,6 +184,16 @@ public class MainViewModel : ViewModelBase, IDisposable
     public string SampleRateText =>
         CurrentProject != null ? $"{CurrentProject.SampleRate / 1000.0:G4} kHz" : "";
 
+    // ── 클립보드 ──
+
+    private sealed record ClipboardEntry(
+        string SourceId, long SourceInSamples, long SourceOutSamples,
+        float GainDb, float Pan, bool Muted, FadeCurve FadeCurve,
+        long FadeInSamples, long FadeOutSamples,
+        long RelativeStart, string TrackId);
+
+    private static List<ClipboardEntry>? _clipboard;
+
     private bool _isPlaying;
     public bool IsPlaying
     {
@@ -215,9 +235,14 @@ public class MainViewModel : ViewModelBase, IDisposable
     public ICommand ToggleMetronomeCommand { get; }
     public ICommand ToggleSnapCommand { get; }
     public ICommand DeleteCommand { get; }
-    public ICommand SeparateClipCommand      { get; }
-    public ICommand ReduceNoiseCommand       { get; }
-    public ICommand ImportSheetMusicCommand  { get; }
+    public ICommand SeparateClipCommand        { get; }
+    public ICommand ReduceNoiseCommand         { get; }
+    public ICommand ImportSheetMusicCommand    { get; }
+    public ICommand CopyCommand                { get; }
+    public ICommand PasteCommand               { get; }
+    public ICommand CutCommand                 { get; }
+    public ICommand MergeCommand               { get; }
+    public ICommand MoveAfterPreviousCommand   { get; }
 
     // ── 커맨드 핸들러 ──
 
@@ -401,9 +426,11 @@ public class MainViewModel : ViewModelBase, IDisposable
     private void OnDelete()
     {
         if (CurrentProject == null || SelectedTrack?.IsEnabled != true) return;
-        if (SelectedClip != null && SelectedTrack != null)
+        var selected = GetSelectedClips();
+        if (selected.Count > 0)
         {
-            SelectedTrack.RemoveClip(SelectedClip);
+            foreach (var (track, clip) in selected)
+                track.RemoveClip(clip);
             SelectedClip = null;
             AudioEngine.RebuildMixers();
         }
@@ -489,6 +516,141 @@ public class MainViewModel : ViewModelBase, IDisposable
         if (CurrentProject == null || SelectedTrack == null || !SelectedTrack.IsEnabled) return;
         SelectedTrack.SplitClipAt(Timeline.PlayheadFrames);
         AudioEngine.RebuildMixers();
+    }
+
+    // ── 클립보드 커맨드 ────────────────────────────────────────────────────
+
+    /// <summary>선택된 모든 클립을 (트랙, 클립) 쌍 목록으로 반환합니다.</summary>
+    private IReadOnlyList<(TrackViewModel Track, ClipViewModel Clip)> GetSelectedClips()
+    {
+        if (CurrentProject == null) return [];
+        return CurrentProject.Tracks
+            .SelectMany(t => t.Clips.Where(c => c.IsSelected).Select(c => (t, c)))
+            .OrderBy(x => x.c.TimelineStartSamples)
+            .ToList();
+    }
+
+    private void OnCopy()
+    {
+        var selected = GetSelectedClips();
+        if (selected.Count == 0 && SelectedClip != null && SelectedTrack != null)
+            selected = new List<(TrackViewModel Track, ClipViewModel Clip)> { (SelectedTrack, SelectedClip) };
+        if (selected.Count == 0) return;
+
+        long minStart = selected.Min(x => x.Clip.TimelineStartSamples);
+        _clipboard = selected.Select(x => new ClipboardEntry(
+            x.Clip.Model.SourceId,
+            x.Clip.Model.SourceInSamples,
+            x.Clip.Model.SourceOutSamples,
+            x.Clip.Model.GainDb,
+            x.Clip.Model.Pan,
+            x.Clip.Model.Muted,
+            x.Clip.Model.FadeCurve,
+            x.Clip.Model.FadeInSamples,
+            x.Clip.Model.FadeOutSamples,
+            x.Clip.TimelineStartSamples - minStart,
+            x.Track.Id
+        )).ToList();
+        System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+        StatusMessage = Loc.Format("Status_Copied", selected.Count);
+    }
+
+    private void OnPaste()
+    {
+        if (CurrentProject == null || _clipboard == null || _clipboard.Count == 0) return;
+        long pasteStart = Timeline.PlayheadFrames;
+        ClipViewModel? lastVm = null;
+        TrackViewModel? lastTrack = null;
+
+        foreach (var entry in _clipboard)
+        {
+            var targetTrack = CurrentProject.Tracks.FirstOrDefault(t => t.Id == entry.TrackId)
+                           ?? SelectedTrack
+                           ?? CurrentProject.Tracks.FirstOrDefault();
+            if (targetTrack == null) continue;
+
+            var newClip = new Clip
+            {
+                SourceId             = entry.SourceId,
+                TimelineStartSamples = pasteStart + entry.RelativeStart,
+                SourceInSamples      = entry.SourceInSamples,
+                SourceOutSamples     = entry.SourceOutSamples,
+                GainDb               = entry.GainDb,
+                Pan                  = entry.Pan,
+                Muted                = entry.Muted,
+                FadeCurve            = entry.FadeCurve,
+                FadeInSamples        = entry.FadeInSamples,
+                FadeOutSamples       = entry.FadeOutSamples
+            };
+            var vm = new ClipViewModel(newClip, CurrentProject.Model);
+            targetTrack.AddClip(vm);
+            lastVm = vm;
+            lastTrack = targetTrack;
+        }
+
+        if (lastVm != null) SelectedClip = lastVm;
+        if (lastTrack != null) SelectedTrack = lastTrack;
+        AudioEngine.RebuildMixers();
+        CurrentProject.Model.IsDirty = true;
+        StatusMessage = Loc.Format("Status_Pasted", _clipboard.Count);
+    }
+
+    private void OnCut()
+    {
+        OnCopy();
+        var selected = GetSelectedClips();
+        if (selected.Count == 0 && SelectedClip != null && SelectedTrack != null)
+            selected = new List<(TrackViewModel Track, ClipViewModel Clip)> { (SelectedTrack, SelectedClip) };
+        foreach (var (track, clip) in selected)
+            track.RemoveClip(clip);
+        SelectedClip = null;
+        AudioEngine.RebuildMixers();
+    }
+
+    private void OnMerge()
+    {
+        var selected = GetSelectedClips();
+        if (selected.Count < 2) return;
+
+        var trackGroups = selected.GroupBy(x => x.Track.Id).ToList();
+        if (trackGroups.Count > 1)
+        {
+            StatusMessage = Loc.Get("Status_MergeMultiTrackError");
+            return;
+        }
+
+        var track = selected[0].Track;
+        track.MergeClips(selected.Select(x => x.Clip).ToList());
+        SelectedClip = track.Clips.FirstOrDefault(c => c.IsSelected);
+        AudioEngine.RebuildMixers();
+        StatusMessage = Loc.Get("Status_Merged");
+    }
+
+    private void OnMoveAfterPrevious()
+    {
+        if (CurrentProject == null || SelectedClip == null || SelectedTrack == null) return;
+        ClipViewModel primaryClip = SelectedClip;
+        TrackViewModel primaryTrack = SelectedTrack;
+
+        var selected = GetSelectedClips()
+            .Where(x => x.Track.Id == primaryTrack.Id)
+            .Select(x => x.Clip)
+            .OrderBy(c => c.TimelineStartSamples)
+            .ToList();
+        if (selected.Count == 0)
+            selected = new List<ClipViewModel> { primaryClip };
+
+        long groupStart = selected[0].TimelineStartSamples;
+        var ordered = primaryTrack.Clips.OrderBy(c => c.TimelineStartSamples).ToList();
+        var prevClip = ordered.LastOrDefault(c => c.TimelineEndProjectFrame <= groupStart && !selected.Contains(c));
+        if (prevClip == null) return;
+
+        long delta = prevClip.TimelineEndProjectFrame - groupStart;
+        foreach (var clip in selected)
+            clip.TimelineStartSamples = Math.Max(0, clip.TimelineStartSamples + delta);
+
+        AudioEngine.RebuildMixers();
+        StatusMessage = Loc.Get("Status_MovedAfterPrevious");
     }
 
     /// <summary>

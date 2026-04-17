@@ -248,12 +248,16 @@ public class TimelineCanvas : FrameworkElement
 
     // ── 선택/드래그 상태 ──
 
-    private ClipViewModel? _selectedClip;
-    private TrackViewModel? _selectedClipTrack;
-    private TrackViewModel? _dragTargetTrack;   // 드래그 중 마우스가 위치한 트랙
+    private readonly HashSet<ClipViewModel> _selectedClips = new();
+    private ClipViewModel? _anchorClip;
+    private TrackViewModel? _anchorTrack;
+
+    private ClipViewModel? _selectedClip;         // 드래그 기준 클립 (primary)
+    private TrackViewModel? _selectedClipTrack;   // primary 클립의 트랙
+    private TrackViewModel? _dragTargetTrack;     // 드래그 중 마우스가 위치한 트랙
     private bool _isDraggingClip;
     private double _dragStartX;
-    private long _dragClipOrigStart;
+    private Dictionary<ClipViewModel, long> _dragOrigStarts = new();
 
     // ── 이벤트 ──
 
@@ -372,8 +376,8 @@ public class TimelineCanvas : FrameworkElement
                 : new SolidColorBrush(TrackRowBg);
             dc.DrawRectangle(trackBg, null, new Rect(0, y, w, trackH));
 
-            // 드래그 드롭 대상 트랙 하이라이트
-            if (_isDraggingClip && track == _dragTargetTrack && track != _selectedClipTrack)
+            // 드래그 드롭 대상 트랙 하이라이트 (단일 클립 드래그일 때만)
+            if (_isDraggingClip && _selectedClips.Count == 1 && track == _dragTargetTrack && track != _selectedClipTrack)
                 dc.DrawRectangle(DropTargetHighlight, DropTargetPen, new Rect(0, y, w, trackH));
 
             foreach (var clip in track.Clips)
@@ -396,7 +400,7 @@ public class TimelineCanvas : FrameworkElement
                     Color.FromArgb(clip.Muted ? (byte)80 : (byte)200,
                         clipColor.R, clipColor.G, clipColor.B));
 
-                bool isSelected = clip == _selectedClip;
+                bool isSelected = _selectedClips.Contains(clip);
                 var borderPen = isSelected
                     ? SelectedClipPen
                     : new Pen(new SolidColorBrush(clipColor), 1);
@@ -607,6 +611,17 @@ public class TimelineCanvas : FrameworkElement
         return (null, null);
     }
 
+    // ── 선택 관리 ──
+
+    private void ClearSelection()
+    {
+        foreach (var c in _selectedClips)
+            c.IsSelected = false;
+        _selectedClips.Clear();
+        _anchorClip = null;
+        _anchorTrack = null;
+    }
+
     // ── 마우스 인터랙션 ──
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -622,17 +637,86 @@ public class TimelineCanvas : FrameworkElement
         }
 
         var (track, clip) = HitTestClip(pos.X, pos.Y);
-        _selectedClip = clip;
-        _selectedClipTrack = track;
-        ClipSelected?.Invoke(this, (track, clip));
+        bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
+        bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
 
         if (clip != null)
         {
+            if (ctrl)
+            {
+                // Ctrl+클릭: 토글 선택
+                if (_selectedClips.Contains(clip))
+                {
+                    clip.IsSelected = false;
+                    _selectedClips.Remove(clip);
+                    if (_selectedClip == clip)
+                        _selectedClip = _selectedClips.LastOrDefault();
+                }
+                else
+                {
+                    clip.IsSelected = true;
+                    _selectedClips.Add(clip);
+                    _selectedClip = clip;
+                    _selectedClipTrack = track;
+                    _anchorClip = clip;
+                    _anchorTrack = track;
+                }
+            }
+            else if (shift && _anchorClip != null && _anchorTrack == track)
+            {
+                // Shift+클릭: 같은 트랙 내 앵커~클릭 범위 선택
+                var savedAnchor = _anchorClip;
+                var savedAnchorTrack = _anchorTrack;
+                foreach (var c in _selectedClips) c.IsSelected = false;
+                _selectedClips.Clear();
+
+                var allClips = track.Clips.OrderBy(c => c.TimelineStartSamples).ToList();
+                int anchorIdx = allClips.IndexOf(savedAnchor);
+                int clickedIdx = allClips.IndexOf(clip);
+                if (anchorIdx >= 0 && clickedIdx >= 0)
+                {
+                    int lo = Math.Min(anchorIdx, clickedIdx);
+                    int hi = Math.Max(anchorIdx, clickedIdx);
+                    for (int i = lo; i <= hi; i++)
+                    {
+                        allClips[i].IsSelected = true;
+                        _selectedClips.Add(allClips[i]);
+                    }
+                }
+                _anchorClip = savedAnchor;
+                _anchorTrack = savedAnchorTrack;
+                _selectedClip = clip;
+                _selectedClipTrack = track;
+            }
+            else
+            {
+                // 일반 클릭: 이미 선택된 클립이면 유지(그룹 드래그 허용), 아니면 단독 선택
+                if (!_selectedClips.Contains(clip))
+                {
+                    ClearSelection();
+                    clip.IsSelected = true;
+                    _selectedClips.Add(clip);
+                    _anchorClip = clip;
+                    _anchorTrack = track;
+                }
+                _selectedClip = clip;
+                _selectedClipTrack = track;
+            }
+
+            ClipSelected?.Invoke(this, (track, clip));
             _isDraggingClip = true;
             _dragStartX = pos.X;
-            _dragClipOrigStart = clip.TimelineStartSamples;
+            _dragOrigStarts = _selectedClips.ToDictionary(c => c, c => c.TimelineStartSamples);
             _dragTargetTrack = track;
             CaptureMouse();
+        }
+        else
+        {
+            // 빈 공간 클릭: 선택 해제
+            ClearSelection();
+            _selectedClip = null;
+            _selectedClipTrack = track;
+            ClipSelected?.Invoke(this, (track, null));
         }
 
         InvalidateVisual();
@@ -652,16 +736,27 @@ public class TimelineCanvas : FrameworkElement
             if (tl == null || proj == null) return;
 
             double deltaX = pos.X - _dragStartX;
-            long deltaFrames = (long)(deltaX * proj.SampleRate / tl.PixelsPerSecond);
-            long newStart = Math.Max(0, _dragClipOrigStart + deltaFrames);
+            long rawDelta = (long)(deltaX * proj.SampleRate / tl.PixelsPerSecond);
 
+            // 어느 클립도 0 미만으로 이동하지 않도록 클램프
+            long minOrig = _dragOrigStarts.Values.DefaultIfEmpty(0).Min();
+            long clampedDelta = Math.Max(-minOrig, rawDelta);
+
+            // 스냅: primary 클립 기준
+            long primaryOrig = _dragOrigStarts.TryGetValue(_selectedClip, out var po) ? po : 0;
+            long newPrimary = Math.Max(0, primaryOrig + clampedDelta);
             if (tl.SnapEnabled)
-                newStart = tl.SnapFrame(newStart, proj.SampleRate, proj.Model.TempoMap);
+                newPrimary = tl.SnapFrame(newPrimary, proj.SampleRate, proj.Model.TempoMap);
+            long snappedDelta = newPrimary - primaryOrig;
 
-            _selectedClip.TimelineStartSamples = newStart;
+            // 모든 선택 클립에 동일한 델타 적용
+            foreach (var (c, origStart) in _dragOrigStarts)
+                c.TimelineStartSamples = Math.Max(0, origStart + snappedDelta);
 
-            // 수직 이동: 마우스가 위치한 트랙을 드롭 대상으로 추적
-            _dragTargetTrack = HitTestTrack(pos.Y) ?? _dragTargetTrack;
+            // 수직 이동: 단일 클립 드래그일 때만 트랙 전환 추적
+            if (_selectedClips.Count == 1)
+                _dragTargetTrack = HitTestTrack(pos.Y) ?? _dragTargetTrack;
+
             InvalidateVisual();
         }
         else if (e.LeftButton == MouseButtonState.Pressed && !_isDraggingClip)
@@ -676,9 +771,9 @@ public class TimelineCanvas : FrameworkElement
 
         if (_isDraggingClip && _selectedClip != null)
         {
-            // 다른 트랙으로 드롭: 클립을 원래 트랙에서 제거하고 대상 트랙에 추가
-            if (_dragTargetTrack != null && _dragTargetTrack != _selectedClipTrack
-                && _selectedClipTrack != null)
+            // 트랙 간 이동: 단일 클립 드래그일 때만 허용
+            if (_selectedClips.Count == 1 && _dragTargetTrack != null
+                && _dragTargetTrack != _selectedClipTrack && _selectedClipTrack != null)
             {
                 _selectedClipTrack.RemoveClip(_selectedClip);
                 _dragTargetTrack.AddClip(_selectedClip);

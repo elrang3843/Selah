@@ -99,6 +99,40 @@ public class TrackViewModel : ViewModelBase
         _project.IsDirty = true;
     }
 
+    /// <summary>
+    /// 선택된 클립들을 하나로 합칩니다.
+    /// 첫 번째 클립의 소스를 기준으로 SourceIn~마지막 클립의 SourceOut 범위를 사용합니다.
+    /// </summary>
+    public void MergeClips(IList<ClipViewModel> clipsToMerge)
+    {
+        if (clipsToMerge.Count < 2) return;
+        var ordered = clipsToMerge.OrderBy(c => c.TimelineStartSamples).ToList();
+        int insertIdx = Clips.IndexOf(ordered[0]);
+
+        var mergedModel = new Clip
+        {
+            SourceId             = ordered[0].Model.SourceId,
+            TimelineStartSamples = ordered[0].TimelineStartSamples,
+            SourceInSamples      = ordered[0].Model.SourceInSamples,
+            SourceOutSamples     = ordered[^1].Model.SourceOutSamples,
+            GainDb               = ordered[0].Model.GainDb,
+            Pan                  = ordered[0].Model.Pan,
+            Muted                = ordered[0].Model.Muted
+        };
+
+        foreach (var clip in ordered)
+        {
+            _track.Clips.Remove(clip.Model);
+            Clips.Remove(clip);
+        }
+
+        int idx = Math.Min(insertIdx, Clips.Count);
+        var mergedVm = new ClipViewModel(mergedModel, _project) { IsSelected = true };
+        _track.Clips.Insert(idx, mergedModel);
+        Clips.Insert(idx, mergedVm);
+        _project.IsDirty = true;
+    }
+
     /// <summary>커서 위치의 클립을 분할합니다.</summary>
     public bool SplitClipAt(long timelineFrame)
     {

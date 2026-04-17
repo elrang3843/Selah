@@ -222,6 +222,13 @@
     <sys:String x:Key="Instrument_Saxophone">萨克斯风</sys:String>
     <sys:String x:Key="Instrument_Flute">长笛</sys:String>
 
+    <!-- ── 片段编辑 ── -->
+    <sys:String x:Key="Status_Copied">已复制 {0} 个片段</sys:String>
+    <sys:String x:Key="Status_Pasted">已粘贴 {0} 个片段</sys:String>
+    <sys:String x:Key="Status_Merged">片段合并完成</sys:String>
+    <sys:String x:Key="Status_MergeMultiTrackError">合并仅适用于同一轨道的片段</sys:String>
+    <sys:String x:Key="Status_MovedAfterPrevious">已移至上一片段之后</sys:String>
+
     <!-- ── 其他 ── -->
     <sys:String x:Key="Clip_UnknownSource">未知来源</sys:String>
     <sys:String x:Key="Project_SaveFirst">请先保存项目。</sys:String>
