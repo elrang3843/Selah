@@ -436,13 +436,20 @@ def main() -> None:
     # RGBA(투명도 채널 포함)·팔레트·그레이스케일 이미지는
     # oemer 내부에서 np.array() 변환 시 NoneType 오류를 유발합니다.
     # 이진화는 하지 않고, 순수 RGB 변환 + PNG 저장만 수행합니다.
+    # 어두운 배경(반전 스캔)은 자동으로 invert하여 oemer에 전달합니다.
     print("PROGRESS:10", flush=True)
     print("LOG:이미지 포맷 확인 중...", flush=True)
     normalized_input = os.path.join(args.output_dir, "input_rgb.png")
     try:
+        from PIL import ImageOps
         with Image.open(args.input) as img:
             if img.mode != "RGB":
                 img = img.convert("RGB")
+            # 평균 밝기 < 100 이면 반전된(어두운 배경) 이미지로 간주하고 invert
+            mean_brightness = np.array(img).mean()
+            if mean_brightness < 100:
+                img = ImageOps.invert(img)
+                print(f"LOG:어두운 배경 감지 (평균 밝기 {mean_brightness:.1f}) — 이미지 반전 적용", flush=True)
             img.save(normalized_input, format="PNG")
         oemer_input = normalized_input
     except Exception as exc:
