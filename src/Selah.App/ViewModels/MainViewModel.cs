@@ -61,6 +61,11 @@ public class MainViewModel : ViewModelBase, IDisposable
         SheetMusicService = new SheetMusicService(FluidSynthService);
 
         Timeline = new TimelineViewModel();
+        Timeline.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(TimelineViewModel.PlayheadSeconds))
+                OnPropertyChanged(nameof(PlayheadTimeDisplay));
+        };
         ModelManager = new ModelManagerViewModel(ModelManagerService);
 
         // ── 커맨드 초기화 ──
@@ -95,6 +100,10 @@ public class MainViewModel : ViewModelBase, IDisposable
             () => CurrentProject != null && SelectedClip != null);
         MoveAfterPreviousCommand = new RelayCommand(OnMoveAfterPrevious,
             () => CurrentProject != null && SelectedClip != null && SelectedTrack != null);
+        MoveToPlayheadCommand = new RelayCommand(OnMoveToPlayhead,
+            () => CurrentProject != null && SelectedClip != null);
+        MoveToTrackStartCommand = new RelayCommand(OnMoveToTrackStart,
+            () => CurrentProject != null && SelectedClip != null);
 
         AudioEngine.PlayheadAdvanced += OnPlayheadAdvanced;
         AudioEngine.PlaybackStopped += OnPlaybackStopped;
@@ -245,6 +254,8 @@ public class MainViewModel : ViewModelBase, IDisposable
     public ICommand CutCommand                 { get; }
     public ICommand MergeCommand               { get; }
     public ICommand MoveAfterPreviousCommand   { get; }
+    public ICommand MoveToPlayheadCommand      { get; }
+    public ICommand MoveToTrackStartCommand    { get; }
 
     // ── 커맨드 핸들러 ──
 
@@ -669,6 +680,43 @@ public class MainViewModel : ViewModelBase, IDisposable
 
         AudioEngine.RebuildMixers();
         StatusMessage = Loc.Get("Status_MovedAfterPrevious");
+    }
+
+    private void OnMoveToPlayhead()
+    {
+        if (CurrentProject == null || SelectedClip == null) return;
+        var selected = GetSelectedClips();
+        if (selected.Count == 0) return;
+
+        // 트랙별로 그룹화하여 각 그룹의 첫 클립을 플레이헤드에 정렬
+        foreach (var group in selected.GroupBy(x => x.Track.Id))
+        {
+            var clips = group.OrderBy(x => x.Clip.TimelineStartSamples).ToList();
+            long delta = Timeline.PlayheadFrames - clips[0].Clip.TimelineStartSamples;
+            foreach (var (_, clip) in clips)
+                clip.TimelineStartSamples = Math.Max(0, clip.TimelineStartSamples + delta);
+        }
+
+        AudioEngine.RebuildMixers();
+        StatusMessage = Loc.Get("Status_MovedToPlayhead");
+    }
+
+    private void OnMoveToTrackStart()
+    {
+        if (CurrentProject == null || SelectedClip == null) return;
+        var selected = GetSelectedClips();
+        if (selected.Count == 0) return;
+
+        foreach (var group in selected.GroupBy(x => x.Track.Id))
+        {
+            var clips = group.OrderBy(x => x.Clip.TimelineStartSamples).ToList();
+            long delta = -clips[0].Clip.TimelineStartSamples;
+            foreach (var (_, clip) in clips)
+                clip.TimelineStartSamples = Math.Max(0, clip.TimelineStartSamples + delta);
+        }
+
+        AudioEngine.RebuildMixers();
+        StatusMessage = Loc.Get("Status_MovedToTrackStart");
     }
 
     /// <summary>

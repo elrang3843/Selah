@@ -26,6 +26,8 @@
         <KeyBinding Gesture="Ctrl+V"           Command="{Binding PasteCommand}"/>
         <KeyBinding Gesture="Ctrl+M"           Command="{Binding MergeCommand}"/>
         <KeyBinding Gesture="Ctrl+J"           Command="{Binding MoveAfterPreviousCommand}"/>
+        <KeyBinding Gesture="Ctrl+G"           Command="{Binding MoveToPlayheadCommand}"/>
+        <KeyBinding Gesture="Ctrl+H"           Command="{Binding MoveToTrackStartCommand}"/>
     </Window.InputBindings>
 
     <DockPanel>
@@ -63,6 +65,8 @@
                 <MenuItem Header="{DynamicResource Menu_Edit_Split}"  Command="{Binding SplitAtPlayheadCommand}" InputGestureText="S"/>
                 <MenuItem Header="{DynamicResource Menu_Edit_Merge}"  Command="{Binding MergeCommand}" InputGestureText="Ctrl+M"/>
                 <MenuItem Header="{DynamicResource Menu_Edit_MoveAfterPrevious}" Command="{Binding MoveAfterPreviousCommand}" InputGestureText="Ctrl+J"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_MoveToPlayhead}"   Command="{Binding MoveToPlayheadCommand}"   InputGestureText="Ctrl+G"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_MoveToTrackStart}" Command="{Binding MoveToTrackStartCommand}" InputGestureText="Ctrl+H"/>
                 <MenuItem Header="{DynamicResource Menu_Edit_Delete}" Command="{Binding DeleteCommand}" InputGestureText="Del"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource Menu_Edit_Separate}"    Command="{Binding SeparateClipCommand}"/>
