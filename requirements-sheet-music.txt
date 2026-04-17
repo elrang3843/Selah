@@ -1,0 +1,12 @@
+# Selah — 악보 인식 전용 패키지
+# pip install -r requirements-sheet-music.txt
+#
+# FluidSynth 네이티브 DLL도 별도 설치 필요: https://www.fluidsynth.org/
+
+oemer
+music21
+mido
+Pillow
+scipy
+numpy>=1.20
+fluidsynth
