@@ -179,7 +179,7 @@
     <sys:String x:Key="Dialog_Export_Title">Export as WAV</sys:String>
     <sys:String x:Key="Dialog_Export_Filter">WAV File (24-bit)|*.wav</sys:String>
     <sys:String x:Key="Dialog_Error_Title">Selah Error</sys:String>
-    <sys:String x:Key="Dialog_HardwareDiag_Message">Hardware acceleration diagnosis:&#x0a;&#x0a;{0}&#x0a;&#x0a;You can force CPU mode in Settings &gt; Acceleration Backend.</sys:String>
+    <sys:String x:Key="Dialog_HardwareDiag_Message">Hardware acceleration diagnosis:&#x0a;&#x0a;{0}</sys:String>
     <sys:String x:Key="Dialog_HardwareDiag_Title">Hardware Diagnostics</sys:String>
     <sys:String x:Key="Dialog_UnsavedChanges_Message">Project '{0}' has unsaved changes.&#x0a;Do you want to save?</sys:String>
     <sys:String x:Key="Dialog_UnsavedChanges_Title">Selah</sys:String>
