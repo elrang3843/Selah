@@ -6,6 +6,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>Selah.Core</AssemblyName>
     <RootNamespace>Selah.Core</RootNamespace>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
     <!-- 앱이 Windows 전용(net8.0-windows)이므로 플랫폼 호환성 경고를 억제합니다 -->
     <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>

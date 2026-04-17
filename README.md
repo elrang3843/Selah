@@ -4,7 +4,7 @@
 
 It is designed to help churches, missionaries, and small worship teams prepare accompaniment-oriented audio materials from recordings or worship media in a practical and accessible way.
 
-> Current status: early-stage prototype / actively evolving architecture
+> Version 1.0
 
 ---
 
