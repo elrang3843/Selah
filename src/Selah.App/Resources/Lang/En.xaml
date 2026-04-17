@@ -20,6 +20,13 @@
     <sys:String x:Key="Menu_Edit_Redo">Redo</sys:String>
     <sys:String x:Key="Menu_Edit_Split">Split Clip</sys:String>
     <sys:String x:Key="Menu_Edit_Delete">Delete Selection</sys:String>
+    <sys:String x:Key="Menu_Edit_Copy">Copy</sys:String>
+    <sys:String x:Key="Menu_Edit_Cut">Cut</sys:String>
+    <sys:String x:Key="Menu_Edit_Paste">Paste</sys:String>
+    <sys:String x:Key="Menu_Edit_Merge">Merge Clips</sys:String>
+    <sys:String x:Key="Menu_Edit_MoveAfterPrevious">Move After Previous Clip</sys:String>
+    <sys:String x:Key="Menu_Edit_MoveToPlayhead">Move to Playhead</sys:String>
+    <sys:String x:Key="Menu_Edit_MoveToTrackStart">Move to Track Start</sys:String>
     <sys:String x:Key="Menu_Edit_Separate">Separate Stems (Selected Clip)...</sys:String>
     <sys:String x:Key="Menu_Edit_ReduceNoise">Reduce Noise (Selected Clip)...</sys:String>
     <sys:String x:Key="Menu_Track">Track(_T)</sys:String>
@@ -221,6 +228,15 @@
     <sys:String x:Key="Instrument_Synthesizer">Synthesizer</sys:String>
     <sys:String x:Key="Instrument_Saxophone">Saxophone</sys:String>
     <sys:String x:Key="Instrument_Flute">Flute</sys:String>
+
+    <!-- ── Clip editing ── -->
+    <sys:String x:Key="Status_Copied">{0} clip(s) copied</sys:String>
+    <sys:String x:Key="Status_Pasted">{0} clip(s) pasted</sys:String>
+    <sys:String x:Key="Status_Merged">Clips merged</sys:String>
+    <sys:String x:Key="Status_MergeMultiTrackError">Merge requires clips from the same track</sys:String>
+    <sys:String x:Key="Status_MovedAfterPrevious">Moved to after previous clip</sys:String>
+    <sys:String x:Key="Status_MovedToPlayhead">Selected clips moved to playhead position</sys:String>
+    <sys:String x:Key="Status_MovedToTrackStart">Selected clips moved to track start</sys:String>
 
     <!-- ── Misc ── -->
     <sys:String x:Key="Clip_UnknownSource">Unknown source</sys:String>

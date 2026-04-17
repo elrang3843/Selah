@@ -66,6 +66,7 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
         {
             _positionFrames = positionFrames;
             _endReported = false;
+            _lastPlayheadFrames = long.MinValue / 2;
             foreach (var m in _trackMixers) m.Seek(positionFrames);
             _metronome.Seek(positionFrames);
         }

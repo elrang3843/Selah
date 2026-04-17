@@ -20,6 +20,13 @@
     <sys:String x:Key="Menu_Edit_Redo">重做</sys:String>
     <sys:String x:Key="Menu_Edit_Split">分割片段</sys:String>
     <sys:String x:Key="Menu_Edit_Delete">删除所选</sys:String>
+    <sys:String x:Key="Menu_Edit_Copy">复制</sys:String>
+    <sys:String x:Key="Menu_Edit_Cut">剪切</sys:String>
+    <sys:String x:Key="Menu_Edit_Paste">粘贴</sys:String>
+    <sys:String x:Key="Menu_Edit_Merge">合并片段</sys:String>
+    <sys:String x:Key="Menu_Edit_MoveAfterPrevious">移至上一片段之后</sys:String>
+    <sys:String x:Key="Menu_Edit_MoveToPlayhead">移至播放头位置</sys:String>
+    <sys:String x:Key="Menu_Edit_MoveToTrackStart">移至轨道开头</sys:String>
     <sys:String x:Key="Menu_Edit_Separate">分离音轨（所选片段）...</sys:String>
     <sys:String x:Key="Menu_Edit_ReduceNoise">降噪（所选片段）...</sys:String>
     <sys:String x:Key="Menu_Track">轨道(_T)</sys:String>
@@ -221,6 +228,15 @@
     <sys:String x:Key="Instrument_Synthesizer">合成器</sys:String>
     <sys:String x:Key="Instrument_Saxophone">萨克斯风</sys:String>
     <sys:String x:Key="Instrument_Flute">长笛</sys:String>
+
+    <!-- ── 片段编辑 ── -->
+    <sys:String x:Key="Status_Copied">已复制 {0} 个片段</sys:String>
+    <sys:String x:Key="Status_Pasted">已粘贴 {0} 个片段</sys:String>
+    <sys:String x:Key="Status_Merged">片段合并完成</sys:String>
+    <sys:String x:Key="Status_MergeMultiTrackError">合并仅适用于同一轨道的片段</sys:String>
+    <sys:String x:Key="Status_MovedAfterPrevious">已移至上一片段之后</sys:String>
+    <sys:String x:Key="Status_MovedToPlayhead">所选片段已移至播放头位置</sys:String>
+    <sys:String x:Key="Status_MovedToTrackStart">所选片段已移至轨道开头</sys:String>
 
     <!-- ── 其他 ── -->
     <sys:String x:Key="Clip_UnknownSource">未知来源</sys:String>
