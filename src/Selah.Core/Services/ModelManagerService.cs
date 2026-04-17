@@ -292,34 +292,7 @@ public class ModelManagerService
             ?? throw new InvalidOperationException(
                 "Python을 찾을 수 없습니다.\n" +
                 "python.org에서 Python 3.10 이상을 설치하고 PATH에 추가하세요.");
-
-        var packages = "onnxruntime numpy scipy";
-        progress?.Report($"pip install {packages}");
-
-        var psi = new ProcessStartInfo(python, $"-m pip install {packages}")
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError  = true,
-            UseShellExecute        = false,
-            CreateNoWindow         = true
-        };
-
-        using var proc = new Process { StartInfo = psi };
-        proc.OutputDataReceived += (_, e) =>
-        {
-            if (e.Data != null) progress?.Report(e.Data);
-        };
-        proc.ErrorDataReceived += (_, e) =>
-        {
-            if (e.Data != null) progress?.Report(e.Data);
-        };
-        proc.Start();
-        proc.BeginOutputReadLine();
-        proc.BeginErrorReadLine();
-        await proc.WaitForExitAsync(ct);
-
-        if (proc.ExitCode != 0)
-            throw new Exception($"pip install 실패 (코드 {proc.ExitCode})");
+        await RunPipInstallAsync(python, "onnxruntime numpy scipy", progress, ct);
     }
 
     // ── 모델 다운로드 ─────────────────────────────────────────────
@@ -472,33 +445,11 @@ public class ModelManagerService
     }
 
     /// <summary>pip install audio-separator[cpu]를 실행합니다.</summary>
-    public async Task InstallAudioSeparatorAsync(
+    public Task InstallAudioSeparatorAsync(
         string python,
         IProgress<string>? progress = null,
         CancellationToken ct = default)
-    {
-        const string pkg = "\"audio-separator[cpu]\"";
-        progress?.Report($"pip install {pkg}");
-
-        var psi = new ProcessStartInfo(python, $"-m pip install {pkg}")
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError  = true,
-            UseShellExecute        = false,
-            CreateNoWindow         = true
-        };
-
-        using var proc = new Process { StartInfo = psi };
-        proc.OutputDataReceived += (_, e) => { if (e.Data != null) progress?.Report(e.Data); };
-        proc.ErrorDataReceived  += (_, e) => { if (e.Data != null) progress?.Report(e.Data); };
-        proc.Start();
-        proc.BeginOutputReadLine();
-        proc.BeginErrorReadLine();
-        await proc.WaitForExitAsync(ct);
-
-        if (proc.ExitCode != 0)
-            throw new Exception($"pip install 실패 (코드 {proc.ExitCode})");
-    }
+        => RunPipInstallAsync(python, "\"audio-separator[cpu]\"", progress, ct);
 
     // ── OMR 패키지 설치 ──────────────────────────────────────────────
 
@@ -514,10 +465,16 @@ public class ModelManagerService
             ?? throw new InvalidOperationException(
                 "Python을 찾을 수 없습니다.\n" +
                 "python.org에서 Python 3.10 이상을 설치하고 PATH에 추가하세요.");
+        await RunPipInstallAsync(python, "oemer music21 mido Pillow scipy", progress, ct);
+    }
 
-        const string packages = "oemer music21 mido Pillow scipy";
+    // ── 공통 pip 실행 헬퍼 ───────────────────────────────────────────
+
+    private static async Task RunPipInstallAsync(
+        string python, string packages,
+        IProgress<string>? progress, CancellationToken ct)
+    {
         progress?.Report($"pip install {packages}");
-
         var psi = new ProcessStartInfo(python, $"-m pip install {packages}")
         {
             RedirectStandardOutput = true,
@@ -525,7 +482,6 @@ public class ModelManagerService
             UseShellExecute        = false,
             CreateNoWindow         = true
         };
-
         using var proc = new Process { StartInfo = psi };
         proc.OutputDataReceived += (_, e) => { if (e.Data != null) progress?.Report(e.Data); };
         proc.ErrorDataReceived  += (_, e) => { if (e.Data != null) progress?.Report(e.Data); };
@@ -533,7 +489,6 @@ public class ModelManagerService
         proc.BeginOutputReadLine();
         proc.BeginErrorReadLine();
         await proc.WaitForExitAsync(ct);
-
         if (proc.ExitCode != 0)
             throw new Exception($"pip install 실패 (코드 {proc.ExitCode})");
     }
