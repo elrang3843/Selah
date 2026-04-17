@@ -52,6 +52,46 @@ The repository currently includes:
 - **sheet music recognition** — scanned/photographed score → per-instrument audio tracks (OMR via oemer + FluidSynth synthesis)
 - localization resources (Korean / English / Chinese)
 - theme resources (light / dark)
+- **non-destructive clip editing** — copy / cut / paste / split / merge
+- **multi-clip selection** — Ctrl+click toggle, Shift+click range; split and move operations apply to all selected clips
+- **clip positioning commands** — move after previous clip, move to playhead position, move to track start
+
+---
+
+## Keyboard Shortcuts
+
+### Transport
+
+| Key | Action |
+|-----|--------|
+| `Space` | Play / Stop |
+| `Shift+Space` | Stop + Return to Start |
+| `Home` | Return to Start (keep playing if active) |
+
+### Timeline Editing
+
+| Key | Action |
+|-----|--------|
+| `S` | Split selected clip(s) at playhead |
+| `Del` | Delete selected clip(s) or track |
+| `Ctrl+C` | Copy selected clip(s) |
+| `Ctrl+X` | Cut selected clip(s) |
+| `Ctrl+V` | Paste |
+| `Ctrl+M` | Merge selected clips (same track) |
+| `Ctrl+J` | Move after previous clip |
+| `Ctrl+G` | Move to playhead position |
+| `Ctrl+H` | Move to track start (position 0) |
+
+### Mouse
+
+| Action | Result |
+|--------|--------|
+| Click clip | Select clip |
+| Ctrl+Click clip | Toggle clip selection |
+| Shift+Click clip | Range select |
+| Drag clip | Move clip |
+| Click timeline ruler | Seek playhead |
+| Ctrl+Scroll | Zoom in / out |
 
 ---
 
