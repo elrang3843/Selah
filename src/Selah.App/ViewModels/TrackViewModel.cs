@@ -133,18 +133,25 @@ public class TrackViewModel : ViewModelBase
         _project.IsDirty = true;
     }
 
-    /// <summary>커서 위치의 클립을 분할합니다.</summary>
+    /// <summary>커서 위치의 클립을 분할합니다 (트랙에서 처음 발견되는 클립).</summary>
     public bool SplitClipAt(long timelineFrame)
     {
         var target = Clips.FirstOrDefault(c =>
             timelineFrame > c.TimelineStartSamples && timelineFrame < c.TimelineEndProjectFrame);
-        if (target == null) return false;
+        return target != null && SplitSpecificClip(target, timelineFrame);
+    }
 
-        var (left, right) = target.Split(timelineFrame);
-        int idx = Clips.IndexOf(target);
+    /// <summary>지정한 클립을 timelineFrame 위치에서 분할합니다.</summary>
+    public bool SplitSpecificClip(ClipViewModel clip, long timelineFrame)
+    {
+        if (timelineFrame <= clip.TimelineStartSamples || timelineFrame >= clip.TimelineEndProjectFrame)
+            return false;
 
-        _track.Clips.Remove(target.Model);
-        Clips.Remove(target);
+        var (left, right) = clip.Split(timelineFrame);
+        int idx = Clips.IndexOf(clip);
+
+        _track.Clips.Remove(clip.Model);
+        Clips.Remove(clip);
 
         _track.Clips.Insert(idx, left.Model);
         Clips.Insert(idx, left);

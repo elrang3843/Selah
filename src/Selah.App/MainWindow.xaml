@@ -21,6 +21,11 @@
         <KeyBinding Key="M"                    Command="{Binding ToggleMetronomeCommand}"/>
         <KeyBinding Key="N"                    Command="{Binding ToggleSnapCommand}"/>
         <KeyBinding Gesture="Delete"           Command="{Binding DeleteCommand}"/>
+        <KeyBinding Gesture="Ctrl+C"           Command="{Binding CopyCommand}"/>
+        <KeyBinding Gesture="Ctrl+X"           Command="{Binding CutCommand}"/>
+        <KeyBinding Gesture="Ctrl+V"           Command="{Binding PasteCommand}"/>
+        <KeyBinding Gesture="Ctrl+M"           Command="{Binding MergeCommand}"/>
+        <KeyBinding Gesture="Ctrl+J"           Command="{Binding MoveAfterPreviousCommand}"/>
     </Window.InputBindings>
 
     <DockPanel>
@@ -51,12 +56,16 @@
                 <MenuItem Header="{DynamicResource Menu_Edit_Undo}" InputGestureText="Ctrl+Z" IsEnabled="False"/>
                 <MenuItem Header="{DynamicResource Menu_Edit_Redo}" InputGestureText="Ctrl+Y" IsEnabled="False"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource Menu_Edit_Split}" Command="{Binding SplitAtPlayheadCommand}"
-                          InputGestureText="S"/>
-                <MenuItem Header="{DynamicResource Menu_Edit_Delete}" Command="{Binding DeleteCommand}"
-                          InputGestureText="Del"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Copy}"   Command="{Binding CopyCommand}"  InputGestureText="Ctrl+C"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Cut}"    Command="{Binding CutCommand}"   InputGestureText="Ctrl+X"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Paste}"  Command="{Binding PasteCommand}" InputGestureText="Ctrl+V"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource Menu_Edit_Separate}" Command="{Binding SeparateClipCommand}"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Split}"  Command="{Binding SplitAtPlayheadCommand}" InputGestureText="S"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Merge}"  Command="{Binding MergeCommand}" InputGestureText="Ctrl+M"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_MoveAfterPrevious}" Command="{Binding MoveAfterPreviousCommand}" InputGestureText="Ctrl+J"/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Delete}" Command="{Binding DeleteCommand}" InputGestureText="Del"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource Menu_Edit_Separate}"    Command="{Binding SeparateClipCommand}"/>
                 <MenuItem Header="{DynamicResource Menu_Edit_ReduceNoise}" Command="{Binding ReduceNoiseCommand}"/>
             </MenuItem>
 

@@ -513,9 +513,23 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private void OnSplitAtPlayhead()
     {
-        if (CurrentProject == null || SelectedTrack == null || !SelectedTrack.IsEnabled) return;
-        SelectedTrack.SplitClipAt(Timeline.PlayheadFrames);
-        AudioEngine.RebuildMixers();
+        if (CurrentProject == null) return;
+        long frame = Timeline.PlayheadFrames;
+        var selected = GetSelectedClips();
+        bool didSplit = false;
+
+        if (selected.Count > 0)
+        {
+            // 선택된 클립 중 플레이헤드가 통과하는 모든 클립 분할
+            foreach (var (track, clip) in selected)
+                if (track.IsEnabled && frame > clip.TimelineStartSamples && frame < clip.TimelineEndProjectFrame)
+                    didSplit |= track.SplitSpecificClip(clip, frame);
+        }
+
+        if (!didSplit && SelectedTrack?.IsEnabled == true)
+            didSplit = SelectedTrack.SplitClipAt(frame);
+
+        if (didSplit) AudioEngine.RebuildMixers();
     }
 
     // ── 클립보드 커맨드 ────────────────────────────────────────────────────

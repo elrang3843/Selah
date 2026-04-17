@@ -20,6 +20,11 @@
     <sys:String x:Key="Menu_Edit_Redo">다시 실행</sys:String>
     <sys:String x:Key="Menu_Edit_Split">클립 분할</sys:String>
     <sys:String x:Key="Menu_Edit_Delete">선택 삭제</sys:String>
+    <sys:String x:Key="Menu_Edit_Copy">복사</sys:String>
+    <sys:String x:Key="Menu_Edit_Cut">잘라내기</sys:String>
+    <sys:String x:Key="Menu_Edit_Paste">붙여넣기</sys:String>
+    <sys:String x:Key="Menu_Edit_Merge">클립 합치기</sys:String>
+    <sys:String x:Key="Menu_Edit_MoveAfterPrevious">앞 클립 바로 뒤로 이동</sys:String>
     <sys:String x:Key="Menu_Edit_Separate">스템 분리 (선택 클립)...</sys:String>
     <sys:String x:Key="Menu_Edit_ReduceNoise">노이즈 감소 (선택 클립)...</sys:String>
     <sys:String x:Key="Menu_Track">트랙(_T)</sys:String>

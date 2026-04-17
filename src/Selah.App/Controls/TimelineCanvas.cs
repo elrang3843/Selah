@@ -76,7 +76,11 @@ public class TimelineCanvas : FrameworkElement
         if (proj == null) return;
         proj.Tracks.CollectionChanged += OnTracksChanged;
         foreach (var track in proj.Tracks)
+        {
             track.Clips.CollectionChanged += OnClipsChanged;
+            foreach (var clip in track.Clips)
+                clip.PropertyChanged += OnClipPropertyChanged;
+        }
     }
 
     private void UnsubscribeFromProject(ProjectViewModel? proj)
@@ -84,17 +88,29 @@ public class TimelineCanvas : FrameworkElement
         if (proj == null) return;
         proj.Tracks.CollectionChanged -= OnTracksChanged;
         foreach (var track in proj.Tracks)
+        {
             track.Clips.CollectionChanged -= OnClipsChanged;
+            foreach (var clip in track.Clips)
+                clip.PropertyChanged -= OnClipPropertyChanged;
+        }
     }
 
     private void OnTracksChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.NewItems != null)
             foreach (TrackViewModel track in e.NewItems)
+            {
                 track.Clips.CollectionChanged += OnClipsChanged;
+                foreach (var clip in track.Clips)
+                    clip.PropertyChanged += OnClipPropertyChanged;
+            }
         if (e.OldItems != null)
             foreach (TrackViewModel track in e.OldItems)
+            {
                 track.Clips.CollectionChanged -= OnClipsChanged;
+                foreach (var clip in track.Clips)
+                    clip.PropertyChanged -= OnClipPropertyChanged;
+            }
 
         InvalidateMeasure();
         InvalidateVisual();
@@ -102,8 +118,28 @@ public class TimelineCanvas : FrameworkElement
 
     private void OnClipsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        if (e.NewItems != null)
+            foreach (ClipViewModel clip in e.NewItems)
+                clip.PropertyChanged += OnClipPropertyChanged;
+        if (e.OldItems != null)
+            foreach (ClipViewModel clip in e.OldItems)
+                clip.PropertyChanged -= OnClipPropertyChanged;
+
         InvalidateMeasure();
         InvalidateVisual();
+    }
+
+    private void OnClipPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ClipViewModel.TimelineStartSamples)
+                           or nameof(ClipViewModel.SourceOutSamples)
+                           or nameof(ClipViewModel.FadeInSamples)
+                           or nameof(ClipViewModel.FadeOutSamples)
+                           or nameof(ClipViewModel.IsSelected)
+                           or nameof(ClipViewModel.Muted))
+        {
+            InvalidateVisual();
+        }
     }
 
     private static void OnTimelineChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
