@@ -36,7 +36,7 @@ public class SheetMusicService
             ["BassGuitar"]     = 33,   // Electric Bass (Finger)
             ["Drums"]          = -1,   // 타악: MIDI 채널 9
             ["Synthesizer"]    = 80,   // Lead 1 (Square)
-            ["Saxophone"]      = 66,   // Alto Sax
+            ["Saxophone"]      = 65,   // Alto Sax
             ["Flute"]          = 73,   // Flute
         };
 
