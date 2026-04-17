@@ -146,11 +146,15 @@ into realistic audio. Selah does not bundle one due to file size.
 
 #### Free SoundFont comparison
 
-| SoundFont | Size | Quality | License | Notes |
-|-----------|------|---------|---------|-------|
-| **GeneralUser GS** | ~29 MB | ★★★★☆ | Free (commercial OK) | Best size-to-quality ratio; **recommended** |
-| **MuseScore_General.sf2** | ~206 MB | ★★★★★ | MIT | Best overall quality across all instruments |
-| **FluidR3_GM.sf2** | ~141 MB | ★★★☆☆ | MIT | Widely distributed; weak on brass/reeds |
+Both SF2 and SF3 formats are supported. SF3 stores samples compressed with OGG Vorbis,
+offering the same quality at a much smaller file size (requires FluidSynth 1.1.7+).
+
+| SoundFont | Format | Size | Quality | License | Notes |
+|-----------|--------|------|---------|---------|-------|
+| **GeneralUser GS** | SF2 | ~29 MB | ★★★★☆ | Free (commercial OK) | Best size-to-quality ratio; **recommended** |
+| **MuseScore_General.sf3** | SF3 | ~50 MB | ★★★★★ | MIT | Best quality + compressed |
+| **MuseScore_General.sf2** | SF2 | ~206 MB | ★★★★★ | MIT | Best quality (uncompressed) |
+| **FluidR3_GM.sf2** | SF2 | ~141 MB | ★★★☆☆ | MIT | Widely distributed; weak on brass/reeds |
 
 ---
 
@@ -162,13 +166,18 @@ and woodwinds (including saxophone).
 - Download: `schristiancollins.com/generaluser.php`
 - Extract `GeneralUser GS.sf2` from the archive.
 
-**MuseScore_General.sf2** — best quality
+**MuseScore_General.sf3** — best quality + compact (recommended high-quality option)
 
-Highest-quality samples across all GM instruments. If MuseScore is installed,
-you can copy it directly from the program folder.
+Same samples as MuseScore_General.sf2, compressed with OGG Vorbis as an SF3 file.
+206 MB reduced to ~50 MB with identical audio quality.
 
-- MuseScore installation path: `C:\Program Files\MuseScore 4\sound\`
+- MuseScore installation path: `C:\Program Files\MuseScore 4\sound\MuseScore_General.sf3`
 - Also available for separate download from the MuseScore website.
+
+**MuseScore_General.sf2** — best quality (uncompressed, SF3 alternative)
+
+Use this if you have an older FluidSynth build without SF3 support. Available from
+the same location as the SF3 version.
 
 **FluidR3_GM.sf2** — fallback option (lower quality)
 
@@ -179,9 +188,9 @@ obtain. However, brass and reed instrument samples are noticeably weak
 > **For worship music:** GeneralUser GS is recommended. Piano, strings, acoustic
 > guitar, and woodwind patches are well-suited for hymn and worship score playback.
 
-#### Where to place the .sf2 file
+#### Where to place the .sf2 / .sf3 file
 
-Place the `.sf2` file in **any one** of these locations (Selah searches them in order):
+Place the `.sf2` or `.sf3` file in **any one** of these locations (Selah searches them in order):
 
 | Priority | Path |
 |----------|------|

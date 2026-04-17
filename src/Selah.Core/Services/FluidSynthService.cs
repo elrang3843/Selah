@@ -8,11 +8,11 @@ namespace Selah.Core.Services;
 ///   1. Python fluidsynth 패키지 (pip install fluidsynth) — libfluidsynth DLL 필요
 ///   2. fluidsynth.exe 실행 파일 (fluidsynth.org 또는 PATH에 설치)
 ///
-/// SoundFont(.sf2) 배치 위치 (우선순위 순):
-///   %AppData%\Selah\soundfonts\*.sf2
-///   앱 번들\soundfonts\*.sf2
-///   C:\Program Files\FluidSynth\*.sf2
-///   C:\soundfonts\*.sf2
+/// SoundFont(.sf2/.sf3) 배치 위치 (우선순위 순):
+///   %AppData%\Selah\soundfonts\*.sf2 / *.sf3
+///   앱 번들\soundfonts\*.sf2 / *.sf3
+///   C:\Program Files\FluidSynth\*.sf2 / *.sf3
+///   C:\soundfonts\*.sf2 / *.sf3
 /// </summary>
 public class FluidSynthService
 {
@@ -69,7 +69,7 @@ public class FluidSynthService
         return candidates.FirstOrDefault(File.Exists);
     }
 
-    // ── SoundFont(.sf2) 탐지 ─────────────────────────────────────────────────
+    // ── SoundFont(.sf2/.sf3) 탐지 ────────────────────────────────────────────
 
     private static string? FindSoundFont()
     {
@@ -92,10 +92,10 @@ public class FluidSynthService
         foreach (var dir in searchDirs)
         {
             if (!Directory.Exists(dir)) continue;
-            var sf2 = Directory
-                .EnumerateFiles(dir, "*.sf2", SearchOption.AllDirectories)
-                .FirstOrDefault();
-            if (sf2 != null) return sf2;
+            // sf2 우선 탐색, 없으면 sf3 (FluidSynth 1.1.7+ 에서 SF3 지원)
+            var sf = Directory.EnumerateFiles(dir, "*.sf2", SearchOption.AllDirectories).FirstOrDefault()
+                  ?? Directory.EnumerateFiles(dir, "*.sf3", SearchOption.AllDirectories).FirstOrDefault();
+            if (sf != null) return sf;
         }
         return null;
     }
@@ -104,7 +104,7 @@ public class FluidSynthService
 
     /// <summary>
     /// 사용자 AppData SoundFont 저장 디렉터리를 반환합니다 (없으면 생성).
-    /// SF2 파일을 이 폴더에 복사하면 자동으로 탐지됩니다.
+    /// SF2 또는 SF3 파일을 이 폴더에 복사하면 자동으로 탐지됩니다.
     /// </summary>
     public static string GetSoundFontsDir()
     {

@@ -119,8 +119,8 @@ public class SheetMusicService
 
         if (!_fluidSynth.IsSoundFontFound)
             throw new InvalidOperationException(
-                "SoundFont(.sf2) 파일을 찾을 수 없습니다.\n" +
-                $".sf2 파일을 {FluidSynthService.GetSoundFontsDir()} 에 넣어 주세요.");
+                "SoundFont(.sf2/.sf3) 파일을 찾을 수 없습니다.\n" +
+                $".sf2 또는 .sf3 파일을 {FluidSynthService.GetSoundFontsDir()} 에 넣어 주세요.");
 
         if (!GmPatchMap.TryGetValue(instrument, out int patch))
             patch = 0;

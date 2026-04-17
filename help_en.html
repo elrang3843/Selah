@@ -266,25 +266,30 @@ function scrollToSection(id) {
 <div class="code">Get-ChildItem -Path C:\ -Filter "libfluidsynth*.dll" -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName</div>
 <p>If a DLL is found, add its folder (e.g. <code>C:\tools\fluidsynth\bin</code>) to the system PATH, then restart Selah.</p>
 
-<h3>⑨ Install SoundFont (.sf2) — Required (instrument tones)</h3>
-<p>A SoundFont is an instrument sample bank FluidSynth uses to render MIDI to audio. Choose one of the three free options below.</p>
+<h3>⑨ Install SoundFont (.sf2 / .sf3) — Required (instrument tones)</h3>
+<p>A SoundFont is an instrument sample bank FluidSynth uses to render MIDI to audio. Both SF2 and SF3 formats are supported. SF3 uses OGG Vorbis compression for the same quality at a much smaller size.</p>
 <div class="card" style="margin-bottom:6px;">
   <div class="credit-name">GeneralUser GS &nbsp;<span style="color:var(--good-tx);font-size:11px;">★ Recommended</span></div>
-  <div class="credit-meta">~29 MB · Free (commercial use OK) · Best size-to-quality ratio</div>
+  <div class="credit-meta">SF2 · ~29 MB · Free (commercial use OK) · Best size-to-quality ratio</div>
   <div class="credit-meta" style="margin-top:4px;">Download: <strong>schristiancollins.com/generaluser.php</strong> → extract <code>GeneralUser GS.sf2</code></div>
   <div class="credit-meta">Well-balanced quality for piano, strings, and woodwinds (including saxophone)</div>
 </div>
 <div class="card" style="margin-bottom:6px;">
+  <div class="credit-name">MuseScore_General.sf3 &nbsp;<span style="color:var(--good-tx);font-size:11px;">★ Best quality</span></div>
+  <div class="credit-meta">SF3 · ~50 MB · MIT · Best quality + OGG-compressed for smaller size</div>
+  <div class="credit-meta" style="margin-top:4px;">MuseScore installation folder: <code>C:\Program Files\MuseScore 4\sound\MuseScore_General.sf3</code></div>
+</div>
+<div class="card" style="margin-bottom:6px;">
   <div class="credit-name">MuseScore_General.sf2</div>
-  <div class="credit-meta">~206 MB · MIT · Best overall quality across all instruments</div>
-  <div class="credit-meta" style="margin-top:4px;">Copy from the MuseScore installation folder (<code>C:\Program Files\MuseScore 4\sound\</code>), or download from the MuseScore website</div>
+  <div class="credit-meta">SF2 · ~206 MB · MIT · Best quality (uncompressed, SF3 alternative)</div>
+  <div class="credit-meta" style="margin-top:4px;">Available from the MuseScore installation folder or MuseScore website</div>
 </div>
 <div class="card" style="margin-bottom:8px;">
   <div class="credit-name">FluidR3_GM.sf2</div>
-  <div class="credit-meta">~141 MB · MIT · Fallback option (weak brass/reed quality)</div>
+  <div class="credit-meta">SF2 · ~141 MB · MIT · Fallback option (weak brass/reed quality)</div>
   <div class="credit-meta" style="margin-top:4px;">Bundled with Linux distros and MuseScore. Use when other options are unavailable</div>
 </div>
-<p>Copy the .sf2 file to:</p>
+<p>Copy the .sf2 or .sf3 file to:</p>
 <div class="code">%AppData%\Selah\soundfonts\</div>
 <div class="note">Type or paste this path directly into Windows Explorer's address bar to open the folder.</div>
 </section>
