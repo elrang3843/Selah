@@ -435,6 +435,8 @@ def main() -> None:
     # RGBA(투명도 채널 포함)·팔레트·그레이스케일 이미지는
     # oemer 내부에서 np.array() 변환 시 NoneType 오류를 유발합니다.
     # 이진화는 하지 않고, 순수 RGB 변환 + PNG 저장만 수행합니다.
+    # RGBA/LA/P 이미지는 투명 픽셀을 흰색으로 합성 후 RGB 변환합니다.
+    # (PIL 기본 convert("RGB")는 투명 영역을 검은색으로 채워 오인식을 유발)
     # 어두운 배경(반전 스캔)은 자동으로 invert하여 oemer에 전달합니다.
     print("PROGRESS:10", flush=True)
     print("LOG:이미지 포맷 확인 중...", flush=True)
@@ -442,7 +444,15 @@ def main() -> None:
     try:
         from PIL import ImageOps
         with Image.open(args.input) as img:
-            if img.mode != "RGB":
+            # 팔레트 모드는 먼저 RGBA로 변환하여 투명도 정보를 보존
+            if img.mode == "P":
+                img = img.convert("RGBA")
+            # 투명 채널이 있으면 흰 배경에 합성
+            if img.mode in ("RGBA", "LA"):
+                white_bg = Image.new("RGB", img.size, (255, 255, 255))
+                white_bg.paste(img, mask=img.split()[-1])  # 마지막 채널 = alpha
+                img = white_bg
+            elif img.mode != "RGB":
                 img = img.convert("RGB")
             # 평균 밝기 < 100 이면 반전된(어두운 배경) 이미지로 간주하고 invert
             mean_brightness = np.array(img).mean()
