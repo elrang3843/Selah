@@ -240,16 +240,38 @@ def synthesize_python_manual(soundfont: str, midi_path: str, output_wav: str,
 
     # MIDI 이벤트를 샘플 시각으로 변환
     mid = mido.MidiFile(midi_path)
-    tempo = 500_000       # 기본 120 BPM
     tpb   = mid.ticks_per_beat
     events: list[tuple[int, object]] = []
+
+    # 모든 트랙에서 set_tempo 이벤트를 절대 tick 위치와 함께 수집하여 템포 맵 구성
+    tempo_map: list[tuple[int, int]] = [(0, 500_000)]  # (abs_tick, tempo)
+    for track in mid.tracks:
+        tick = 0
+        for msg in track:
+            tick += msg.time
+            if msg.type == "set_tempo":
+                tempo_map.append((tick, msg.tempo))
+    tempo_map.sort(key=lambda x: x[0])
+
+    def tick_to_sample(abs_tick: int) -> int:
+        """템포 변화를 반영한 절대 tick → 샘플 인덱스 변환"""
+        secs = 0.0
+        prev_tick = 0
+        prev_tempo = 500_000
+        for t_tick, t_tempo in tempo_map:
+            if t_tick >= abs_tick:
+                break
+            secs += mido.tick2second(t_tick - prev_tick, tpb, prev_tempo)
+            prev_tick = t_tick
+            prev_tempo = t_tempo
+        secs += mido.tick2second(abs_tick - prev_tick, tpb, prev_tempo)
+        return int(secs * sample_rate)
 
     for track in mid.tracks:
         tick = 0
         for msg in track:
             tick += msg.time
-            secs = mido.tick2second(tick, tpb, tempo)
-            events.append((int(secs * sample_rate), msg))
+            events.append((tick_to_sample(tick), msg))
 
     if not events:
         fs.delete()
