@@ -151,17 +151,15 @@ def run_omr(image_path: str, output_dir: str) -> str:
     stdout_data, stderr_data = proc_oemer.communicate()
 
     if proc_oemer.returncode != 0:
+        # C#이 OMR 실패를 감지할 수 있도록 마커를 먼저 출력합니다.
+        print("LOG:OMR_FAILED", flush=True)
+
         # oemer는 오류를 stderr 대신 stdout에 출력하는 경우가 있음.
         stderr_text = (stderr_data or "").strip()
         stdout_text = (stdout_data or "").strip()
         combined_lines = [l for l in (stderr_text + "\n" + stdout_text).splitlines() if l.strip()]
 
         if combined_lines:
-            # 각 줄을 별도 LOG: 메시지로 출력.
-            # C#의 BeginOutputReadLine은 줄 단위로 이벤트를 발생시키므로
-            # 멀티라인 err_tail을 한 번에 print하면 첫 줄만 LOG: 프리픽스가 붙고
-            # 나머지 줄은 버려집니다. 줄마다 LOG: 를 붙여 모두 전달합니다.
-            # logLines[^1] 이 가장 구체적인 예외 메시지(마지막 줄)가 됩니다.
             for line in combined_lines[-15:]:
                 print(f"LOG:{line}", flush=True)
         else:
@@ -180,6 +178,7 @@ def run_omr(image_path: str, output_dir: str) -> str:
         if fname.endswith((".musicxml", ".xml")):
             return os.path.join(output_dir, fname)
 
+    print("LOG:OMR_FAILED", flush=True)
     print("LOG:OMR이 MusicXML 파일을 생성하지 못했습니다.", flush=True)
     sys.exit(1)
 

@@ -82,6 +82,7 @@ public class SheetMusicService
                 Success          = false,
                 IsOmerMissing    = errorDetail.Contains("OEMER_MISSING",   StringComparison.Ordinal),
                 IsMusic21Missing = errorDetail.Contains("MUSIC21_MISSING", StringComparison.Ordinal),
+                IsOmrFailed      = errorDetail.Contains("OMR_FAILED",      StringComparison.Ordinal),
                 Error = string.IsNullOrWhiteSpace(errorDetail)
                     ? $"OMR 엔진 종료 코드: {exitCode}"
                     : errorDetail
@@ -391,4 +392,6 @@ public class SheetMusicResult
     public bool IsOmerMissing    { get; set; }
     /// <summary>music21 패키지가 설치되지 않은 경우.</summary>
     public bool IsMusic21Missing { get; set; }
+    /// <summary>oemer가 악보를 인식하지 못한 경우 (패키지 문제가 아닌 이미지/악보 자체의 문제).</summary>
+    public bool IsOmrFailed      { get; set; }
 }

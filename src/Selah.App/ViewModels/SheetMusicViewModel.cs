@@ -141,7 +141,9 @@ public class SheetMusicViewModel : ViewModelBase
                     ? "oemer 미설치 — 터미널에서 'pip install oemer'를 실행하세요."
                     : result.IsMusic21Missing
                         ? "music21 미설치 — 터미널에서 'pip install music21'를 실행하세요."
-                        : $"오류: {result.Error ?? "알 수 없는 오류"}";
+                        : result.IsOmrFailed
+                            ? "인식할 수 없는 악보입니다."
+                            : $"오류: {result.Error ?? "알 수 없는 오류"}";
                 return;
             }
 
