@@ -179,7 +179,7 @@
     <sys:String x:Key="Dialog_Export_Title">导出为 WAV</sys:String>
     <sys:String x:Key="Dialog_Export_Filter">WAV 文件 (24-bit)|*.wav</sys:String>
     <sys:String x:Key="Dialog_Error_Title">Selah 错误</sys:String>
-    <sys:String x:Key="Dialog_HardwareDiag_Message">硬件加速诊断结果：&#x0a;&#x0a;{0}&#x0a;&#x0a;可在"设置 &gt; 加速后端"中强制使用 CPU 模式。</sys:String>
+    <sys:String x:Key="Dialog_HardwareDiag_Message">硬件加速诊断结果：&#x0a;&#x0a;{0}</sys:String>
     <sys:String x:Key="Dialog_HardwareDiag_Title">硬件诊断</sys:String>
     <sys:String x:Key="Dialog_UnsavedChanges_Message">项目"{0}"有未保存的更改。&#x0a;是否保存？</sys:String>
     <sys:String x:Key="Dialog_UnsavedChanges_Title">Selah</sys:String>
@@ -203,13 +203,14 @@
     <sys:String x:Key="SheetMusic_RecommendHint">★ = 根据乐谱特征推荐</sys:String>
     <sys:String x:Key="SheetMusic_Insert">插入为轨道</sys:String>
     <sys:String x:Key="SheetMusic_Cancel">取消</sys:String>
+    <sys:String x:Key="SheetMusic_Notice">✓ 支持: 印刷西方乐谱 (五线谱), 高音/低音谱号, 清晰图像&#x0a;✗ 不支持: 手写乐谱, 吉他 TAB 谱, 打击乐专用谱 (×符头), 非西方乐谱&#x0a;◎ 推荐分辨率: 150 DPI 以上 · 短边 800 px 以上 (低于时自动放大)</sys:String>
     <sys:String x:Key="Progress_Title_SheetMusic">正在从乐谱合成乐器轨道...</sys:String>
     <sys:String x:Key="Status_SheetMusic_Synthesizing">正在合成 {0}...</sys:String>
     <sys:String x:Key="Status_SheetMusicComplete">已插入 {0} 条乐谱轨道</sys:String>
     <sys:String x:Key="Status_SheetMusicFailed">乐谱轨道插入失败：{0}</sys:String>
     <sys:String x:Key="Status_SheetMusic_NoPython">未安装 Python。请从 python.org 安装。</sys:String>
     <sys:String x:Key="Status_SheetMusic_NoFluidSynth">未找到 FluidSynth。&#x0a;安装 Python 包：pip install fluidsynth&#x0a;或从 fluidsynth.org 安装可执行文件并添加到 PATH。</sys:String>
-    <sys:String x:Key="Status_SheetMusic_NoSoundFont">未找到 SoundFont (.sf2)。&#x0a;请将 .sf2 文件放入 %AppData%\Selah\soundfonts\</sys:String>
+    <sys:String x:Key="Status_SheetMusic_NoSoundFont">未找到 SoundFont (.sf2/.sf3)。&#x0a;请将 .sf2 或 .sf3 文件放入 %AppData%\Selah\soundfonts\</sys:String>
 
     <!-- ── 乐器轨道名称 ── -->
     <sys:String x:Key="Instrument_Piano">钢琴</sys:String>

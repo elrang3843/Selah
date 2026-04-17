@@ -38,7 +38,7 @@
                     <TextBlock Text="{DynamicResource Welcome_Feature1_Title}"
                                FontSize="14" FontWeight="SemiBold"
                                Foreground="{DynamicResource TextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource Overlay0Brush}" FontSize="12"
+                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource SubtextBrush}" FontSize="12"
                                Text="{DynamicResource Welcome_Feature1_Desc}"/>
                 </StackPanel>
             </Border>
@@ -48,19 +48,19 @@
                     <TextBlock Text="{DynamicResource Welcome_Feature2_Title}"
                                FontSize="14" FontWeight="SemiBold"
                                Foreground="{DynamicResource TextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource Overlay0Brush}" FontSize="12"
+                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource SubtextBrush}" FontSize="12"
                                Text="{DynamicResource Welcome_Feature2_Desc}"/>
                 </StackPanel>
             </Border>
 
             <!-- 단축키 힌트 -->
             <TextBlock Text="{DynamicResource Welcome_Shortcuts}"
-                       FontSize="11" Foreground="{DynamicResource Surface2Brush}"
+                       FontSize="11" Foreground="{DynamicResource SubtextBrush}"
                        HorizontalAlignment="Center"
                        Margin="0,24,0,0"/>
 
             <!-- 라이선스 안내 -->
-            <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Surface2Brush}"
+            <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource SubtextBrush}"
                        HorizontalAlignment="Center" TextAlignment="Center"
                        Margin="0,12,0,0"
                        Text="{DynamicResource Welcome_License}"/>

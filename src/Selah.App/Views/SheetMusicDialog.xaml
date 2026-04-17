@@ -10,6 +10,18 @@
 
     <StackPanel Margin="20,16,20,20">
 
+        <!-- 악보 인식 안내 -->
+        <Border Background="{DynamicResource Surface1Brush}"
+                CornerRadius="4"
+                Padding="12,10"
+                Margin="0,0,0,14">
+            <TextBlock Text="{DynamicResource SheetMusic_Notice}"
+                       FontSize="10"
+                       Foreground="{DynamicResource SubtextBrush}"
+                       TextWrapping="Wrap"
+                       LineHeight="18"/>
+        </Border>
+
         <!-- 이미지 선택 -->
         <TextBlock Text="{DynamicResource SheetMusic_ImageLabel}"
                    FontSize="12" FontWeight="SemiBold"
@@ -32,20 +44,18 @@
                      Margin="0,0,8,0"/>
             <Button Grid.Column="1"
                     Content="{DynamicResource SheetMusic_Browse}"
+                    Style="{StaticResource DefaultButton}"
                     Click="BrowseButton_Click"
                     MinWidth="72" Padding="10,5"/>
         </Grid>
 
         <!-- 인식 시작 버튼 -->
         <Button Content="{DynamicResource SheetMusic_Recognize}"
+                Style="{StaticResource AccentButton}"
                 Command="{Binding RecognizeCommand}"
                 HorizontalAlignment="Left"
                 MinWidth="100" Padding="16,6"
-                Margin="0,0,0,12"
-                Background="{DynamicResource AccentBrush}"
-                Foreground="White"
-                FontWeight="SemiBold"
-                BorderThickness="0"/>
+                Margin="0,0,0,12"/>
 
         <!-- 진행 바 (인식 중에만 표시) -->
         <ProgressBar Height="6"
@@ -138,14 +148,16 @@
 
             <Button Grid.Column="1"
                     Content="{DynamicResource SheetMusic_Insert}"
+                    Style="{StaticResource AccentButton}"
                     IsDefault="True"
                     IsEnabled="{Binding CanInsert}"
                     Click="InsertButton_Click"
-                    MinWidth="88" Padding="10,6"
+                    MinWidth="110" Padding="12,6"
                     Margin="0,0,8,0"/>
 
             <Button Grid.Column="2"
                     Content="{DynamicResource SheetMusic_Cancel}"
+                    Style="{StaticResource DefaultButton}"
                     IsCancel="True"
                     MinWidth="72" Padding="10,6"/>
         </Grid>

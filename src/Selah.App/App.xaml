@@ -22,8 +22,6 @@
             <conv:InstalledStatusConverter         x:Key="InstalledStatusConverter"/>
             <conv:PlayPauseConverter               x:Key="PlayPauseConverter"/>
             <conv:HexToColorConverter              x:Key="HexToColorConverter"/>
-            <conv:MuteColorConverter               x:Key="MuteColorConverter"/>
-            <conv:SoloColorConverter               x:Key="SoloColorConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

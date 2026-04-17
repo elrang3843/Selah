@@ -166,48 +166,16 @@ public class HexToColorConverter : IValueConverter
 }
 
 // ─────────────────────────────────────────────────────────────
-// MuteColorConverter  (bool IsMuted → Brush, 뮤트=빨강, 아니면=회색)
+// BoolToBrushConverter  (bool → configurable Brush pair)
 // ─────────────────────────────────────────────────────────────
 [ValueConversion(typeof(bool), typeof(Brush))]
-public class MuteColorConverter : IValueConverter
+public class BoolToBrushConverter : IValueConverter
 {
-    private static readonly Brush MutedBrush =
-        new SolidColorBrush(Color.FromRgb(0xF3, 0x8B, 0xA8));
-    private static readonly Brush NormalBrush =
-        new SolidColorBrush(Color.FromRgb(0x6C, 0x70, 0x86));
-
-    static MuteColorConverter()
-    {
-        MutedBrush.Freeze();
-        NormalBrush.Freeze();
-    }
+    public Brush TrueBrush  { get; set; } = Brushes.Transparent;
+    public Brush FalseBrush { get; set; } = Brushes.Transparent;
 
     public object Convert(object value, Type t, object p, CultureInfo c)
-        => value is bool b && b ? MutedBrush : NormalBrush;
-
-    public object ConvertBack(object value, Type t, object p, CultureInfo c)
-        => DependencyProperty.UnsetValue;
-}
-
-// ─────────────────────────────────────────────────────────────
-// SoloColorConverter  (bool IsSolo → Brush, 솔로=노랑, 아니면=회색)
-// ─────────────────────────────────────────────────────────────
-[ValueConversion(typeof(bool), typeof(Brush))]
-public class SoloColorConverter : IValueConverter
-{
-    private static readonly Brush SoloBrush =
-        new SolidColorBrush(Color.FromRgb(0xF9, 0xE2, 0xAF));
-    private static readonly Brush NormalBrush =
-        new SolidColorBrush(Color.FromRgb(0x6C, 0x70, 0x86));
-
-    static SoloColorConverter()
-    {
-        SoloBrush.Freeze();
-        NormalBrush.Freeze();
-    }
-
-    public object Convert(object value, Type t, object p, CultureInfo c)
-        => value is bool b && b ? SoloBrush : NormalBrush;
+        => value is bool b && b ? TrueBrush : FalseBrush;
 
     public object ConvertBack(object value, Type t, object p, CultureInfo c)
         => DependencyProperty.UnsetValue;

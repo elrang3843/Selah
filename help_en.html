@@ -5,67 +5,116 @@
 <meta charset="UTF-8">
 <title>Selah Help</title>
 <style>
+:root {
+  color-scheme: dark light;
+  --bg:       #1e1e2e;
+  --surface:  #313244;
+  --text:     #cdd6f4;
+  --subtext:  #a6adc8;
+  --muted:    #9199b2;
+  --accent:   #89b4fa;
+  --h3:       #fab387;
+  --warn-bg:  #2a2419;
+  --warn-br:  #f9e2af;
+  --warn-tx:  #f9e2af;
+  --good-bg:  #1a2820;
+  --good-br:  #a6e3a1;
+  --good-tx:  #a6e3a1;
+  --bad-bg:   #2a1a1e;
+  --bad-br:   #f38ba8;
+  --bad-tx:   #f38ba8;
+  --code-bg:  #11111b;
+  --code-tx:  #a6e3a1;
+  --divider:  #313244;
+  --kbd-bg:   #313244;
+  --kbd-tx:   #a6adc8;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:       #eff1f5;
+    --surface:  #e6e9ef;
+    --text:     #4c4f69;
+    --subtext:  #5c5f77;
+    --muted:    #5c5f77;
+    --accent:   #1751c8;
+    --h3:       #7c4e00;
+    --warn-bg:  #fef3d8;
+    --warn-br:  #df8e1d;
+    --warn-tx:  #7c5200;
+    --good-bg:  #e8f5e4;
+    --good-br:  #40a02b;
+    --good-tx:  #1f6b1a;
+    --bad-bg:   #fce8ed;
+    --bad-br:   #d20f39;
+    --bad-tx:   #8e0025;
+    --code-bg:  #dce0e8;
+    --code-tx:  #1f6b1a;
+    --divider:  #bcc0cc;
+    --kbd-bg:   #ccd0da;
+    --kbd-tx:   #4c4f69;
+  }
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: #1e1e2e; color: #cdd6f4;
+  background: var(--bg); color: var(--text);
   font-family: 'Segoe UI', sans-serif; font-size: 14px;
   line-height: 1.7; padding: 32px 36px 60px;
 }
-h1 { font-size: 22px; font-weight: 600; color: #89b4fa; margin-bottom: 4px; }
-h2 { font-size: 15px; font-weight: 600; color: #cdd6f4; margin: 22px 0 7px; }
-h3 { font-size: 13px; font-weight: 600; color: #fab387; margin: 18px 0 6px; }
-p  { color: #a6adc8; margin-bottom: 8px; }
-hr { border: none; border-top: 1px solid #313244; margin: 14px 0 14px; }
+h1 { font-size: 22px; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+h2 { font-size: 15px; font-weight: 600; color: var(--text); margin: 22px 0 7px; }
+h3 { font-size: 13px; font-weight: 600; color: var(--h3); margin: 18px 0 6px; }
+p  { color: var(--subtext); margin-bottom: 8px; }
+hr { border: none; border-top: 1px solid var(--divider); margin: 14px 0 14px; }
 section { margin-bottom: 56px; }
 .cat {
   font-size: 10px; font-weight: 600; letter-spacing: 1px;
-  color: #6c7086; text-transform: uppercase;
+  color: var(--muted); text-transform: uppercase;
   margin: 22px 0 10px;
 }
-.divider { border-top: 1px solid #313244; margin-bottom: 12px; }
-.key-row {
-  display: table; width: 100%; margin-bottom: 8px;
-}
+.divider { border-top: 1px solid var(--divider); margin-bottom: 12px; }
+.key-row { display: table; width: 100%; margin-bottom: 8px; }
 .key-cell { display: table-cell; width: 180px; vertical-align: middle; }
-.desc-cell { display: table-cell; vertical-align: middle; color: #cdd6f4; font-size: 13px; }
+.desc-cell { display: table-cell; vertical-align: middle; color: var(--text); font-size: 13px; }
 .kbd {
   display: inline-block;
-  background: #313244; color: #a6adc8;
+  background: var(--kbd-bg); color: var(--kbd-tx);
   font-family: Consolas, 'Courier New', monospace; font-size: 11.5px;
   padding: 3px 9px; border-radius: 4px;
 }
-.dim { color: #6c7086; }
+.dim { color: var(--muted); }
 .warn {
-  background: #2a2419; border: 1px solid #f9e2af; border-radius: 5px;
-  padding: 10px 14px; margin: 8px 0; color: #f9e2af; font-size: 12.5px;
+  background: var(--warn-bg); border: 1px solid var(--warn-br); border-radius: 5px;
+  padding: 10px 14px; margin: 8px 0; color: var(--warn-tx); font-size: 12.5px;
 }
 .good {
-  background: #1a2820; border: 1px solid #a6e3a1; border-radius: 5px;
+  background: var(--good-bg); border: 1px solid var(--good-br); border-radius: 5px;
   padding: 10px 14px; margin: 8px 0;
 }
-.good-item { color: #a6e3a1; font-size: 12.5px; margin-bottom: 4px; }
+.good-item { color: var(--good-tx); font-size: 12.5px; margin-bottom: 4px; }
 .bad {
-  background: #2a1a1e; border: 1px solid #f38ba8; border-radius: 5px;
+  background: var(--bad-bg); border: 1px solid var(--bad-br); border-radius: 5px;
   padding: 10px 14px; margin: 8px 0;
 }
-.bad-item { color: #f38ba8; font-size: 12.5px; margin-bottom: 4px; }
+.bad-item { color: var(--bad-tx); font-size: 12.5px; margin-bottom: 4px; }
 .code {
-  background: #11111b; border-radius: 4px;
+  background: var(--code-bg); border-radius: 4px;
   padding: 8px 14px; margin: 6px 0;
   font-family: Consolas, 'Courier New', monospace;
-  font-size: 12px; color: #a6e3a1;
+  font-size: 12px; color: var(--code-tx);
 }
-.note { font-size: 12px; color: #6c7086; margin: 8px 0 2px; }
-.card {
-  background: #313244; border-radius: 5px;
-  padding: 14px 16px; margin: 8px 0;
+code {
+  font-family: Consolas, 'Courier New', monospace;
+  background: var(--code-bg); color: var(--code-tx);
+  padding: 1px 5px; border-radius: 3px; font-size: 0.9em;
 }
-.credit-name { font-size: 13px; font-weight: 600; color: #cdd6f4; }
-.credit-meta { font-size: 11.5px; color: #6c7086; }
+.note { font-size: 12px; color: var(--muted); margin: 8px 0 2px; }
+.card { background: var(--surface); border-radius: 5px; padding: 14px 16px; margin: 8px 0; }
+.credit-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.credit-meta { font-size: 11.5px; color: var(--muted); }
 .glory {
   text-align: center; font-style: italic;
-  color: #a6adc8; font-size: 15px;
-  border-top: 1px solid #313244; padding-top: 18px; margin-top: 28px;
+  color: var(--subtext); font-size: 15px;
+  border-top: 1px solid var(--divider); padding-top: 18px; margin-top: 28px;
 }
 </style>
 <script>
@@ -149,10 +198,18 @@ function scrollToSection(id) {
 4. Each stem is automatically added as a new track.</p>
 <p><strong>Noise Reduction:</strong> Edit → Reduce Noise. (Requires: <code>pip install noisereduce</code>)</p>
 
+<h2>Import Sheet Music</h2>
+<p>Automatically generate per-instrument audio tracks from a scanned or photographed score image (PNG, JPG, TIFF).</p>
+<p>1. Choose <strong>File → Import Sheet Music</strong>.<br>
+2. Select a score image file, then click <strong>Recognize</strong>.<br>
+3. After recognition, select the instruments you want. (★ = auto-recommended)<br>
+4. Click <strong>Insert into Track</strong> — a new track is added for each instrument.</p>
+<p>This feature requires Python packages (oemer, music21, etc.), FluidSynth, and a SoundFont (.sf2). See <strong>Required Tools ⑦⑧⑨</strong> below.</p>
+
 <h2>Exporting</h2>
 <p>Use <strong>File → Export as WAV</strong> (<span class="kbd">Ctrl+E</span>) to render the entire timeline to a 24-bit WAV. Muted tracks are excluded. If the metronome is on, it will be included — turn it off before exporting.</p>
 
-<hr style="margin:32px 0 18px; border-color:#89b4fa;">
+<hr style="margin:32px 0 18px; border-color:var(--accent);">
 <h1 style="font-size:18px;">Required Tools Setup</h1>
 <p style="margin-top:8px;">The following tools are required for stem separation and noise reduction. Basic WAV editing works without any additional installation.</p>
 
@@ -191,6 +248,50 @@ function scrollToSection(id) {
   <div class="credit-meta">vocal/backing 2-stem · 65 MB · requires audio-separator</div>
 </div>
 <p>Select a model, click <strong>Install Model / Download</strong>, then click <strong>Refresh</strong> when done.</p>
+
+<h3>⑦ Install OMR packages — Required (sheet music import)</h3>
+<div class="code">pip install oemer music21 mido Pillow scipy</div>
+<div class="note">oemer downloads its own model weights automatically on first run (internet required).</div>
+
+<h3>⑧ Install FluidSynth — Required (sheet music → audio)</h3>
+<p><strong>Both steps are required.</strong></p>
+<p>Step 1 — Install the native library (<code>libfluidsynth-3.dll</code>):</p>
+<div class="code">choco install fluidsynth</div>
+<p>Or download the Windows installer from <strong>fluidsynth.org</strong>. Selah detects the DLL automatically — no PATH change needed.</p>
+<div class="note">Chocolatey may install to <code>C:\Program Files\FluidSynth\bin\</code> or <code>C:\tools\fluidsynth\bin\</code> depending on the version. Selah searches both paths automatically.</div>
+<p>Step 2 — Install the Python wrapper:</p>
+<div class="code">pip install fluidsynth</div>
+<div class="warn">⚠ Installing only the pip package without the native installer will cause synthesis errors. Both steps are required.</div>
+<p><strong>Troubleshooting — "FLUIDSYNTH_DLL_MISSING" error:</strong> If you see this error during synthesis, Selah cannot find <code>libfluidsynth-3.dll</code>. Run the following command in an Administrator PowerShell to locate the DLL:</p>
+<div class="code">Get-ChildItem -Path C:\ -Filter "libfluidsynth*.dll" -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName</div>
+<p>If a DLL is found, add its folder (e.g. <code>C:\tools\fluidsynth\bin</code>) to the system PATH, then restart Selah.</p>
+
+<h3>⑨ Install SoundFont (.sf2 / .sf3) — Required (instrument tones)</h3>
+<p>A SoundFont is an instrument sample bank FluidSynth uses to render MIDI to audio. Both SF2 and SF3 formats are supported. SF3 uses OGG Vorbis compression for the same quality at a much smaller size.</p>
+<div class="card" style="margin-bottom:6px;">
+  <div class="credit-name">GeneralUser GS &nbsp;<span style="color:var(--good-tx);font-size:11px;">★ Recommended</span></div>
+  <div class="credit-meta">SF2 · ~29 MB · Free (commercial use OK) · Best size-to-quality ratio</div>
+  <div class="credit-meta" style="margin-top:4px;">Download: <strong>schristiancollins.com/generaluser.php</strong> → extract <code>GeneralUser GS.sf2</code></div>
+  <div class="credit-meta">Well-balanced quality for piano, strings, and woodwinds (including saxophone)</div>
+</div>
+<div class="card" style="margin-bottom:6px;">
+  <div class="credit-name">MuseScore_General.sf3 &nbsp;<span style="color:var(--good-tx);font-size:11px;">★ Best quality</span></div>
+  <div class="credit-meta">SF3 · ~50 MB · MIT · Best quality + OGG-compressed for smaller size</div>
+  <div class="credit-meta" style="margin-top:4px;">MuseScore installation folder: <code>C:\Program Files\MuseScore 4\sound\MuseScore_General.sf3</code></div>
+</div>
+<div class="card" style="margin-bottom:6px;">
+  <div class="credit-name">MuseScore_General.sf2</div>
+  <div class="credit-meta">SF2 · ~206 MB · MIT · Best quality (uncompressed, SF3 alternative)</div>
+  <div class="credit-meta" style="margin-top:4px;">Available from the MuseScore installation folder or MuseScore website</div>
+</div>
+<div class="card" style="margin-bottom:8px;">
+  <div class="credit-name">FluidR3_GM.sf2</div>
+  <div class="credit-meta">SF2 · ~141 MB · MIT · Fallback option (weak brass/reed quality)</div>
+  <div class="credit-meta" style="margin-top:4px;">Bundled with Linux distros and MuseScore. Use when other options are unavailable</div>
+</div>
+<p>Copy the .sf2 or .sf3 file to:</p>
+<div class="code">%AppData%\Selah\soundfonts\</div>
+<div class="note">Type or paste this path directly into Windows Explorer's address bar to open the folder.</div>
 </section>
 
 <!-- ═══════════════════════════════════════════
@@ -225,7 +326,7 @@ function scrollToSection(id) {
 <h2>AI / Model Caution</h2>
 <p>Model outputs may be imperfect and may contain artifacts. Third-party model terms may impose additional restrictions. Maintainers do not guarantee suitability for commercial distribution or public release.</p>
 
-<p style="font-size:11.5px; color:#6c7086; font-style:italic; border-top:1px solid #313244; padding-top:14px; margin-top:24px;">
+<p style="font-size:11.5px; color:var(--muted); font-style:italic; border-top:1px solid var(--divider); padding-top:14px; margin-top:24px;">
 This document does not replace legal advice. For legal terms, see LICENSE and TRADEMARK.md.
 </p>
 </section>
@@ -235,19 +336,19 @@ This document does not replace legal advice. For legal terms, see LICENSE and TR
      ═══════════════════════════════════════════ -->
 <section id="about">
 <h1 style="font-size:32px;">Selah</h1>
-<p style="font-size:15px; color:#a6adc8; margin-top:4px; margin-bottom:20px;">MR Editor for Worship Ministry</p>
+<p style="font-size:15px; color:var(--subtext); margin-top:4px; margin-bottom:20px;">MR Editor for Worship Ministry</p>
 <hr>
 
 <p style="margin-top:16px;">Version: 0.1.0 (Prototype)</p>
 <p>License: GPLv3</p>
-<p>Source: <span style="color:#89b4fa; text-decoration:underline;">https://github.com/elrang3843/Selah</span></p>
+<p>Source: <span style="color:var(--accent); text-decoration:underline;">https://github.com/elrang3843/Selah</span></p>
 
-<p style="margin-top:16px; color:#a6adc8;">This software is freely distributed as open source (GPLv3) for worship workers in small churches and mission fields.</p>
+<p style="margin-top:16px; color:var(--subtext);">This software is freely distributed as open source (GPLv3) for worship workers in small churches and mission fields.</p>
 
 <h2>Key Open Source Libraries</h2>
 <div class="card" style="margin-bottom:8px;">
   <div style="display:table; width:100%;">
-    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; width:14px; color:var(--accent); font-size:14px;">•</div>
     <div style="display:table-cell; padding-left:10px;">
       <div class="credit-name">NAudio 2.2.1</div>
       <div class="credit-meta">MIT License — Microsoft</div>
@@ -256,7 +357,7 @@ This document does not replace legal advice. For legal terms, see LICENSE and TR
 </div>
 <div class="card" style="margin-bottom:8px;">
   <div style="display:table; width:100%;">
-    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; width:14px; color:var(--accent); font-size:14px;">•</div>
     <div style="display:table-cell; padding-left:10px;">
       <div class="credit-name">Demucs</div>
       <div class="credit-meta">MIT License — Meta AI</div>
@@ -265,7 +366,7 @@ This document does not replace legal advice. For legal terms, see LICENSE and TR
 </div>
 <div class="card">
   <div style="display:table; width:100%;">
-    <div style="display:table-cell; width:14px; color:#89b4fa; font-size:14px;">•</div>
+    <div style="display:table-cell; width:14px; color:var(--accent); font-size:14px;">•</div>
     <div style="display:table-cell; padding-left:10px;">
       <div class="credit-name">FFmpeg</div>
       <div class="credit-meta">LGPL / GPL (optional)</div>

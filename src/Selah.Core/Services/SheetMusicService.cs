@@ -8,7 +8,8 @@ namespace Selah.Core.Services;
 /// 악보 이미지 인식(OMR) 및 MIDI 합성 서비스.
 ///
 /// 파이프라인:
-///   1. RecognizeAsync  — sheet_music_runner.py → 이미지 전처리 + oemer OMR + music21 분석
+///   1. RecognizeAsync  — sheet_music_runner.py → 이미지 전처리 + oemer OMR
+///                        MIDI/ScoreProfile은 xml.etree + mido로 직접 추출 (music21 불필요)
 ///                        출력: ScoreProfile JSON + score.mid
 ///   2. SynthesizeAsync — midi_synthesizer.py   → MIDI 패치 교체 + FluidSynth 합성
 ///                        출력: 악기별 WAV
@@ -35,7 +36,7 @@ public class SheetMusicService
             ["BassGuitar"]     = 33,   // Electric Bass (Finger)
             ["Drums"]          = -1,   // 타악: MIDI 채널 9
             ["Synthesizer"]    = 80,   // Lead 1 (Square)
-            ["Saxophone"]      = 66,   // Alto Sax
+            ["Saxophone"]      = 65,   // Alto Sax
             ["Flute"]          = 73,   // Flute
         };
 
@@ -72,7 +73,7 @@ public class SheetMusicService
         var args = $"\"{scriptPath}\" --input \"{imagePath}\" --output-dir \"{outputDir}\"";
         progress?.Report(new SheetMusicProgress { Phase = "악보 인식 시작...", Percent = 0 });
 
-        var (exitCode, profile, errorDetail) = await RunRunnerAsync(_pythonPath, args, progress, ct);
+        var (exitCode, profile, errorDetail, omrFailed) = await RunRunnerAsync(_pythonPath, args, progress, ct);
 
         if (exitCode != 0 || profile == null)
         {
@@ -81,6 +82,7 @@ public class SheetMusicService
                 Success          = false,
                 IsOmerMissing    = errorDetail.Contains("OEMER_MISSING",   StringComparison.Ordinal),
                 IsMusic21Missing = errorDetail.Contains("MUSIC21_MISSING", StringComparison.Ordinal),
+                IsOmrFailed      = omrFailed,
                 Error = string.IsNullOrWhiteSpace(errorDetail)
                     ? $"OMR 엔진 종료 코드: {exitCode}"
                     : errorDetail
@@ -118,8 +120,8 @@ public class SheetMusicService
 
         if (!_fluidSynth.IsSoundFontFound)
             throw new InvalidOperationException(
-                "SoundFont(.sf2) 파일을 찾을 수 없습니다.\n" +
-                $".sf2 파일을 {FluidSynthService.GetSoundFontsDir()} 에 넣어 주세요.");
+                "SoundFont(.sf2/.sf3) 파일을 찾을 수 없습니다.\n" +
+                $".sf2 또는 .sf3 파일을 {FluidSynthService.GetSoundFontsDir()} 에 넣어 주세요.");
 
         if (!GmPatchMap.TryGetValue(instrument, out int patch))
             patch = 0;
@@ -202,18 +204,22 @@ public class SheetMusicService
 
     // ── 서브프로세스 실행 ─────────────────────────────────────────────────────
 
-    private static async Task<(int ExitCode, ScoreProfile? Profile, string Error)> RunRunnerAsync(
+    private static async Task<(int ExitCode, ScoreProfile? Profile, string Error, bool OmrFailed)> RunRunnerAsync(
         string python, string args,
         IProgress<SheetMusicProgress>? progress,
         CancellationToken ct)
     {
         var psi = new ProcessStartInfo(python, args)
         {
-            RedirectStandardOutput = true,
-            RedirectStandardError  = true,
-            UseShellExecute        = false,
-            CreateNoWindow         = true
+            RedirectStandardOutput  = true,
+            RedirectStandardError   = true,
+            UseShellExecute         = false,
+            CreateNoWindow          = true,
+            StandardOutputEncoding  = System.Text.Encoding.UTF8,
+            StandardErrorEncoding   = System.Text.Encoding.UTF8,
         };
+        // PYTHONIOENCODING=utf-8 — Korean Windows(CP949) 환경에서 Python stdout을 UTF-8로 강제
+        psi.Environment["PYTHONIOENCODING"] = "utf-8:replace";
 
         using var proc = new Process { StartInfo = psi };
         double lastPct = 0;
@@ -264,15 +270,37 @@ public class SheetMusicService
         proc.BeginOutputReadLine();
         proc.BeginErrorReadLine();
         await proc.WaitForExitAsync(ct);
+        // WaitForExitAsync 만으로는 BeginOutputReadLine 콜백이 완료됨을 보장하지 않음.
+        // 동기 WaitForExit()를 추가로 호출하여 모든 stdout/stderr 데이터가 처리된 뒤 읽음.
+        proc.WaitForExit();
 
         string error;
+        bool omrFailed;
         lock (lockObj)
         {
-            error = logLines.Count > 0
-                ? string.Join("\n", logLines.TakeLast(15))
-                : string.Join("\n", stderrLines.TakeLast(15));
+            // LOG:OMR_FAILED는 첫 번째로 출력되지만 이후 상세 줄에 덮이므로
+            // 마지막 줄만 보지 않고 전체 logLines에서 마커 존재를 확인합니다.
+            omrFailed = logLines.Any(l => l.Contains("OMR_FAILED", StringComparison.Ordinal));
+
+            var lastLog    = logLines.Count > 0 ? logLines[^1] : null;
+            var stderrText = stderrLines.Count > 0
+                ? string.Join("\n", stderrLines.TakeLast(5))
+                : null;
+
+            // 마지막 LOG 줄이 오류/실패를 나타내면 우선 사용.
+            // 진행 메시지("실행 중...", "경과" 등)이면 stderr(Python traceback 등) 우선 사용.
+            bool lastLogIsError = lastLog is not null &&
+                (lastLog.Contains("실패",    StringComparison.Ordinal)  ||
+                 lastLog.Contains("MISSING", StringComparison.Ordinal)  ||
+                 lastLog.Contains("오류",    StringComparison.Ordinal)  ||
+                 lastLog.Contains("Error",   StringComparison.OrdinalIgnoreCase));
+
+            error = (lastLogIsError ? lastLog : null)
+                 ?? stderrText
+                 ?? lastLog
+                 ?? string.Empty;
         }
-        return (proc.ExitCode, profile, error);
+        return (proc.ExitCode, profile, error, omrFailed);
     }
 
     private static async Task<(int ExitCode, string Error)> RunSynthesizerAsync(
@@ -282,11 +310,14 @@ public class SheetMusicService
     {
         var psi = new ProcessStartInfo(python, args)
         {
-            RedirectStandardOutput = true,
-            RedirectStandardError  = true,
-            UseShellExecute        = false,
-            CreateNoWindow         = true
+            RedirectStandardOutput  = true,
+            RedirectStandardError   = true,
+            UseShellExecute         = false,
+            CreateNoWindow          = true,
+            StandardOutputEncoding  = System.Text.Encoding.UTF8,
+            StandardErrorEncoding   = System.Text.Encoding.UTF8,
         };
+        psi.Environment["PYTHONIOENCODING"] = "utf-8:replace";
 
         using var proc = new Process { StartInfo = psi };
         double lastPct = 0;
@@ -326,13 +357,23 @@ public class SheetMusicService
         proc.BeginOutputReadLine();
         proc.BeginErrorReadLine();
         await proc.WaitForExitAsync(ct);
+        proc.WaitForExit(); // 비동기 stdout/stderr 읽기 완료 보장
 
         string error;
         lock (lockObj)
         {
-            error = logLines.Count > 0
-                ? string.Join("\n", logLines.TakeLast(15))
-                : string.Join("\n", stderrLines.TakeLast(15));
+            var lastLog    = logLines.Count > 0 ? logLines[^1] : null;
+            var stderrText = stderrLines.Count > 0
+                ? string.Join("\n", stderrLines.TakeLast(5))
+                : null;
+            bool lastLogIsError = lastLog is not null &&
+                (lastLog.Contains("실패",    StringComparison.Ordinal)  ||
+                 lastLog.Contains("오류",    StringComparison.Ordinal)  ||
+                 lastLog.Contains("Error",   StringComparison.OrdinalIgnoreCase));
+            error = (lastLogIsError ? lastLog : null)
+                 ?? stderrText
+                 ?? lastLog
+                 ?? string.Empty;
         }
         return (proc.ExitCode, error);
     }
@@ -356,4 +397,6 @@ public class SheetMusicResult
     public bool IsOmerMissing    { get; set; }
     /// <summary>music21 패키지가 설치되지 않은 경우.</summary>
     public bool IsMusic21Missing { get; set; }
+    /// <summary>oemer가 악보를 인식하지 못한 경우 (패키지 문제가 아닌 이미지/악보 자체의 문제).</summary>
+    public bool IsOmrFailed      { get; set; }
 }

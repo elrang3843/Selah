@@ -18,6 +18,10 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
     private float[] _temp = Array.Empty<float>();
     private bool _disposed;
     private bool _endReported;
+    // PlayheadAdvanced를 매 Read() 호출마다 발생시키면 UI Dispatcher 큐가 포화됩니다.
+    // 최대 30 Hz로 스로틀하여 초당 30회만 발생시킵니다.
+    private long _lastPlayheadFrames = long.MinValue / 2;
+    private readonly long _playheadIntervalFrames;
 
     public WaveFormat WaveFormat { get; }
 
@@ -33,6 +37,7 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
         WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(project.SampleRate, 2);
         _metronome = new MetronomeProvider(project.TempoMap, project.SampleRate);
         _limiter = new SoftLimiter();
+        _playheadIntervalFrames = Math.Max(1, project.SampleRate / 30);
         RebuildMixers();
     }
 
@@ -112,6 +117,7 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
 
         long currentPosition;
         bool shouldFireEnded = false;
+        bool shouldFirePlayhead = false;
         lock (_lock)
         {
             if (_temp.Length < count)
@@ -149,6 +155,13 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
             _positionFrames += frames;
             currentPosition = _positionFrames;
 
+            // PlayheadAdvanced 스로틀: 30 Hz 초과 시 발생 생략
+            if (currentPosition - _lastPlayheadFrames >= _playheadIntervalFrames)
+            {
+                _lastPlayheadFrames = currentPosition;
+                shouldFirePlayhead = true;
+            }
+
             // 재생 가능한 클립이 모두 끝났는지 확인 (메트로놈 제외)
             if (!_endReported)
             {
@@ -164,7 +177,7 @@ public sealed class MasterMixerProvider : ISampleProvider, IDisposable
         // 이벤트는 lock 밖에서 발생시킵니다.
         // lock 안에서 호출하면 이벤트 핸들러가 UI 스레드 디스패치를 시도할 때
         // UI 스레드가 Stop()으로 오디오 스레드를 기다리고 있을 경우 교착 상태가 됩니다.
-        PlayheadAdvanced?.Invoke(this, currentPosition);
+        if (shouldFirePlayhead) PlayheadAdvanced?.Invoke(this, currentPosition);
         if (shouldFireEnded) PlaybackEnded?.Invoke(this, EventArgs.Empty);
 
         return count;
