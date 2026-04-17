@@ -8,6 +8,11 @@
                     MaxWidth="520">
 
             <!-- 로고 영역 -->
+            <Image Source="pack://application:,,,/Resources/Selah_1024.png"
+                   Width="96" Height="96"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,16"/>
             <TextBlock Text="{DynamicResource Welcome_Title}"
                        FontSize="42" FontWeight="Light"
                        Foreground="{DynamicResource AccentBrush}"
