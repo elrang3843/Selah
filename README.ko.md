@@ -12,15 +12,19 @@
 
 | 시작 화면 | 새 프로젝트 |
 |:---------:|:-----------:|
-| ![시작 화면](docs/screenshots/01_welcome.png) | ![새 프로젝트](docs/screenshots/02_new_project.png) |
+| ![시작 화면](docs/screenshots/Screen001.jpg) | ![새 프로젝트](docs/screenshots/Screen002.jpg) |
 
 | 메인 편집 화면 |
 |:--------------:|
-| ![메인 편집 화면](docs/screenshots/03_editor.png) |
+| ![메인 편집 화면](docs/screenshots/Screen013.jpg) |
 
 | 파일 메뉴 | 편집 메뉴 |
 |:---------:|:---------:|
-| ![파일 메뉴](docs/screenshots/04_menu_file.png) | ![편집 메뉴](docs/screenshots/05_menu_edit.png) |
+| ![파일 메뉴](docs/screenshots/Screen004.jpg) | ![편집 메뉴](docs/screenshots/Screen005.jpg) |
+
+| 악보 인식 — 악기 선택 | 모델 관리자 |
+|:---------------------:|:-----------:|
+| ![악보 인식](docs/screenshots/Screen016.jpg) | ![모델 관리자](docs/screenshots/Screen019.jpg) |
 
 ---
 

@@ -8,6 +8,26 @@ It is designed to help churches, missionaries, and small worship teams prepare a
 
 ---
 
+## Screenshots
+
+| Welcome Screen | New Project |
+|:--------------:|:-----------:|
+| ![Welcome](docs/screenshots/Screen001.jpg) | ![New Project](docs/screenshots/Screen002.jpg) |
+
+| Main Editor |
+|:-----------:|
+| ![Main Editor](docs/screenshots/Screen013.jpg) |
+
+| File Menu | Edit Menu |
+|:---------:|:---------:|
+| ![File Menu](docs/screenshots/Screen004.jpg) | ![Edit Menu](docs/screenshots/Screen005.jpg) |
+
+| Sheet Music Recognition | Model Manager |
+|:-----------------------:|:-------------:|
+| ![Sheet Music](docs/screenshots/Screen016.jpg) | ![Model Manager](docs/screenshots/Screen019.jpg) |
+
+---
+
 ## Overview
 
 Selah combines three main ideas into one workflow:
