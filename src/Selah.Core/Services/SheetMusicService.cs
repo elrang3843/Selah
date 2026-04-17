@@ -73,7 +73,7 @@ public class SheetMusicService
         var args = $"\"{scriptPath}\" --input \"{imagePath}\" --output-dir \"{outputDir}\"";
         progress?.Report(new SheetMusicProgress { Phase = "악보 인식 시작...", Percent = 0 });
 
-        var (exitCode, profile, errorDetail) = await RunRunnerAsync(_pythonPath, args, progress, ct);
+        var (exitCode, profile, errorDetail, omrFailed) = await RunRunnerAsync(_pythonPath, args, progress, ct);
 
         if (exitCode != 0 || profile == null)
         {
@@ -82,7 +82,7 @@ public class SheetMusicService
                 Success          = false,
                 IsOmerMissing    = errorDetail.Contains("OEMER_MISSING",   StringComparison.Ordinal),
                 IsMusic21Missing = errorDetail.Contains("MUSIC21_MISSING", StringComparison.Ordinal),
-                IsOmrFailed      = errorDetail.Contains("OMR_FAILED",      StringComparison.Ordinal),
+                IsOmrFailed      = omrFailed,
                 Error = string.IsNullOrWhiteSpace(errorDetail)
                     ? $"OMR 엔진 종료 코드: {exitCode}"
                     : errorDetail
@@ -204,7 +204,7 @@ public class SheetMusicService
 
     // ── 서브프로세스 실행 ─────────────────────────────────────────────────────
 
-    private static async Task<(int ExitCode, ScoreProfile? Profile, string Error)> RunRunnerAsync(
+    private static async Task<(int ExitCode, ScoreProfile? Profile, string Error, bool OmrFailed)> RunRunnerAsync(
         string python, string args,
         IProgress<SheetMusicProgress>? progress,
         CancellationToken ct)
@@ -275,8 +275,13 @@ public class SheetMusicService
         proc.WaitForExit();
 
         string error;
+        bool omrFailed;
         lock (lockObj)
         {
+            // LOG:OMR_FAILED는 첫 번째로 출력되지만 이후 상세 줄에 덮이므로
+            // 마지막 줄만 보지 않고 전체 logLines에서 마커 존재를 확인합니다.
+            omrFailed = logLines.Any(l => l.Contains("OMR_FAILED", StringComparison.Ordinal));
+
             var lastLog    = logLines.Count > 0 ? logLines[^1] : null;
             var stderrText = stderrLines.Count > 0
                 ? string.Join("\n", stderrLines.TakeLast(5))
@@ -295,7 +300,7 @@ public class SheetMusicService
                  ?? lastLog
                  ?? string.Empty;
         }
-        return (proc.ExitCode, profile, error);
+        return (proc.ExitCode, profile, error, omrFailed);
     }
 
     private static async Task<(int ExitCode, string Error)> RunSynthesizerAsync(
