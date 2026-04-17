@@ -9,7 +9,7 @@ echo.
 
 set SOLUTION_DIR=%~dp0..
 set PUBLISH_DIR=%SOLUTION_DIR%\src\Selah.App\bin\Release\net8.0-windows\win-x64\publish
-set ISS_FILE=%~dp0Selah.iss
+set ISS_FILE=%SOLUTION_DIR%\Selah.iss
 
 :: ── 1. dotnet publish ─────────────────────────────────────────
 echo [1/2] dotnet publish (self-contained, win-x64)...
