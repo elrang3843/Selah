@@ -210,17 +210,22 @@ def _musicxml_to_midi(xml_path: str, midi_path: str) -> None:
     ticks_per_beat = 480
     tempo = 500_000  # 기본 120 BPM
 
-    # 최초 <sound tempo="…"> 에서 템포 추출
+    # 최초 <sound tempo="…"> 에서 템포 추출 (20~400 BPM 범위 외 값은 비정상으로 간주하고 무시)
     for sound in root.iter(t("sound")):
         val = sound.get("tempo")
         if val:
             try:
-                tempo = int(60_000_000 / float(val))
+                bpm = float(val)
+                if 20.0 <= bpm <= 400.0:
+                    tempo = int(60_000_000 / bpm)
+                else:
+                    print(f"LOG:템포 값 무시 (범위 초과: {bpm} BPM, 기본 120 BPM 사용)", flush=True)
             except ValueError:
                 pass
             break
 
-    mid = mido.MidiFile(ticks_per_beat=ticks_per_beat)
+    # type=1: 멀티트랙 MIDI (메타트랙 + 파트별 노트트랙)
+    mid = mido.MidiFile(type=1, ticks_per_beat=ticks_per_beat)
 
     meta_track = mido.MidiTrack()
     mid.tracks.append(meta_track)
@@ -240,6 +245,9 @@ def _musicxml_to_midi(xml_path: str, midi_path: str) -> None:
         if alter is not None:
             num += round(float(alter.text))
         return max(0, min(127, num))
+
+    # oemer 오인식으로 비정상적으로 큰 duration 값이 생성되는 경우를 방지 (96비트 = 24마디 상한)
+    MAX_NOTE_TICKS = ticks_per_beat * 96
 
     # 파트별 처리
     for part_idx, part in enumerate(root.findall(t("part"))):
@@ -270,7 +278,8 @@ def _musicxml_to_midi(xml_path: str, midi_path: str) -> None:
 
                     dur_el  = child.find(t("duration"))
                     dur_xml = int(dur_el.text) if dur_el is not None else divisions
-                    dur_tck = max(1, round(dur_xml * ticks_per_beat / divisions))
+                    dur_tck = max(1, min(MAX_NOTE_TICKS,
+                                        round(dur_xml * ticks_per_beat / divisions)))
 
                     if not is_chord:
                         note_pos = advance
@@ -292,14 +301,17 @@ def _musicxml_to_midi(xml_path: str, midi_path: str) -> None:
                 elif local == "backup":
                     dur_el = child.find(t("duration"))
                     if dur_el is not None:
-                        advance -= round(int(dur_el.text) * ticks_per_beat / divisions)
+                        advance -= min(MAX_NOTE_TICKS,
+                                       round(int(dur_el.text) * ticks_per_beat / divisions))
 
                 elif local == "forward":
                     dur_el = child.find(t("duration"))
                     if dur_el is not None:
-                        advance += round(int(dur_el.text) * ticks_per_beat / divisions)
+                        advance += min(MAX_NOTE_TICKS,
+                                       round(int(dur_el.text) * ticks_per_beat / divisions))
 
-            cursor = measure_start + advance
+            # advance가 음수(backup 초과)인 경우 0으로 보정
+            cursor = measure_start + max(0, advance)
 
         events.sort(key=lambda x: x[0])
 
@@ -313,7 +325,16 @@ def _musicxml_to_midi(xml_path: str, midi_path: str) -> None:
         track.append(mido.MetaMessage("end_of_track", time=0))
 
     mid.save(midi_path)
-    print(f"LOG:MIDI 저장 완료 ({len(mid.tracks) - 1}개 트랙)", flush=True)
+
+    # 생성된 MIDI 길이 진단 로그 (비정상적인 경우를 빠르게 감지하기 위해)
+    try:
+        midi_duration = round(mido.MidiFile(midi_path).length, 1)
+        print(f"LOG:MIDI 저장 완료 ({len(mid.tracks) - 1}개 트랙, {midi_duration}초)", flush=True)
+        if midi_duration > 600:
+            print(f"LOG:경고: MIDI 길이가 비정상적으로 깁니다 ({midi_duration}초). "
+                  "악보 인식 결과를 확인하세요.", flush=True)
+    except Exception:
+        print(f"LOG:MIDI 저장 완료 ({len(mid.tracks) - 1}개 트랙)", flush=True)
 
 
 def _build_profile_from_xml(xml_path: str, midi_path: str) -> dict:
