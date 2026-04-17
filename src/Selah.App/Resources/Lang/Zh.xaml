@@ -203,6 +203,7 @@
     <sys:String x:Key="SheetMusic_RecommendHint">★ = 根据乐谱特征推荐</sys:String>
     <sys:String x:Key="SheetMusic_Insert">插入为轨道</sys:String>
     <sys:String x:Key="SheetMusic_Cancel">取消</sys:String>
+    <sys:String x:Key="SheetMusic_Notice">✓ 支持: 印刷西方乐谱 (五线谱), 高音/低音谱号, 清晰图像&#x0a;✗ 不支持: 手写乐谱, 吉他 TAB 谱, 打击乐专用谱 (×符头), 非西方乐谱&#x0a;◎ 推荐分辨率: 150 DPI 以上 · 短边 800 px 以上 (低于时自动放大)</sys:String>
     <sys:String x:Key="Progress_Title_SheetMusic">正在从乐谱合成乐器轨道...</sys:String>
     <sys:String x:Key="Status_SheetMusic_Synthesizing">正在合成 {0}...</sys:String>
     <sys:String x:Key="Status_SheetMusicComplete">已插入 {0} 条乐谱轨道</sys:String>

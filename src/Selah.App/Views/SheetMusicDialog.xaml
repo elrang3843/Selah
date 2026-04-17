@@ -10,6 +10,18 @@
 
     <StackPanel Margin="20,16,20,20">
 
+        <!-- 악보 인식 안내 -->
+        <Border Background="{DynamicResource Surface1Brush}"
+                CornerRadius="4"
+                Padding="12,10"
+                Margin="0,0,0,14">
+            <TextBlock Text="{DynamicResource SheetMusic_Notice}"
+                       FontSize="10"
+                       Foreground="{DynamicResource SubtextBrush}"
+                       TextWrapping="Wrap"
+                       LineHeight="18"/>
+        </Border>
+
         <!-- 이미지 선택 -->
         <TextBlock Text="{DynamicResource SheetMusic_ImageLabel}"
                    FontSize="12" FontWeight="SemiBold"

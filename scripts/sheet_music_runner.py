@@ -430,35 +430,52 @@ def main() -> None:
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # Step 1: 이미지 포맷 정규화
-    # oemer는 RGB PNG를 기대합니다.
-    # RGBA(투명도 채널 포함)·팔레트·그레이스케일 이미지는
-    # oemer 내부에서 np.array() 변환 시 NoneType 오류를 유발합니다.
-    # 이진화는 하지 않고, 순수 RGB 변환 + PNG 저장만 수행합니다.
-    # RGBA/LA/P 이미지는 투명 픽셀을 흰색으로 합성 후 RGB 변환합니다.
-    # (PIL 기본 convert("RGB")는 투명 영역을 검은색으로 채워 오인식을 유발)
-    # 어두운 배경(반전 스캔)은 자동으로 invert하여 oemer에 전달합니다.
+    # Step 1: 이미지 전처리
+    # oemer는 선명한 RGB PNG를 기대합니다. 다음 문제를 자동으로 보정합니다:
+    #   (a) 팔레트/RGBA/LA 모드 → 흰 배경에 합성 후 RGB 변환
+    #       (PIL 기본 convert("RGB")는 투명 영역을 검은색으로 채워 오인식 유발)
+    #   (b) 어두운 배경(반전 스캔) → 자동 반전
+    #   (c) 저해상도(짧은 변 < 800px) → Lanczos 업스케일
+    #       oemer는 150 DPI 이상 / 짧은 변 800px 이상을 권장합니다.
+    #   (d) 낮은 대비 → 자동 히스토그램 스트레칭 (1% 클리핑)
+    #   (e) 고주파 노이즈 → scipy 균일 필터 (2px, 선택적)
     print("PROGRESS:10", flush=True)
-    print("LOG:이미지 포맷 확인 중...", flush=True)
+    print("LOG:이미지 전처리 중...", flush=True)
     normalized_input = os.path.join(args.output_dir, "input_rgb.png")
     try:
         from PIL import ImageOps
         with Image.open(args.input) as img:
-            # 팔레트 모드는 먼저 RGBA로 변환하여 투명도 정보를 보존
+            # (a) 팔레트 모드: 먼저 RGBA로 변환하여 투명도 정보를 보존
             if img.mode == "P":
                 img = img.convert("RGBA")
-            # 투명 채널이 있으면 흰 배경에 합성
+            # (a) 투명 채널: 흰 배경에 합성 후 RGB
             if img.mode in ("RGBA", "LA"):
                 white_bg = Image.new("RGB", img.size, (255, 255, 255))
-                white_bg.paste(img, mask=img.split()[-1])  # 마지막 채널 = alpha
+                white_bg.paste(img, mask=img.split()[-1])
                 img = white_bg
             elif img.mode != "RGB":
                 img = img.convert("RGB")
-            # 평균 밝기 < 100 이면 반전된(어두운 배경) 이미지로 간주하고 invert
+            # (b) 어두운 배경 감지 → 반전
             mean_brightness = np.array(img).mean()
             if mean_brightness < 100:
                 img = ImageOps.invert(img)
                 print(f"LOG:어두운 배경 감지 (평균 밝기 {mean_brightness:.1f}) — 이미지 반전 적용", flush=True)
+            # (c) 해상도 보정: 짧은 변 < 800px이면 업스케일
+            w, h = img.size
+            min_dim = min(w, h)
+            if min_dim < 800:
+                scale = 800 / min_dim
+                new_w, new_h = int(w * scale), int(h * scale)
+                img = img.resize((new_w, new_h), Image.LANCZOS)
+                print(f"LOG:해상도 보정 ({w}×{h} → {new_w}×{new_h}, {scale:.1f}× 업스케일)", flush=True)
+            # (d) 대비 향상: 자동 히스토그램 스트레칭 (1% 클리핑)
+            img = ImageOps.autocontrast(img, cutoff=1)
+            # (e) 노이즈 감소: scipy 균일 필터 (2px, 고주파 노이즈만 제거)
+            if _SCIPY_OK:
+                arr = np.array(img, dtype=np.float32)
+                for c in range(arr.shape[2]):
+                    arr[:, :, c] = uniform_filter(arr[:, :, c], size=2)
+                img = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
             img.save(normalized_input, format="PNG")
         oemer_input = normalized_input
     except Exception as exc:

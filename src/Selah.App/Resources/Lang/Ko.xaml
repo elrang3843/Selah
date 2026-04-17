@@ -203,6 +203,7 @@
     <sys:String x:Key="SheetMusic_RecommendHint">★ = 악보 특성 기반 추천 악기</sys:String>
     <sys:String x:Key="SheetMusic_Insert">트랙으로 삽입</sys:String>
     <sys:String x:Key="SheetMusic_Cancel">취소</sys:String>
+    <sys:String x:Key="SheetMusic_Notice">✓ 지원: 인쇄된 서양 악보 (5선보), 높은음자리표/낮은음자리표, 선명한 이미지&#x0a;✗ 미지원: 손으로 쓴 악보, 기타 TAB, 드럼 전용 악보 (× 음표머리), 비서양 악보&#x0a;◎ 권장 해상도: 150 DPI 이상 · 짧은 변 800 px 이상 (미달 시 자동 보정 적용)</sys:String>
     <sys:String x:Key="Progress_Title_SheetMusic">악보 악기 트랙 합성 중...</sys:String>
     <sys:String x:Key="Status_SheetMusic_Synthesizing">{0} 합성 중...</sys:String>
     <sys:String x:Key="Status_SheetMusicComplete">악보 트랙 {0}개 삽입 완료</sys:String>

@@ -203,6 +203,7 @@
     <sys:String x:Key="SheetMusic_RecommendHint">★ = recommended based on score characteristics</sys:String>
     <sys:String x:Key="SheetMusic_Insert">Insert as Tracks</sys:String>
     <sys:String x:Key="SheetMusic_Cancel">Cancel</sys:String>
+    <sys:String x:Key="SheetMusic_Notice">✓ Supported: Printed Western notation (5-line staves), treble/bass clef, clear images&#x0a;✗ Not supported: Handwritten scores, guitar TAB, drum-specific notation (x noteheads), non-Western scores&#x0a;◎ Recommended: 150 DPI or higher · 800 px minimum on short side (auto-upscaled if below)</sys:String>
     <sys:String x:Key="Progress_Title_SheetMusic">Synthesizing instrument tracks from sheet music...</sys:String>
     <sys:String x:Key="Status_SheetMusic_Synthesizing">Synthesizing {0}...</sys:String>
     <sys:String x:Key="Status_SheetMusicComplete">{0} sheet music track(s) inserted</sys:String>
