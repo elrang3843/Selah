@@ -95,6 +95,12 @@ The repository currently includes:
 
 ---
 
+## Release History
+
+See **[HISTORY.md](HISTORY.md)** for a full version changelog.
+
+---
+
 ## Installation & Dependencies
 
 See **[docs/SETUP.md](docs/SETUP.md)** for a full guide covering:
