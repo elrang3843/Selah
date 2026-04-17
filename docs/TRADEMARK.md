@@ -4,7 +4,7 @@
 
 The project name is **Selah**.
 
-This repository may also refer to the project together with its publisher/maintainer information, including **HANDTECH**.
+This repository may also refer to the project together with its publisher/maintainer information, including **HANDTECH** and its author **Noh JinMoon (노진문)**.
 
 ---
 
