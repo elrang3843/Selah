@@ -689,6 +689,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     {
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
+            if (!AudioEngine.IsPlaying) return;
             int sr = CurrentProject?.SampleRate ?? 48000;
             Timeline.UpdatePlayhead(frames, sr);
             OnPropertyChanged(nameof(PlayheadTimeDisplay));
@@ -699,6 +700,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     {
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
+            if (AudioEngine.IsPlaying) return;
             IsPlaying = false;
             Timeline.IsPlaying = false;
         });
