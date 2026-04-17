@@ -456,8 +456,9 @@ def main() -> None:
     #   (a) 팔레트/RGBA/LA 모드 → 흰 배경에 합성 후 RGB 변환
     #       (PIL 기본 convert("RGB")는 투명 영역을 검은색으로 채워 오인식 유발)
     #   (b) 어두운 배경(반전 스캔) → 자동 반전
-    #   (c) 저해상도(짧은 변 < 800px) → Lanczos 업스케일
-    #       oemer는 150 DPI 이상 / 짧은 변 800px 이상을 권장합니다.
+    #   (c) 고해상도(긴 변 > 3500px) → Lanczos 다운스케일 (999 DPI급 스캔 오인식 방지)
+    #       저해상도(짧은 변 < 800px) → Lanczos 업스케일
+    #       oemer 권장 범위: 150~300 DPI (A4 기준 약 1240~2480px)
     #   (d) 낮은 대비 → 자동 히스토그램 스트레칭 (1% 클리핑)
     #   (e) 고주파 노이즈 → scipy 균일 필터 (2px, 선택적)
     print("PROGRESS:10", flush=True)
@@ -481,14 +482,25 @@ def main() -> None:
             if mean_brightness < 100:
                 img = ImageOps.invert(img)
                 print(f"LOG:어두운 배경 감지 (평균 밝기 {mean_brightness:.1f}) — 이미지 반전 적용", flush=True)
-            # (c) 해상도 보정: 짧은 변 < 800px이면 업스케일
+            # (c) 해상도 보정: 긴 변 > 3500px이면 다운스케일, 짧은 변 < 800px이면 업스케일
+            #     oemer 권장 범위: 150~300 DPI (A4 기준 약 1240~2480px).
+            #     999 DPI급 고해상도 스캔은 oemer 오인식의 주요 원인이므로 반드시 축소.
             w, h = img.size
+            max_dim = max(w, h)
             min_dim = min(w, h)
-            if min_dim < 800:
+            MAX_LONG_EDGE = 3500   # ≈ A4 @ 300 DPI
+            if max_dim > MAX_LONG_EDGE:
+                scale = MAX_LONG_EDGE / max_dim
+                new_w, new_h = int(w * scale), int(h * scale)
+                img = img.resize((new_w, new_h), Image.LANCZOS)
+                print(f"LOG:해상도 보정 ({w}×{h} → {new_w}×{new_h}, "
+                      f"{scale:.2f}× 다운스케일)", flush=True)
+            elif min_dim < 800:
                 scale = 800 / min_dim
                 new_w, new_h = int(w * scale), int(h * scale)
                 img = img.resize((new_w, new_h), Image.LANCZOS)
-                print(f"LOG:해상도 보정 ({w}×{h} → {new_w}×{new_h}, {scale:.1f}× 업스케일)", flush=True)
+                print(f"LOG:해상도 보정 ({w}×{h} → {new_w}×{new_h}, "
+                      f"{scale:.1f}× 업스케일)", flush=True)
             # (d) 대비 향상: 자동 히스토그램 스트레칭 (1% 클리핑)
             img = ImageOps.autocontrast(img, cutoff=1)
             # (e) 노이즈 감소: scipy 균일 필터 (2px, 고주파 노이즈만 제거)
