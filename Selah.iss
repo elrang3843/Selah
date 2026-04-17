@@ -19,6 +19,11 @@
 #define AppExeName   "Selah.exe"
 #define PublishDir   "src\Selah.App\bin\Release\net8.0-windows\win-x64\publish"
 
+; 빌드 출력 폴더가 없으면 즉시 오류 — dotnet publish를 먼저 실행하세요
+#if !DirExists(PublishDir)
+  #error publish 폴더가 없습니다. 먼저 installer\build_release.bat 을 실행하거나, 아래 명령을 직접 실행하세요:^^  dotnet publish src/Selah.App/Selah.App.csproj -c Release -r win-x64 --self-contained true
+#endif
+
 [Setup]
 AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 AppName={#AppName}
