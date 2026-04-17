@@ -967,10 +967,12 @@ public class MainViewModel : ViewModelBase, IDisposable
                     SourceOutSamples     = lengthSamples
                 }, CurrentProject.Model));
 
-                AudioEngine.RebuildMixers();
                 inserted++;
             }
 
+            // 루프 완료 후 한 번만 믹서를 재구성합니다.
+            // (악기별로 호출하면 N개 악기 × 전체 트랙 수만큼 불필요한 WaveFileReader 재생성이 발생합니다)
+            AudioEngine.RebuildMixers();
             CurrentProject.Model.IsDirty = true;
             StatusMessage = Loc.Format("Status_SheetMusicComplete", inserted);
         }

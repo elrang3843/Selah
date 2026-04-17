@@ -260,39 +260,38 @@ def synthesize_python_manual(soundfont: str, midi_path: str, output_wav: str,
     total_samples = events[-1][0] + decay_samples
     block_size    = 1024
 
-    wav_frames = bytearray()
-    pos = 0
-    ei  = 0
-
-    while pos < total_samples:
-        # 현재 위치까지의 이벤트 처리
-        while ei < len(events) and events[ei][0] <= pos:
-            msg = events[ei][1]
-            if msg.type == "note_on":
-                target_ch = ch if is_drums else (
-                    _DRUMS_CHANNEL if msg.channel == _DRUMS_CHANNEL else ch)
-                fs.noteon(target_ch, msg.note, msg.velocity)
-            elif msg.type == "note_off":
-                target_ch = ch if is_drums else (
-                    _DRUMS_CHANNEL if msg.channel == _DRUMS_CHANNEL else ch)
-                fs.noteoff(target_ch, msg.note)
-            elif msg.type == "set_tempo":
-                tempo = msg.tempo
-            ei += 1
-
-        chunk = fs.get_samples(block_size)  # int16 스테레오 인터리브드
-        buf = chunk.tobytes() if hasattr(chunk, "tobytes") else bytes(chunk)
-        wav_frames.extend(buf)
-        pos += block_size
-
-    fs.delete()
-
-    # WAV 파일 저장 (FluidSynth get_samples는 스테레오 int16 출력)
+    # bytearray 전체 누적 대신 WAV 파일에 직접 스트리밍 쓰기.
+    # 누적 방식은 긴 곡의 경우 수백 MB를 RAM에 올린 뒤 한 번에 씁니다.
     with wave.open(output_wav, "wb") as wf:
         wf.setnchannels(2)
-        wf.setsampwidth(2)
+        wf.setsampwidth(2)      # int16 = 2 bytes
         wf.setframerate(sample_rate)
-        wf.writeframes(bytes(wav_frames))
+
+        pos = 0
+        ei  = 0
+
+        while pos < total_samples:
+            # 현재 위치까지의 이벤트 처리
+            while ei < len(events) and events[ei][0] <= pos:
+                msg = events[ei][1]
+                if msg.type == "note_on":
+                    target_ch = ch if is_drums else (
+                        _DRUMS_CHANNEL if msg.channel == _DRUMS_CHANNEL else ch)
+                    fs.noteon(target_ch, msg.note, msg.velocity)
+                elif msg.type == "note_off":
+                    target_ch = ch if is_drums else (
+                        _DRUMS_CHANNEL if msg.channel == _DRUMS_CHANNEL else ch)
+                    fs.noteoff(target_ch, msg.note)
+                elif msg.type == "set_tempo":
+                    tempo = msg.tempo
+                ei += 1
+
+            chunk = fs.get_samples(block_size)  # int16 스테레오 인터리브드
+            buf = chunk.tobytes() if hasattr(chunk, "tobytes") else bytes(chunk)
+            wf.writeframes(buf)
+            pos += block_size
+
+    fs.delete()
 
 
 def synthesize_python_api(soundfont: str, midi_path: str, output_wav: str,
