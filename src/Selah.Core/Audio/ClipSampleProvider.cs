@@ -40,25 +40,28 @@ public sealed class ClipSampleProvider : ISampleProvider, IDisposable
         try
         {
             _reader = new WaveFileReader(_source.AbsolutePath);
-            ISampleProvider raw = _reader.ToSampleProvider();
-
-            // 샘플레이트 변환
-            if (_reader.WaveFormat.SampleRate != WaveFormat.SampleRate)
-                raw = new WdlResamplingSampleProvider(raw, WaveFormat.SampleRate);
-
-            // 채널 수 변환
-            if (_reader.WaveFormat.Channels == 1 && WaveFormat.Channels == 2)
-                raw = new MonoToStereoSampleProvider(raw);
-            else if (_reader.WaveFormat.Channels > 2 && WaveFormat.Channels == 2)
-                raw = new MultiplexingSampleProvider(new[] { raw }, 2);
-
-            _sampleProvider = raw;
+            RebuildSampleProviderChain();
         }
         catch
         {
             _reader?.Dispose();
             _reader = null;
+            _sampleProvider = null;
         }
+    }
+
+    // 파일을 다시 열지 않고 리샘플러/채널 변환 체인만 재생성 (Seek 성능 최적화)
+    private void RebuildSampleProviderChain()
+    {
+        if (_reader == null) return;
+        ISampleProvider raw = _reader.ToSampleProvider();
+        if (_reader.WaveFormat.SampleRate != WaveFormat.SampleRate)
+            raw = new WdlResamplingSampleProvider(raw, WaveFormat.SampleRate);
+        if (_reader.WaveFormat.Channels == 1 && WaveFormat.Channels == 2)
+            raw = new MonoToStereoSampleProvider(raw);
+        else if (_reader.WaveFormat.Channels > 2 && WaveFormat.Channels == 2)
+            raw = new MultiplexingSampleProvider(new[] { raw }, 2);
+        _sampleProvider = raw;
     }
 
     // 소스 샘플레이트 → 프로젝트(출력) 샘플레이트 변환
@@ -82,10 +85,10 @@ public sealed class ClipSampleProvider : ISampleProvider, IDisposable
     {
         _positionFrames = timelineFrames;
 
-        // 샘플 프로바이더 체인(리샘플러 포함)을 리셋하여 내부 버퍼 오염 방지
-        OpenReader();
-
         if (_reader == null) return;
+
+        // 파일을 다시 열지 않고 리샘플러 체인만 재생성하여 내부 버퍼 오염 방지
+        RebuildSampleProviderChain();
 
         long relFrame = timelineFrames - _clip.TimelineStartSamples;
         // 클립 이전 위치라도 소스 시작점에 미리 위치시킴.

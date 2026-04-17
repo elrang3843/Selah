@@ -43,7 +43,7 @@ public sealed class AudioEngine : IDisposable
 
     public void LoadProject(Project project)
     {
-        Stop();
+        TeardownWaveOut();
         _masterMixer?.Dispose();
 
         _project = project;
@@ -122,6 +122,12 @@ public sealed class AudioEngine : IDisposable
     public void Stop()
     {
         _waveOut?.Stop();
+        // _waveOut은 유지 — 다음 Play() 시 드라이버 재초기화 불필요
+    }
+
+    private void TeardownWaveOut()
+    {
+        _waveOut?.Stop();
         _waveOut?.Dispose();
         _waveOut = null;
         _volumeProvider = null;
@@ -143,7 +149,7 @@ public sealed class AudioEngine : IDisposable
     {
         if (_disposed) return;
         _disposed = true;
-        Stop();
+        TeardownWaveOut();
         _masterMixer?.Dispose();
     }
 }
