@@ -62,7 +62,7 @@ See **[docs/SETUP.md](docs/SETUP.md)** for a full guide covering:
 - .NET 8 runtime and Python 3.10+
 - FFmpeg for audio import/export
 - Python packages for stem separation, noise reduction, and sheet music recognition
-- FluidSynth and SoundFont (.sf2) setup for MIDI synthesis
+- FluidSynth and SoundFont (.sf2) for MIDI synthesis — recommended: **GeneralUser GS** (~29 MB, free) or **MuseScore_General.sf2** (~206 MB, MIT, best quality)
 
 ---
 

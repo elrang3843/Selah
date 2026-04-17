@@ -144,16 +144,40 @@ If this prints `fluidsynth OK`, synthesis is ready (assuming a SoundFont is also
 A SoundFont is an instrument sample bank that FluidSynth uses to render MIDI notes
 into realistic audio. Selah does not bundle one due to file size.
 
-#### Recommended free SoundFont
+#### Free SoundFont comparison
 
-**GeneralUser GS** (~29 MB, MIT-like license)
+| SoundFont | Size | Quality | License | Notes |
+|-----------|------|---------|---------|-------|
+| **GeneralUser GS** | ~29 MB | ★★★★☆ | Free (commercial OK) | Best size-to-quality ratio; **recommended** |
+| **MuseScore_General.sf2** | ~206 MB | ★★★★★ | MIT | Best overall quality across all instruments |
+| **FluidR3_GM.sf2** | ~141 MB | ★★★☆☆ | MIT | Widely distributed; weak on brass/reeds |
 
-- Download: <http://schristiancollins.com/generaluser.php>
+---
+
+**GeneralUser GS** — recommended for most users
+
+Smallest download with well-balanced quality. Strong performance on piano, strings,
+and woodwinds (including saxophone).
+
+- Download: `schristiancollins.com/generaluser.php`
 - Extract `GeneralUser GS.sf2` from the archive.
 
-Other options:
-- **FluidR3_GM.sf2** (~141 MB) — included with many Linux distributions; widely available.
-- **MuseScore_General.sf2** — bundled with MuseScore; high quality, larger size.
+**MuseScore_General.sf2** — best quality
+
+Highest-quality samples across all GM instruments. If MuseScore is installed,
+you can copy it directly from the program folder.
+
+- MuseScore installation path: `C:\Program Files\MuseScore 4\sound\`
+- Also available for separate download from the MuseScore website.
+
+**FluidR3_GM.sf2** — fallback option (lower quality)
+
+Included with many Linux distributions and music applications, making it easy to
+obtain. However, brass and reed instrument samples are noticeably weak
+(saxophone quality in particular is poor). Use as a last resort.
+
+> **For worship music:** GeneralUser GS is recommended. Piano, strings, acoustic
+> guitar, and woodwind patches are well-suited for hymn and worship score playback.
 
 #### Where to place the .sf2 file
 

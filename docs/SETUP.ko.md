@@ -145,16 +145,35 @@ python -c "import fluidsynth; print('fluidsynth OK')"
 SoundFont는 FluidSynth가 MIDI 음표를 실제 악기 음색으로 렌더링하는 데 사용하는
 악기 샘플 뱅크입니다. 파일 크기 문제로 Selah에 포함되어 있지 않습니다.
 
-#### 추천 무료 SoundFont
+#### 무료 SoundFont 비교
 
-**GeneralUser GS** (약 29 MB, MIT 유사 라이선스)
+| SoundFont | 크기 | 음질 | 라이선스 | 비고 |
+|-----------|------|------|----------|------|
+| **GeneralUser GS** | ~29 MB | ★★★★☆ | 무료 (상업 사용 가능) | 크기 대비 품질 최고, **권장** |
+| **MuseScore_General.sf2** | ~206 MB | ★★★★★ | MIT | 전체 악기 최고 품질 |
+| **FluidR3_GM.sf2** | ~141 MB | ★★★☆☆ | MIT | 널리 배포되지만 관악기 품질 낮음 |
 
-- 다운로드: <http://schristiancollins.com/generaluser.php>
+---
+
+**GeneralUser GS** — 권장 (대부분의 경우)
+
+파일이 가장 작으면서도 음질이 균형 잡혀 있습니다. 피아노·스트링·목관악기(색소폰 포함)에서 좋은 성능을 보입니다.
+
+- 다운로드: `schristiancollins.com/generaluser.php`
 - 압축 해제 후 `GeneralUser GS.sf2` 파일을 사용합니다.
 
-기타 옵션:
-- **FluidR3_GM.sf2** (약 141 MB) — 많은 Linux 배포판에 포함되어 있으며 광범위하게 사용됨.
-- **MuseScore_General.sf2** — MuseScore에 번들로 제공되며 고품질, 대용량.
+**MuseScore_General.sf2** — 최고 음질
+
+GM 전 악기에 걸쳐 가장 높은 샘플 품질을 제공합니다. MuseScore가 설치되어 있다면 프로그램 폴더에서 직접 복사할 수 있습니다.
+
+- MuseScore 설치 경로: `C:\Program Files\MuseScore 4\sound\`
+- MuseScore 공식 웹사이트에서도 별도 다운로드 가능합니다.
+
+**FluidR3_GM.sf2** — 대안 (낮은 품질)
+
+Linux 배포판과 일부 음악 소프트웨어에 기본 포함되어 있어 구하기 쉽지만, 금관·목관악기 샘플 품질이 낮습니다(색소폰 음색이 특히 좋지 않음). 다른 옵션을 구하기 어려울 때 대안으로 사용합니다.
+
+> **예배 음악 용도:** GeneralUser GS를 권장합니다. 피아노·스트링·어쿠스틱 기타·목관악기 패치가 찬송·예배 악보 재생에 적합합니다.
 
 #### .sf2 파일 배치 위치
 
