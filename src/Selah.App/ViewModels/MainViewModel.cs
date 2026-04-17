@@ -30,6 +30,8 @@ public class MainViewModel : ViewModelBase, IDisposable
     private double _progressPercent = -1;
     private HardwareInfo? _hardwareInfo;
     private bool _disposed;
+    // 재생 세션마다 증가 — 이전 재생의 BeginInvoke 항목을 폐기하기 위해 사용
+    private volatile int _playbackGeneration;
 
     // ── 요청 이벤트 (코드 비하인드에서 다이얼로그를 띄움) ──
     public event Func<(string name, int sampleRate), Task>? NewProjectRequested;
@@ -444,6 +446,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     {
         if (AudioEngine.IsPlaying)
         {
+            _playbackGeneration++;
             AudioEngine.Stop();
             IsPlaying = false;
             Timeline.IsPlaying = false;
@@ -462,6 +465,7 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private void OnStop()
     {
+        _playbackGeneration++;
         AudioEngine.Stop();
         AudioEngine.Seek(0);
         Timeline.UpdatePlayhead(0, CurrentProject?.SampleRate ?? 48000);
@@ -474,7 +478,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     private void OnReturnToStart()
     {
         bool wasPlaying = AudioEngine.IsPlaying;
-        if (wasPlaying) AudioEngine.Stop();
+        if (wasPlaying) { _playbackGeneration++; AudioEngine.Stop(); }
         Timeline.UpdatePlayhead(0, CurrentProject?.SampleRate ?? 48000);
         AudioEngine.Seek(0);
         if (wasPlaying) { AudioEngine.Play(); IsPlaying = true; }
@@ -687,9 +691,10 @@ public class MainViewModel : ViewModelBase, IDisposable
 
     private void OnPlayheadAdvanced(object? s, long frames)
     {
+        int generation = _playbackGeneration;
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
-            if (!AudioEngine.IsPlaying) return;
+            if (_playbackGeneration != generation) return;
             int sr = CurrentProject?.SampleRate ?? 48000;
             Timeline.UpdatePlayhead(frames, sr);
             OnPropertyChanged(nameof(PlayheadTimeDisplay));
@@ -711,6 +716,7 @@ public class MainViewModel : ViewModelBase, IDisposable
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
             if (!AudioEngine.IsPlaying) return;
+            _playbackGeneration++;
             AudioEngine.Stop();
             IsPlaying = false;
             Timeline.IsPlaying = false;
