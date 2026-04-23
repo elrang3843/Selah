@@ -163,8 +163,9 @@ Selah.sln
 │  ├─ TRADEMARK.md
 │  ├─ ETHICS.ko.md
 │  └─ TRADEMARK.ko.md
-├─ README.md
-├─ README.ko.md
+├─ README.md                   # 한/영 합본
+├─ README.en.md                # 영문 전용
+├─ README.ko.md                # 이 파일 (한국어 전용)
 ├─ LICENSE
 └─ THIRD_PARTY_NOTICES.md
 ```
