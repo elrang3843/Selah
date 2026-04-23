@@ -123,24 +123,140 @@ This project is a **free and open-source tool** for non-commercial ministry-orie
 
 ## 설치 / Installation
 
-전체 안내: **[docs/SETUP.ko.md](docs/SETUP.ko.md)** · **[docs/SETUP.md](docs/SETUP.md)**
+### 1단계 — 설치 파일 다운로드 / Step 1 — Download installer
 
-**빠른 설치 / Quick install:**
+**[▶ Releases 페이지에서 다운로드](https://github.com/elrang3843/Selah/releases/latest)**
 
-```bat
-:: Python 패키지 전체 설치 / Install all Python packages
-pip install -r requirements.txt
+`Selah-1.0.0-Setup.exe` 파일을 클릭해 다운로드합니다.  
+Click `Selah-1.0.0-Setup.exe` on the Releases page to download.
+
+> Windows Defender SmartScreen이 나타나면 **"추가 정보" → "실행"** 을 클릭하세요.  
+> If Windows Defender SmartScreen appears, click **"More info" → "Run anyway"**.
+
+---
+
+### 2단계 — 설치 마법사 실행 / Step 2 — Run the installer
+
+1. 다운로드한 `Selah-1.0.0-Setup.exe`를 실행합니다.  
+   Run the downloaded `Selah-1.0.0-Setup.exe`.
+2. 설치 언어를 선택합니다 (한국어 / English).  
+   Select installation language.
+3. 설치 경로를 확인하고 **설치** 를 클릭합니다.  
+   Confirm the installation path and click **Install**.
+4. 설치 완료 후 **"Python 패키지 설치"** 체크박스가 나타납니다.  
+   When finished, a **"Install Python packages"** checkbox appears.  
+   - AI 기능(스템 분리·악보 인식)을 사용할 예정이면 체크하고 **마침** 을 클릭하세요.  
+     Check it if you plan to use AI features (stem separation / sheet music), then click **Finish**.
+
+> **.NET 런타임은 별도 설치 불필요** — 설치 파일에 포함되어 있습니다.  
+> **.NET runtime is included** in the installer — no separate download needed.
+
+---
+
+### 3단계 — Python 패키지 설치 (AI 기능) / Step 3 — Install Python packages (AI features)
+
+스템 분리·노이즈 제거·악보 인식을 사용하려면 Python 환경이 필요합니다.  
+Python is required for stem separation, noise reduction, and sheet music recognition.
+
+#### Python 설치 / Install Python
+
+Python이 없으면 먼저 설치합니다.  
+If Python is not installed:
+
+1. <https://www.python.org/downloads/> 에서 **Python 3.10 이상** 다운로드  
+   Download **Python 3.10+** from <https://www.python.org/downloads/>
+2. 설치 중 **"Add Python to PATH"** 반드시 체크  
+   Check **"Add Python to PATH"** during installation
+3. 설치 확인: 명령 프롬프트에서 `python --version` 실행  
+   Verify: run `python --version` in Command Prompt
+
+#### 패키지 설치 / Install packages
+
+설치 폴더(기본: `C:\Program Files\Selah\`)에서 `setup_env.bat`을 실행합니다.  
+Run `setup_env.bat` from the install folder (default: `C:\Program Files\Selah\`).
+
+```
+C:\Program Files\Selah\setup_env.bat
 ```
 
-또는 `setup_env.bat`을 실행하여 언어와 기능을 선택해 설치합니다.  
-Or run `setup_env.bat` to choose language and feature set interactively.
+또는 기능별로 선택 설치 / Or install by feature:
 
-| 필수 / Required | 용도 / Purpose |
-|-----------------|----------------|
-| .NET 8 Desktop Runtime | 앱 실행 · App runtime (included in installer) |
-| Python 3.10+ | AI 기능 · AI features |
-| FFmpeg | 오디오 가져오기/내보내기 · Audio import/export |
-| FluidSynth + SoundFont (.sf2/.sf3) | 악보 합성 · Score synthesis |
+| 파일 / File | 대상 기능 / Feature |
+|-------------|---------------------|
+| `setup_env.ko.bat` | 한국어 안내로 전체 선택 설치 |
+| `setup_env.en.bat` | English guided install |
+| `requirements.txt` | `pip install -r requirements.txt` (전체) |
+| `requirements-stem.txt` | 스템 분리만 · Stem separation only |
+| `requirements-sheet-music.txt` | 악보 인식만 · Sheet music only |
+
+---
+
+### 4단계 — FFmpeg 설치 (WAV 외 형식 지원) / Step 4 — FFmpeg (non-WAV formats)
+
+MP3·MP4·FLAC 등을 가져오거나 내보내려면 FFmpeg가 필요합니다.  
+Required to import/export MP3, MP4, FLAC, and other non-WAV formats.
+
+1. <https://ffmpeg.org/download.html> 에서 Windows 빌드 다운로드  
+   Download a Windows build from <https://ffmpeg.org/download.html>  
+   (권장 / recommended: **gyan.dev full build** 또는 / or **BtbN release**)
+2. 압축 해제 후 `bin\` 폴더 경로 확인 (`ffmpeg.exe`, `ffprobe.exe` 위치)  
+   Extract and note the `bin\` folder containing `ffmpeg.exe` and `ffprobe.exe`
+3. 시스템 PATH에 `bin\` 폴더 추가  
+   Add the `bin\` folder to system PATH:  
+   *시스템 속성 → 환경 변수 → Path → 새로 만들기 / System Properties → Environment Variables → Path → New*
+4. 확인 / Verify: `ffmpeg -version`
+
+---
+
+### 5단계 — FluidSynth + SoundFont (악보 인식 전용) / Step 5 — FluidSynth + SoundFont (sheet music only)
+
+악보 인식 기능을 사용하지 않는다면 이 단계는 건너뛰세요.  
+Skip this step if you do not use the sheet music recognition feature.
+
+#### FluidSynth 네이티브 DLL / Native DLL
+
+1. <https://www.fluidsynth.org/> 에서 Windows 설치 프로그램 다운로드 후 실행  
+   Download and run the Windows installer from <https://www.fluidsynth.org/>
+2. 설치 후 `C:\Program Files\FluidSynth\bin\libfluidsynth-3.dll` 확인  
+   After install, verify `C:\Program Files\FluidSynth\bin\libfluidsynth-3.dll` exists
+
+#### SoundFont 파일 배치 / Place a SoundFont file
+
+아래 경로 중 하나에 `.sf2` 또는 `.sf3` 파일을 넣습니다.  
+Place a `.sf2` or `.sf3` file in any of these locations:
+
+| 우선순위 / Priority | 경로 / Path |
+|---------------------|-------------|
+| 1 (최우선 / highest) | `%AppData%\Selah\soundfonts\` |
+| 2 | `C:\Program Files\Selah\soundfonts\` |
+| 3 | `C:\Program Files\FluidSynth\` |
+| 4 | `C:\soundfonts\` |
+
+**권장 SoundFont / Recommended SoundFont:**
+
+| SoundFont | 크기 / Size | 품질 / Quality | 라이선스 / License |
+|-----------|-------------|----------------|-------------------|
+| **GeneralUser GS** ★ 권장 | ~29 MB | ★★★★☆ | 무료 / Free |
+| MuseScore_General.sf3 | ~50 MB | ★★★★★ | MIT |
+| MuseScore_General.sf2 | ~206 MB | ★★★★★ | MIT |
+
+- GeneralUser GS 다운로드 / Download: `schristiancollins.com/generaluser.php`
+- MuseScore_General.sf3: MuseScore 4 설치 경로 / install path  
+  `C:\Program Files\MuseScore 4\sound\MuseScore_General.sf3`
+
+---
+
+### 설치 요약 / Installation Summary
+
+| 기능 / Feature | 필요 항목 / Requires |
+|----------------|----------------------|
+| 기본 재생·편집 / Basic playback & editing | 설치 파일만 / Installer only |
+| MP3·MP4 가져오기 / Import MP3·MP4 | FFmpeg |
+| 스템 분리 / Stem separation | Python 3.10+ · `audio-separator` 또는 `onnxruntime` |
+| 노이즈 제거 / Noise reduction | Python 3.10+ · `noisereduce` |
+| 악보 인식 / Sheet music recognition | Python 3.10+ · `oemer` · FluidSynth · SoundFont |
+
+전체 설치 안내: **[docs/SETUP.ko.md](docs/SETUP.ko.md)** · **[docs/SETUP.md](docs/SETUP.md)**
 
 ---
 

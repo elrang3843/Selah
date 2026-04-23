@@ -123,14 +123,77 @@ See **[HISTORY.md](HISTORY.md)** for a full version changelog.
 
 ---
 
-## Installation & Dependencies
+## Installation
 
-See **[docs/SETUP.md](docs/SETUP.md)** for a full guide covering:
+### Step 1 — Download the installer
 
-- .NET 8 runtime and Python 3.10+
-- FFmpeg for audio import/export
-- Python packages for stem separation, noise reduction, and sheet music recognition
-- FluidSynth and SoundFont (.sf2/.sf3) for MIDI synthesis — recommended: **GeneralUser GS** (~29 MB, free) or **MuseScore_General.sf3** (~50 MB, MIT, best quality)
+**[▶ Download from the Releases page](https://github.com/elrang3843/Selah/releases/latest)**
+
+Click `Selah-1.0.0-Setup.exe` to download.
+
+> If Windows Defender SmartScreen appears, click **"More info" → "Run anyway"**.
+
+### Step 2 — Run the installer
+
+1. Run `Selah-1.0.0-Setup.exe`.
+2. Select installation language.
+3. Confirm the installation path and click **Install**.
+4. When finished, an optional **"Install Python packages"** checkbox appears — check it if you plan to use AI features, then click **Finish**.
+
+> **.NET runtime is bundled** — no separate download needed.
+
+### Step 3 — Install Python packages (AI features)
+
+Required for stem separation, noise reduction, and sheet music recognition.
+
+**Install Python 3.10+** from <https://www.python.org/downloads/>  
+(check **"Add Python to PATH"** during setup)
+
+Then run `setup_env.bat` from the install folder (default: `C:\Program Files\Selah\`):
+
+```
+C:\Program Files\Selah\setup_env.bat
+```
+
+Or install directly:
+
+```bat
+pip install -r "C:\Program Files\Selah\requirements.txt"
+```
+
+### Step 4 — FFmpeg (non-WAV formats)
+
+Required to import/export MP3, MP4, FLAC, and other non-WAV formats.
+
+1. Download a Windows build from <https://ffmpeg.org/download.html>
+2. Extract and add the `bin\` folder (containing `ffmpeg.exe`) to your system PATH.
+3. Verify: `ffmpeg -version`
+
+### Step 5 — FluidSynth + SoundFont (sheet music only)
+
+Skip if you do not use the sheet music recognition feature.
+
+1. Install FluidSynth from <https://www.fluidsynth.org/> (provides `libfluidsynth-3.dll`)
+2. Place a SoundFont (`.sf2` / `.sf3`) in `%AppData%\Selah\soundfonts\`
+
+**Recommended SoundFonts:**
+
+| SoundFont | Size | Quality | License |
+|-----------|------|---------|---------|
+| **GeneralUser GS** ★ | ~29 MB | ★★★★☆ | Free |
+| MuseScore_General.sf3 | ~50 MB | ★★★★★ | MIT |
+
+### Installation Summary
+
+| Feature | Requires |
+|---------|----------|
+| Basic playback & editing | Installer only |
+| Import MP3 / MP4 | FFmpeg |
+| Stem separation | Python 3.10+ · `audio-separator` or `onnxruntime` |
+| Noise reduction | Python 3.10+ · `noisereduce` |
+| Sheet music recognition | Python 3.10+ · `oemer` · FluidSynth · SoundFont |
+
+Full guide: **[docs/SETUP.md](docs/SETUP.md)**
 
 ---
 
