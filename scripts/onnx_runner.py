@@ -21,7 +21,7 @@ ONNX Runtime으로 추론하고, 오디오 I/O는 FFmpeg로 처리합니다.
 라이선스 고지 (License Notices)
 ──────────────────────────────────────────────────────────────
 본 스크립트 자체:
-    GNU General Public License v2 (GPL v2)
+    GNU General Public License v3 (GPLv3)
     Copyright (C) Selah 프로젝트
 
 사용 라이브러리:
