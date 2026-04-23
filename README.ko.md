@@ -8,6 +8,26 @@
 
 ---
 
+## 스크린샷
+
+| 시작 화면 | 새 프로젝트 |
+|:---------:|:-----------:|
+| ![시작 화면](docs/screenshots/Screen001.jpg) | ![새 프로젝트](docs/screenshots/Screen002.jpg) |
+
+| 메인 편집 화면 |
+|:--------------:|
+| ![메인 편집 화면](docs/screenshots/Screen013.jpg) |
+
+| 파일 메뉴 | 편집 메뉴 |
+|:---------:|:---------:|
+| ![파일 메뉴](docs/screenshots/Screen004.jpg) | ![편집 메뉴](docs/screenshots/Screen005.jpg) |
+
+| 악보 인식 — 악기 선택 | 모델 관리자 |
+|:---------------------:|:-----------:|
+| ![악보 인식](docs/screenshots/Screen016.jpg) | ![모델 관리자](docs/screenshots/Screen019.jpg) |
+
+---
+
 ## 프로젝트 개요
 
 Selah는 다음 세 가지 흐름을 하나의 워크플로우로 묶는 것을 목표로 합니다.
@@ -99,6 +119,12 @@ Selah는 다음과 같은 환경을 지원하기 위해 개발되고 있습니�
 
 ---
 
+## 사용자 매뉴얼
+
+기능 설명과 사용 방법은 **[docs/MANUAL.ko.md](docs/MANUAL.ko.md)** 를 참조하세요.
+
+---
+
 ## 버전 히스토리
 
 전체 변경 이력은 **[HISTORY.ko.md](HISTORY.ko.md)** 를 참조하세요.
@@ -137,8 +163,9 @@ Selah.sln
 │  ├─ TRADEMARK.md
 │  ├─ ETHICS.ko.md
 │  └─ TRADEMARK.ko.md
-├─ README.md
-├─ README.ko.md
+├─ README.md                   # 한/영 합본
+├─ README.en.md                # 영문 전용
+├─ README.ko.md                # 이 파일 (한국어 전용)
 ├─ LICENSE
 └─ THIRD_PARTY_NOTICES.md
 ```

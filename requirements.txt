@@ -1,0 +1,31 @@
+# Selah — Python 패키지 전체 목록
+# 전체 기능 한 번에 설치: pip install -r requirements.txt
+#
+# ※ 스템 분리 GPU 가속이 필요하면 audio-separator[cpu] → audio-separator[gpu] 로 변경
+# ※ FluidSynth 네이티브 DLL은 별도 설치 필요: https://www.fluidsynth.org/
+
+# ── 스템 분리 (MDX-Net / audio-separator) ──────────────────────
+audio-separator[cpu]
+
+# ── 스템 분리 (ONNX Runtime) ───────────────────────────────────
+onnxruntime
+
+# ── 스템 분리 (Demucs) ─────────────────────────────────────────
+demucs
+
+# ── 노이즈 제거 ────────────────────────────────────────────────
+noisereduce
+soundfile
+
+# ── 악보 인식 (OMR) ────────────────────────────────────────────
+oemer
+music21
+mido
+Pillow
+
+# ── MIDI 합성 (FluidSynth Python 래퍼) ────────────────────────
+fluidsynth
+
+# ── 공통 수치 계산 ─────────────────────────────────────────────
+numpy>=1.20
+scipy

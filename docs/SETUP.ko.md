@@ -214,9 +214,39 @@ Linux 배포판과 일부 음악 소프트웨어에 기본 포함되어 있어 �
 
 ## 7. 전체 기능 빠른 설치
 
+### 방법 A — 배치 스크립트 (권장)
+
+저장소 루트의 **`setup_env.bat`** 를 실행하면 언어를 선택한 뒤 설치 모드를 고를 수 있습니다.  
+언어별 스크립트를 직접 실행해도 됩니다.
+
+| 파일 | 언어 |
+|------|------|
+| `setup_env.bat` | 언어 선택 진입점 |
+| `setup_env.ko.bat` | 한국어 |
+| `setup_env.en.bat` | English |
+| `setup_env.zh.bat` | 中文 (简体) |
+
+```
+setup_env.bat
+```
+
+### 방법 B — pip 직접 설치
+
 ```bat
 :: 모든 Python 패키지를 한 번에 설치합니다
 pip install oemer music21 mido Pillow scipy fluidsynth noisereduce soundfile numpy "audio-separator[cpu]"
+```
+
+### 방법 C — 기능별 requirements 파일
+
+| 파일 | 대상 기능 |
+|------|-----------|
+| `requirements.txt` | 전체 (모든 기능) |
+| `requirements-stem.txt` | 스템 분리 전용 |
+| `requirements-sheet-music.txt` | 악보 인식 전용 |
+
+```bat
+pip install -r requirements.txt
 ```
 
 이후:

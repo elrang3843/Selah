@@ -1,0 +1,10 @@
+# Selah — 스템 분리 전용 패키지
+# pip install -r requirements-stem.txt
+#
+# GPU 가속 사용 시: audio-separator[cpu] → audio-separator[gpu]
+
+audio-separator[cpu]
+onnxruntime
+numpy>=1.20
+scipy
+soundfile

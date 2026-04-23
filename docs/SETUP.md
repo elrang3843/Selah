@@ -220,9 +220,39 @@ by Selah on first run). You can open it by typing that path into Explorer's addr
 
 ## 7. Quick-Start Install (all features)
 
+### Option A — Setup script (recommended)
+
+Run **`setup_env.bat`** from the repository root. It first asks for a language, then lets you choose a feature set and installs the required Python packages automatically.  
+You can also run a language-specific script directly.
+
+| File | Language |
+|------|----------|
+| `setup_env.bat` | Language selector entry point |
+| `setup_env.ko.bat` | 한국어 |
+| `setup_env.en.bat` | English |
+| `setup_env.zh.bat` | 中文 (简体) |
+
+```
+setup_env.bat
+```
+
+### Option B — pip directly
+
 ```bat
 :: Install all Python packages in one go
 pip install oemer music21 mido Pillow scipy fluidsynth noisereduce soundfile numpy "audio-separator[cpu]"
+```
+
+### Option C — requirements files
+
+| File | Scope |
+|------|-------|
+| `requirements.txt` | Everything |
+| `requirements-stem.txt` | Stem separation only |
+| `requirements-sheet-music.txt` | Sheet music recognition only |
+
+```bat
+pip install -r requirements.txt
 ```
 
 Then:
